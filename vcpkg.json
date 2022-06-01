@@ -1,0 +1,15 @@
+{
+    "name": "ciallo",
+    "version": "0.0.1",
+    "dependencies": [
+      "spdlog",
+      "glfw3",
+      {
+        "name": "imgui",
+        "features": ["docking-experimental","glfw-binding","vulkan-binding"]
+      },
+      "yaml-cpp",
+      "glslang",
+      "range-v3"
+    ]
+  }
