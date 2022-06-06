@@ -27,13 +27,13 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vulkanWindow.cpp">
+    <ClCompile Include="Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vulkanFramework.cpp">
+    <ClCompile Include="Instance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vulkanTest.cpp">
@@ -44,7 +44,7 @@
     <ClInclude Include="pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vulkanWindow.hpp">
+    <ClInclude Include="Window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Application.hpp">
@@ -56,7 +56,7 @@
     <ClInclude Include="vk_mem_alloc.hpp">
       <Filter>Third Party</Filter>
     </ClInclude>
-    <ClInclude Include="vulkanFramework.hpp">
+    <ClInclude Include="Instance.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vulkanTest.hpp">

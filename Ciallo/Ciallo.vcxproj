@@ -98,18 +98,18 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="vulkanFramework.cpp" />
+    <ClCompile Include="Instance.cpp" />
     <ClCompile Include="vulkanTest.cpp" />
-    <ClCompile Include="vulkanWindow.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="vk_mem_alloc.hpp" />
-    <ClInclude Include="vulkanFramework.hpp" />
+    <ClInclude Include="Instance.hpp" />
     <ClInclude Include="vulkanTest.hpp" />
-    <ClInclude Include="vulkanWindow.hpp" />
+    <ClInclude Include="Window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag.spv" />

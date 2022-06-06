@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vk_mem_alloc.h"
-#include "vulkanWindow.hpp"
+#include "Window.hpp"
 
 namespace ciallo::vulkan
 {
@@ -14,6 +14,7 @@ namespace ciallo::vulkan
 			createGraphicsPipeline();
 			createCommandBuffers();
 			createSyncObject();
+			w->show();
 			while (!w->shouldClose())
 			{
 				glfwPollEvents();
@@ -94,17 +95,20 @@ namespace ciallo::vulkan
 			try
 			{
 				index = w->device().acquireNextImageKHR(w->swapchain(), UINT64_MAX, *m_imageAvailable,
-				                                                 VK_NULL_HANDLE).value;
+				                                        VK_NULL_HANDLE).value;
 			}
-			catch (vk::OutOfDateKHRError& err)
+			catch (vk::OutOfDateKHRError&)
 			{
-				w->recreateOnWindowResize();
+				w->onWindowResize();
+				createGraphicsPipeline();
+				createCommandBuffers();
 				return;
 			}
-			catch (vk::SystemError& err)
+			catch (vk::SystemError&)
 			{
-				throw std::runtime_error("failed to acquire swap chain image!");
+				throw std::runtime_error("Failed to acquire swap chain image!");
 			}
+
 			std::vector<vk::PipelineStageFlags> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 			vk::SubmitInfo si{
 				*m_imageAvailable,
@@ -121,7 +125,22 @@ namespace ciallo::vulkan
 				index,
 				{}
 			};
-			_ = w->queue().presentKHR(pi);
+
+			try
+			{
+				_ = w->queue().presentKHR(pi);
+			}
+			catch (vk::OutOfDateKHRError&)
+			{
+				w->onWindowResize();
+				createGraphicsPipeline();
+				createCommandBuffers();
+				return;
+			}
+			catch (vk::SystemError&)
+			{
+				throw std::runtime_error("Failed to present!");
+			}
 		}
 
 		vku::ShaderModule m_fragmentShader;

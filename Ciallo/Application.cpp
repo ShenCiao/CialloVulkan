@@ -4,29 +4,23 @@
 
 void ciallo::Application::run()
 {
-	// m_mainWindow = std::make_unique<vulkan::Window>(m_mainWindowWidth, m_mainWindowHeight, "Ciallo");
-	// while(!m_mainWindow->shouldClose())
-	// {
-	// 	glfwPollEvents();
-	//
-	// }
 	auto w = std::make_unique<vulkan::Window>(1000, 1000, "hi");
-	auto fw = std::make_shared<vulkan::Framework>();
+	auto inst = std::make_shared<vulkan::Instance>();
 	uint32_t extensionsCount;
 	const char** extensions = glfwGetRequiredInstanceExtensions(&extensionsCount);
 	std::vector<const char*> glfwExtensions{extensions, extensions+extensionsCount};
-	fw->addInstanceExtensions(glfwExtensions);
-	fw->createInstance();
-	fw->createPhysicalDevice(1);
-	fw->pickQueueFamily();
-	fw->createDevice();
-	fw->createCommandPool();
-
-	w->setFramework(fw);
+	inst->addInstanceExtensions(glfwExtensions);
+	inst->create();
+	w->setInstance(inst);
+	w->createPhysicalDevice(1);
+	w->pickQueueFamily();
+	w->createDevice();
+	w->createCommandPool();
+	
 	w->createSurface();
-	w->createSwapchain();
+	w->pickSurfaceFormat();
 	w->createRenderpass();
-	w->createFramebuffers();
+	w->createSwapchain();
 
 	vulkan::Test t(w.get());
 }

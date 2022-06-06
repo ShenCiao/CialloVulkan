@@ -4,14 +4,14 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 
-#include "vulkanFramework.hpp"
+#include "Instance.hpp"
 
 namespace ciallo::vulkan
 {
 	class Window
 	{
 	public:
-		Window(int height, int width, const std::string& title);
+		Window(int height, int width, const std::string& title, bool visible = false);
 		~Window();
 
 		Window(const Window& other) = delete;
@@ -26,32 +26,46 @@ namespace ciallo::vulkan
 		}
 
 	public:
-		void setFramework(const std::shared_ptr<Framework>& framework);
+		void setInstance(const std::shared_ptr<Instance>& instance);
+		void createPhysicalDevice(int index);
+		void pickQueueFamily();
+		void createDevice();
+		void createCommandPool();
 		void createSurface();
+		void pickSurfaceFormat();
 		void createSwapchain();
 		void createRenderpass();
-		void createFramebuffers();
-
-		void recreateOnWindowResize();
+		void onWindowResize();
 		std::vector<vk::UniqueCommandBuffer>
 		createCommandBuffers(const vk::CommandBufferLevel level, const int n) const;
+		bool isPhysicalDeviceValid(vk::PhysicalDevice device);
 
+	public:
+		void show() const { glfwShowWindow(m_glfwWindow); }
+		void hide() const { glfwHideWindow(m_glfwWindow); }
 		bool shouldClose() const { return glfwWindowShouldClose(m_glfwWindow); }
 	private:
-		GLFWwindow* m_glfwWindow; //self-owned
-
-		std::shared_ptr<Framework> m_framework;
+		GLFWwindow* m_glfwWindow;
+		std::shared_ptr<Instance> m_instance;
+		std::vector<const char*> m_deviceExtensions{
+			"VK_KHR_swapchain"
+		};
 
 	private:
+		uint32_t m_queueFamilyIndex;
+		vk::UniqueDevice m_device;
+		vk::PhysicalDevice m_physicalDevice;
+		vk::UniqueCommandPool m_commandPool;
 		vk::UniqueSurfaceKHR m_surface;
 		vk::UniqueSwapchainKHR m_swapchain;
 		std::vector<vk::Image> m_swapchainImages;
 		std::vector<vk::UniqueImageView> m_swapchainImageViews;
-		std::vector<vk::Framebuffer> m_swapchainFramebuffers;
+		std::vector<vk::UniqueFramebuffer> m_swapchainFramebuffers;
 		vk::Extent2D m_swapchainExtent;
 		vk::Format m_swapchainImageFormat;
+		vk::ColorSpaceKHR m_swapchainImageColorSpace;
 		vk::UniqueRenderPass m_renderPass;
-		std::vector<vk::UniqueFramebuffer> m_framebuffers;
+
 	public:
 		vk::SwapchainKHR swapchain() const
 		{
@@ -70,7 +84,7 @@ namespace ciallo::vulkan
 
 		vk::Device device() const
 		{
-			return *m_framework->m_device;
+			return *m_device;
 		}
 
 		int swapchainImageCount() const
@@ -81,7 +95,7 @@ namespace ciallo::vulkan
 		std::vector<vk::Framebuffer> framebuffers() const
 		{
 			std::vector<vk::Framebuffer> v;
-			for (const auto& fb : m_framebuffers)
+			for (const auto& fb : m_swapchainFramebuffers)
 			{
 				v.push_back(*fb);
 			}
@@ -90,12 +104,12 @@ namespace ciallo::vulkan
 
 		vk::Framebuffer framebuffer(const int index) const
 		{
-			return *m_framebuffers[index];
+			return *m_swapchainFramebuffers[index];
 		}
 
 		vk::Queue queue() const
 		{
-			return m_framework->m_device->getQueue(m_framework->m_queueFamilyIndex, 0);
+			return m_device->getQueue(m_queueFamilyIndex, 0);
 		}
 	};
 }

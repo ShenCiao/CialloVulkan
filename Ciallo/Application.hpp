@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "vulkanWindow.hpp"
+#include "Window.hpp"
 #include "vulkanTest.hpp"
 
 namespace ciallo
