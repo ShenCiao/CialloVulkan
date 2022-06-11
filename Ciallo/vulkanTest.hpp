@@ -1,7 +1,9 @@
 #pragma once
 
-#include "vk_mem_alloc.h"
 #include "Window.hpp"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 
 namespace ciallo::vulkan
 {
@@ -25,6 +27,8 @@ namespace ciallo::vulkan
 
 	private:
 		Window* w;
+
+		void dummy(){};
 
 		void createGraphicsPipeline()
 		{
@@ -55,8 +59,7 @@ namespace ciallo::vulkan
 				rpbi.renderArea.offset = vk::Offset2D{0, 0};
 				rpbi.renderArea.extent = w->swapchainExtent();
 				vk::ClearValue clearColor = {std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f}};
-				rpbi.clearValueCount = 1;
-				rpbi.pClearValues = &clearColor;
+				rpbi.setClearValues(clearColor);
 
 				cb->beginRenderPass(rpbi, vk::SubpassContents::eInline);
 				{
@@ -67,7 +70,7 @@ namespace ciallo::vulkan
 				cb->end();
 			};
 
-			auto framebuffers = w->framebuffers();
+			auto framebuffers = w->swapchainFramebuffers();
 
 			for (auto [cb, fb] : views::zip(m_commandBuffers, framebuffers))
 			{

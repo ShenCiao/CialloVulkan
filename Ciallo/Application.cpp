@@ -1,6 +1,7 @@
 ﻿#include "pch.hpp"
 #include "Application.hpp"
 #include "vulkanTest.hpp"
+#include "MainPassRenderer.hpp"
 
 void ciallo::Application::run()
 {
@@ -12,15 +13,7 @@ void ciallo::Application::run()
 	inst->addInstanceExtensions(glfwExtensions);
 	inst->create();
 	w->setInstance(inst);
-	w->createPhysicalDevice(1);
-	w->pickQueueFamily();
-	w->createDevice();
-	w->createCommandPool();
-	
-	w->createSurface();
-	w->pickSurfaceFormat();
-	w->createRenderpass();
-	w->createSwapchain();
+	w->initResources();
 
 	vulkan::Test t(w.get());
 }

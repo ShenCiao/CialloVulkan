@@ -8,6 +8,10 @@
 
 namespace ciallo::vulkan
 {
+	/**
+	 * \brief Wrap up glfw and vulkan infrastructure for ciallo, will be changed into platform native api or something else.
+	 *	Since the imgui_impl_glfw(for vulkan) introduce extra lag and supporting tablet and stylus is a rabbit hole.
+	 */
 	class Window
 	{
 	public:
@@ -25,7 +29,12 @@ namespace ciallo::vulkan
 			spdlog::error("Glfw error: {}", description);
 		}
 
+
 	public:
+		void imguiInitWindow();
+		void imguiShutdownWindow();
+		void initResources();
+	private:
 		void setInstance(const std::shared_ptr<Instance>& instance);
 		void createPhysicalDevice(int index);
 		void pickQueueFamily();
@@ -34,16 +43,16 @@ namespace ciallo::vulkan
 		void createSurface();
 		void pickSurfaceFormat();
 		void createSwapchain();
-		void createRenderpass();
+		void createRenderPass();
 		void onWindowResize();
 		std::vector<vk::UniqueCommandBuffer>
 		createCommandBuffers(const vk::CommandBufferLevel level, const int n) const;
 		bool isPhysicalDeviceValid(vk::PhysicalDevice device);
 
 	public:
-		void show() const { glfwShowWindow(m_glfwWindow); }
-		void hide() const { glfwHideWindow(m_glfwWindow); }
-		bool shouldClose() const { return glfwWindowShouldClose(m_glfwWindow); }
+		void show() const;
+		void hide() const;
+		bool shouldClose() const;
 	private:
 		GLFWwindow* m_glfwWindow;
 		std::shared_ptr<Instance> m_instance;
@@ -67,49 +76,16 @@ namespace ciallo::vulkan
 		vk::UniqueRenderPass m_renderPass;
 
 	public:
-		vk::SwapchainKHR swapchain() const
-		{
-			return *m_swapchain;
-		}
-
-		vk::RenderPass renderPass() const
-		{
-			return *m_renderPass;
-		}
-
-		vk::Extent2D swapchainExtent() const
-		{
-			return m_swapchainExtent;
-		}
-
-		vk::Device device() const
-		{
-			return *m_device;
-		}
-
-		int swapchainImageCount() const
-		{
-			return static_cast<int>(m_swapchainImages.size());
-		}
-
-		std::vector<vk::Framebuffer> framebuffers() const
-		{
-			std::vector<vk::Framebuffer> v;
-			for (const auto& fb : m_swapchainFramebuffers)
-			{
-				v.push_back(*fb);
-			}
-			return v;
-		}
-
-		vk::Framebuffer framebuffer(const int index) const
-		{
-			return *m_swapchainFramebuffers[index];
-		}
-
-		vk::Queue queue() const
-		{
-			return m_device->getQueue(m_queueFamilyIndex, 0);
-		}
+		vk::SwapchainKHR swapchain() const;
+		vk::RenderPass renderPass() const;
+		vk::Extent2D swapchainExtent() const;
+		vk::Device device() const;
+		int swapchainImageCount() const;
+		std::vector<vk::Framebuffer> swapchainFramebuffers() const;
+		vk::Framebuffer framebuffer(const int index) const;
+		vk::Queue queue() const;
+		vk::Instance instance();
+		vk::PhysicalDevice physicalDevice();
+		uint32_t queueFamilyIndex();
 	};
 }
