@@ -14,7 +14,7 @@ public:
 	Application& operator=(const Application& other) = delete;
 	Application& operator=(Application&& other) = default;
 
-	void run();
+	void run() const;
 	
 	void loadSettings();
 

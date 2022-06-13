@@ -106,8 +106,6 @@
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />
-    <ClInclude Include="vku.hpp" />
-    <ClInclude Include="vk_mem_alloc.hpp" />
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

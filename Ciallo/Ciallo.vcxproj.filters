@@ -50,12 +50,6 @@
     <ClInclude Include="Application.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vku.hpp">
-      <Filter>Internal Dependencies</Filter>
-    </ClInclude>
-    <ClInclude Include="vk_mem_alloc.hpp">
-      <Filter>Third Party</Filter>
-    </ClInclude>
     <ClInclude Include="Instance.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

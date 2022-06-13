@@ -24,7 +24,7 @@ namespace ciallo::vulkan
 		void createDescriptorPool();
 		void createSyncObject();
 		void createRenderPass();
-		void uploadFonts();
+		void uploadFonts() const;
 
 	public:
 		void createFramebuffers();

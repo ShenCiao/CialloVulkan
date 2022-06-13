@@ -56,6 +56,7 @@ namespace ciallo::vulkan
 		w->imguiInitWindow();
 
 		createDescriptorPool();
+		// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 		ImGui_ImplVulkan_InitInfo init_info{};
 		init_info.Instance = w->instance();
 		init_info.PhysicalDevice = w->physicalDevice();
@@ -107,7 +108,7 @@ namespace ciallo::vulkan
 		m_renderPass = rpm.createUnique(w->device());
 	}
 
-	void MainPassRenderer::uploadFonts()
+	void MainPassRenderer::uploadFonts() const
 	{
 		w->executeImmediately([this](vk::CommandBuffer cb)
 		{

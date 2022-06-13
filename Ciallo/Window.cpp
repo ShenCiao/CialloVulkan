@@ -65,7 +65,7 @@ namespace ciallo::vulkan
 		m_physicalDevice = devices[index];
 	}
 
-	void Window::imguiInitWindow()
+	void Window::imguiInitWindow() const
 	{
 		ImGui_ImplGlfw_InitForVulkan(m_glfwWindow, true);
 	}
@@ -294,22 +294,22 @@ namespace ciallo::vulkan
 		return m_device->getQueue(m_queueFamilyIndex, 0);
 	}
 
-	vk::Instance Window::instance()
+	vk::Instance Window::instance() const
 	{
 		return m_instance->instance();
 	}
 
-	vk::PhysicalDevice Window::physicalDevice()
+	vk::PhysicalDevice Window::physicalDevice() const
 	{
 		return m_physicalDevice;
 	}
 
-	uint32_t Window::queueFamilyIndex()
+	uint32_t Window::queueFamilyIndex() const
 	{
 		return m_queueFamilyIndex;
 	}
 
-	vk::Format Window::swapchainImageFormat()
+	vk::Format Window::swapchainImageFormat() const
 	{
 		return m_swapchainImageFormat;
 	}

@@ -23,7 +23,7 @@ namespace ciallo::vulkan
 		              void* pUserData);
 	public:
 		void create();
-		
+
 	public:
 		vk::Instance instance() const
 		{

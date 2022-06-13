@@ -2,7 +2,7 @@
 #include "Application.hpp"
 #include "MainPassRenderer.hpp"
 
-void ciallo::Application::run()
+void ciallo::Application::run() const
 {
 	auto w = std::make_unique<vulkan::Window>(1000, 1000, "hi");
 	auto inst = std::make_shared<vulkan::Instance>();

@@ -32,7 +32,7 @@ namespace ciallo::vulkan
 
 
 	public:
-		void imguiInitWindow();
+		void imguiInitWindow() const;
 		void imguiShutdownWindow();
 		void imguiNewFrame();
 		void initResources();
@@ -48,7 +48,7 @@ namespace ciallo::vulkan
 		void createSwapchain();
 		void onWindowResize();
 		std::vector<vk::UniqueCommandBuffer>
-		createCommandBuffers(const vk::CommandBufferLevel level, const int n) const;
+		createCommandBuffers(vk::CommandBufferLevel level, int n) const;
 		bool isPhysicalDeviceValid(vk::PhysicalDevice device);
 
 	public:
@@ -84,9 +84,9 @@ namespace ciallo::vulkan
 		vk::Device device() const;
 		int swapchainImageCount() const;
 		vk::Queue queue() const;
-		vk::Instance instance();
-		vk::PhysicalDevice physicalDevice();
-		uint32_t queueFamilyIndex();
-		vk::Format swapchainImageFormat();
+		vk::Instance instance() const;
+		vk::PhysicalDevice physicalDevice() const;
+		uint32_t queueFamilyIndex() const;
+		vk::Format swapchainImageFormat() const;
 	};
 }
