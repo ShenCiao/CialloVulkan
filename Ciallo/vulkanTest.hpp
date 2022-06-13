@@ -28,8 +28,6 @@ namespace ciallo::vulkan
 	private:
 		Window* w;
 
-		void dummy(){};
-
 		void createGraphicsPipeline()
 		{
 			m_vertexShader = vku::ShaderModule{w->device(), "./shaders/vert.spv"};

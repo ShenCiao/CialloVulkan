@@ -75,6 +75,11 @@ namespace ciallo::vulkan
 		ImGui_ImplGlfw_Shutdown();
 	}
 
+	void Window::imguiNewFrame()
+	{
+		ImGui_ImplGlfw_NewFrame();
+	}
+
 	void Window::initResources()
 	{
 		createPhysicalDevice(1);
@@ -105,7 +110,7 @@ namespace ciallo::vulkan
 
 	void Window::pickSurfaceFormat()
 	{
-		//TODO: make it portable
+		//TODO: make it portable, it's a dirty hack for ShenCiao's laptop only
 		auto surfaceFormats = m_physicalDevice.getSurfaceFormatsKHR(*m_surface);
 		for (auto surface : surfaceFormats)
 		{
@@ -132,7 +137,7 @@ namespace ciallo::vulkan
 		}
 
 		m_swapchainExtent = vk::Extent2D{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
-		
+
 		vk::SwapchainCreateInfoKHR ci{
 			{},
 			*m_surface,
@@ -144,7 +149,7 @@ namespace ciallo::vulkan
 			vk::ImageUsageFlagBits::eColorAttachment,
 			vk::SharingMode::eExclusive
 		};
-		ci.presentMode = vk::PresentModeKHR::eMailbox;
+		ci.presentMode = vk::PresentModeKHR::eFifo;
 		ci.clipped = VK_TRUE;
 		ci.oldSwapchain = *m_swapchain;
 
@@ -172,6 +177,7 @@ namespace ciallo::vulkan
 		};
 		m_swapchainImageViews = m_swapchainImages | views::transform(image2imageView) | ranges::to_vector;
 
+		//TODO:紧急remove this
 		auto imageView2framebuffer = [this](const vk::UniqueImageView& imv)
 		{
 			std::vector<vk::ImageView> views{*imv};
@@ -264,11 +270,40 @@ namespace ciallo::vulkan
 		return glfwWindowShouldClose(m_glfwWindow);
 	}
 
+	void Window::pollEvents() const
+	{
+		glfwPollEvents();
+	}
+
+	std::vector<const char*> Window::getRequiredInstanceExtensions() const
+	{
+		uint32_t extensionsCount = 0;
+		const char** extensions = glfwGetRequiredInstanceExtensions(&extensionsCount);
+		return {extensions, extensions + extensionsCount};
+	}
+
+	void Window::executeImmediately(const std::function<void(vk::CommandBuffer)>& func)
+	{
+		vk::CommandBufferAllocateInfo info{
+			*m_commandPool,
+			vk::CommandBufferLevel::ePrimary,
+			1
+		};
+		auto cb = std::move(m_device->allocateCommandBuffersUnique(info)[0]);
+		func(*cb);
+
+		vk::SubmitInfo si{};
+		si.setCommandBuffers(*cb);
+		queue().submit(si);
+		m_device->waitIdle();
+	}
+
 	vk::SwapchainKHR Window::swapchain() const
 	{
 		return *m_swapchain;
 	}
 
+	//TODO: 紧急remove it.
 	vk::RenderPass Window::renderPass() const
 	{
 		return *m_renderPass;
@@ -322,5 +357,10 @@ namespace ciallo::vulkan
 	uint32_t Window::queueFamilyIndex()
 	{
 		return m_queueFamilyIndex;
+	}
+
+	vk::Format Window::swapchainImageFormat()
+	{
+		return m_swapchainImageFormat;
 	}
 }

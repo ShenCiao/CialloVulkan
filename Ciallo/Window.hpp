@@ -14,6 +14,7 @@ namespace ciallo::vulkan
 	 */
 	class Window
 	{
+		friend class MainPassRenderer;
 	public:
 		Window(int height, int width, const std::string& title, bool visible = false);
 		~Window();
@@ -33,8 +34,10 @@ namespace ciallo::vulkan
 	public:
 		void imguiInitWindow();
 		void imguiShutdownWindow();
+		void imguiNewFrame();
 		void initResources();
-	private:
+	public:
+		// supposed to be private
 		void setInstance(const std::shared_ptr<Instance>& instance);
 		void createPhysicalDevice(int index);
 		void pickQueueFamily();
@@ -53,6 +56,9 @@ namespace ciallo::vulkan
 		void show() const;
 		void hide() const;
 		bool shouldClose() const;
+		void pollEvents() const;
+		std::vector<const char*> getRequiredInstanceExtensions() const;
+		void executeImmediately(const std::function<void(vk::CommandBuffer)>& func);
 	private:
 		GLFWwindow* m_glfwWindow;
 		std::shared_ptr<Instance> m_instance;
@@ -87,5 +93,6 @@ namespace ciallo::vulkan
 		vk::Instance instance();
 		vk::PhysicalDevice physicalDevice();
 		uint32_t queueFamilyIndex();
+		vk::Format swapchainImageFormat();
 	};
 }

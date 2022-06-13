@@ -10,7 +10,34 @@ namespace ciallo::vulkan
 
 	MainPassRenderer::~MainPassRenderer()
 	{
+		if (m_imguiInitialized)
+		{
+			ImGui_ImplVulkan_Shutdown();
+			w->imguiShutdownWindow();
+		}
 		ImGui::DestroyContext();
+	}
+
+	void MainPassRenderer::init()
+	{
+		createRenderPass();
+		createFramebuffers();
+		initImGui();
+		createSyncObject();
+		uploadFonts();
+	}
+
+	void MainPassRenderer::render(vk::CommandBuffer cb, uint32_t framebufferIndex, ImDrawData* drawData)
+	{
+		vk::ClearValue v{};
+		vk::ClearColorValue cv{};
+		cv.setFloat32({.0f, .0f, .0f, 1.0f});
+		v.setColor(cv);
+		vk::RenderPassBeginInfo rpbi(*m_renderPass, *m_framebuffers[framebufferIndex], {{0, 0}, w->swapchainExtent()},
+		                             v);
+		cb.beginRenderPass(rpbi, vk::SubpassContents::eInline);
+		ImGui_ImplVulkan_RenderDrawData(drawData, cb);
+		cb.endRenderPass();
 	}
 
 	void MainPassRenderer::imguiCheckVkResult(VkResult err)
@@ -43,7 +70,11 @@ namespace ciallo::vulkan
 		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		init_info.Allocator = nullptr;
 		init_info.CheckVkResultFn = imguiCheckVkResult;
-		ImGui_ImplVulkan_Init(&init_info, w->renderPass());
+		m_imguiInitialized = ImGui_ImplVulkan_Init(&init_info, *m_renderPass);
+		if (!m_imguiInitialized)
+		{
+			throw std::runtime_error("Cannot initialize imgui!");
+		}
 	}
 
 	void MainPassRenderer::createDescriptorPool()
@@ -54,5 +85,56 @@ namespace ciallo::vulkan
 			m_descriptorPoolSizes
 		);
 		m_descriptorPool = w->device().createDescriptorPoolUnique(poolInfo);
+	}
+
+	void MainPassRenderer::createSyncObject()
+	{
+		vk::FenceCreateInfo fci(vk::FenceCreateFlagBits::eSignaled);
+		m_renderingCompleteFence = w->device().createFenceUnique(fci);
+		vk::SemaphoreCreateInfo sci({});
+		m_renderingCompleteSemaphore = w->device().createSemaphoreUnique(sci);
+	}
+
+	void MainPassRenderer::createRenderPass()
+	{
+		vku::RenderpassMaker rpm;
+		rpm.attachmentBegin(w->swapchainImageFormat())
+		   .attachmentLoadOp(vk::AttachmentLoadOp::eClear)
+		   .attachmentStoreOp(vk::AttachmentStoreOp::eStore)
+		   .attachmentFinalLayout(vk::ImageLayout::ePresentSrcKHR);
+		rpm.subpassBegin(vk::PipelineBindPoint::eGraphics)
+		   .subpassColorAttachment(vk::ImageLayout::eAttachmentOptimal, 0);
+		m_renderPass = rpm.createUnique(w->device());
+	}
+
+	void MainPassRenderer::uploadFonts()
+	{
+		w->executeImmediately([this](vk::CommandBuffer cb)
+		{
+			cb.begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+			ImGui_ImplVulkan_CreateFontsTexture(cb);
+			cb.end();
+		});
+		ImGui_ImplVulkan_DestroyFontUploadObjects();
+	}
+
+	/**
+	 * \brief Create or recreate Framebuffers
+	 */
+	void MainPassRenderer::createFramebuffers()
+	{
+		auto imageView2framebuffer = [this](const vk::UniqueImageView& imv)
+		{
+			vk::FramebufferCreateInfo info{
+				{},
+				*m_renderPass,
+				*imv,
+				w->swapchainExtent().width,
+				w->swapchainExtent().height,
+				1
+			};
+			return w->device().createFramebufferUnique(info);
+		};
+		m_framebuffers = w->m_swapchainImageViews | views::transform(imageView2framebuffer) | ranges::to_vector;
 	}
 }
