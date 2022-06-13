@@ -36,9 +36,6 @@
     <ClCompile Include="Instance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vulkanTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MainPassRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,9 +57,6 @@
       <Filter>Third Party</Filter>
     </ClInclude>
     <ClInclude Include="Instance.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vulkanTest.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainPassRenderer.hpp">

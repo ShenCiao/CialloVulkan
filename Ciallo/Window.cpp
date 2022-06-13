@@ -89,7 +89,6 @@ namespace ciallo::vulkan
 
 		createSurface();
 		pickSurfaceFormat();
-		createRenderPass();
 		createSwapchain();
 	}
 
@@ -176,34 +175,6 @@ namespace ciallo::vulkan
 			return m_device->createImageViewUnique(ci);
 		};
 		m_swapchainImageViews = m_swapchainImages | views::transform(image2imageView) | ranges::to_vector;
-
-		//TODO:紧急remove this
-		auto imageView2framebuffer = [this](const vk::UniqueImageView& imv)
-		{
-			std::vector<vk::ImageView> views{*imv};
-			vk::FramebufferCreateInfo info{
-				{},
-				*m_renderPass,
-				views,
-				m_swapchainExtent.width,
-				m_swapchainExtent.height,
-				1
-			};
-			return m_device->createFramebufferUnique(info);
-		};
-		m_swapchainFramebuffers = m_swapchainImageViews | views::transform(imageView2framebuffer) | ranges::to_vector;
-	}
-
-	void Window::createRenderPass()
-	{
-		vku::RenderpassMaker rpm;
-		rpm.attachmentBegin(m_swapchainImageFormat)
-		   .attachmentLoadOp(vk::AttachmentLoadOp::eClear)
-		   .attachmentStoreOp(vk::AttachmentStoreOp::eStore)
-		   .attachmentFinalLayout(vk::ImageLayout::ePresentSrcKHR);
-		rpm.subpassBegin(vk::PipelineBindPoint::eGraphics)
-		   .subpassColorAttachment(vk::ImageLayout::eAttachmentOptimal, 0);
-		m_renderPass = rpm.createUnique(*m_device);
 	}
 
 	void Window::onWindowResize()
@@ -303,12 +274,6 @@ namespace ciallo::vulkan
 		return *m_swapchain;
 	}
 
-	//TODO: 紧急remove it.
-	vk::RenderPass Window::renderPass() const
-	{
-		return *m_renderPass;
-	}
-
 	vk::Extent2D Window::swapchainExtent() const
 	{
 		return m_swapchainExtent;
@@ -322,21 +287,6 @@ namespace ciallo::vulkan
 	int Window::swapchainImageCount() const
 	{
 		return static_cast<int>(m_swapchainImages.size());
-	}
-
-	std::vector<vk::Framebuffer> Window::swapchainFramebuffers() const
-	{
-		std::vector<vk::Framebuffer> v;
-		for (const auto& fb : m_swapchainFramebuffers)
-		{
-			v.push_back(*fb);
-		}
-		return v;
-	}
-
-	vk::Framebuffer Window::framebuffer(const int index) const
-	{
-		return *m_swapchainFramebuffers[index];
 	}
 
 	vk::Queue Window::queue() const

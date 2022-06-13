@@ -22,7 +22,6 @@ void ciallo::Application::run()
 		vk::Result _;
 		_ = w->device().waitForFences(*mainPassRenderer.m_renderingCompleteFence, VK_TRUE,
 		                              std::numeric_limits<uint64_t>::max());
-		w->device().resetFences(*mainPassRenderer.m_renderingCompleteFence);
 
 		uint32_t index;
 		try
@@ -40,6 +39,7 @@ void ciallo::Application::run()
 		{
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
+		w->device().resetFences(*mainPassRenderer.m_renderingCompleteFence);
 
 		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eSimultaneousUse, nullptr};
 		cb->begin(cbbi);

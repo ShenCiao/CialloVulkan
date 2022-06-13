@@ -46,7 +46,6 @@ namespace ciallo::vulkan
 		void createSurface();
 		void pickSurfaceFormat();
 		void createSwapchain();
-		void createRenderPass();
 		void onWindowResize();
 		std::vector<vk::UniqueCommandBuffer>
 		createCommandBuffers(const vk::CommandBufferLevel level, const int n) const;
@@ -75,20 +74,15 @@ namespace ciallo::vulkan
 		vk::UniqueSwapchainKHR m_swapchain;
 		std::vector<vk::Image> m_swapchainImages;
 		std::vector<vk::UniqueImageView> m_swapchainImageViews;
-		std::vector<vk::UniqueFramebuffer> m_swapchainFramebuffers;
 		vk::Extent2D m_swapchainExtent;
 		vk::Format m_swapchainImageFormat;
 		vk::ColorSpaceKHR m_swapchainImageColorSpace;
-		vk::UniqueRenderPass m_renderPass;
 
 	public:
 		vk::SwapchainKHR swapchain() const;
-		vk::RenderPass renderPass() const;
 		vk::Extent2D swapchainExtent() const;
 		vk::Device device() const;
 		int swapchainImageCount() const;
-		std::vector<vk::Framebuffer> swapchainFramebuffers() const;
-		vk::Framebuffer framebuffer(const int index) const;
 		vk::Queue queue() const;
 		vk::Instance instance();
 		vk::PhysicalDevice physicalDevice();

@@ -100,7 +100,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Instance.cpp" />
-    <ClCompile Include="vulkanTest.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -110,7 +109,6 @@
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="vk_mem_alloc.hpp" />
     <ClInclude Include="Instance.hpp" />
-    <ClInclude Include="vulkanTest.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>
   <ItemGroup>
