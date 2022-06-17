@@ -10,6 +10,8 @@
       },
       "yaml-cpp",
       "glslang",
-      "range-v3"
+      "range-v3",
+      "stb",
+      "vulkan-memory-allocator"
     ]
   }

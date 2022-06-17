@@ -263,10 +263,11 @@ namespace ciallo::vulkan
 		auto cb = std::move(m_device->allocateCommandBuffersUnique(info)[0]);
 		func(*cb);
 
+		vk::UniqueFence fence = m_device->createFenceUnique({});
 		vk::SubmitInfo si{};
 		si.setCommandBuffers(*cb);
-		queue().submit(si);
-		m_device->waitIdle();
+		queue().submit(si, *fence);
+		m_device->waitForFences(*fence, VK_TRUE, std::numeric_limits<uint64_t>::max());
 	}
 
 	vk::SwapchainKHR Window::swapchain() const

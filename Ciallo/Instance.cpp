@@ -1,4 +1,6 @@
 #include "pch.hpp"
+
+#define VMA_IMPLEMENTATION
 #include "Instance.hpp"
 
 namespace ciallo::vulkan

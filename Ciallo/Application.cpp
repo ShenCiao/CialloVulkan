@@ -43,20 +43,19 @@ void ciallo::Application::run() const
 
 		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eSimultaneousUse, nullptr};
 		cb->begin(cbbi);
-		// -----------------------------------------------------------------------------
 		ImGui_ImplVulkan_NewFrame();
 		w->imguiNewFrame();
 		ImGui::NewFrame();
-
+		// -----------------------------------------------------------------------------
 		static bool show_demo_window = true;
 		if (show_demo_window)
 		{
 			ImGui::ShowDemoWindow(&show_demo_window);
 		}
+		// -----------------------------------------------------------------------------
+		ImGui::EndFrame();
 		ImGui::Render();
 		ImDrawData* main_draw_data = ImGui::GetDrawData();
-		ImGui::EndFrame();
-		// -----------------------------------------------------------------------------
 		mainPassRenderer.render(*cb, index, main_draw_data);
 		cb->end();
 		std::vector<vk::PipelineStageFlags> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
