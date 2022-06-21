@@ -7,8 +7,8 @@
 namespace ciallo::vulkan
 {
 	/**
-	 * \brief Main pass is render pass for rendering imgui, anything else would be rendered as texture into main pass(imgui).
-	 * Warning: Imgui vulkan implementation takes 2ms to render himself on ShenCiao's laptop(RTX 3060). Meanwhile openGL 1ms and Direct12 0.5ms. It seems caused by not choosing optimal memory type for buffer and image(find functions calling `ImGui_ImplVulkan_MemoryType` in file imgui_impl_vulkan.cpp). Or using looped semaphore in FramePresent. May invoke performance issue.
+	 * \brief Main pass is a render pass targeting on framebuffer created from swapchain image. Currently only for rendering imgui, anything else would be rendered as textures into imgui.
+	 * Warning: Imgui vulkan implementation takes 2ms to render himself on ShenCiao's laptop(RTX 3060) in immediate mode. Meanwhile openGL 1ms and Direct12 0.5ms. It seems caused by not choosing optimal memory type for buffer and image(find functions calling `ImGui_ImplVulkan_MemoryType` in file imgui_impl_vulkan.cpp). Or using looped semaphore in function FramePresent. May invoke performance issue.
 	 */
 	class MainPassRenderer
 	{
@@ -49,10 +49,25 @@ namespace ciallo::vulkan
 
 		std::vector<vk::Semaphore> m_waitSemaphores{}; //Semaphores needed to wait from other renderers(e.g. scene renderer). Need add and remove manually.
 
-	public:
+	private:
 		vk::UniqueFence m_renderingCompleteFence;
 		vk::UniqueSemaphore m_renderingCompleteSemaphore;
 		vk::UniqueRenderPass m_renderPass;
 		std::vector<vk::UniqueFramebuffer> m_framebuffers;
+	public:
+		vk::Fence renderingCompleteFence() const
+		{
+			return *m_renderingCompleteFence;
+		}
+
+		vk::Semaphore renderingCompleteSemaphore() const
+		{
+			return *m_renderingCompleteSemaphore;
+		}
+
+		vk::RenderPass renderPass() const
+		{
+			return *m_renderPass;
+		}
 	};
 }

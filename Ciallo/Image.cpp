@@ -3,7 +3,8 @@
 
 namespace ciallo::vulkan
 {
-	Image::Image(VmaAllocator allocator, const std::string& path, vk::ImageUsageFlags usage)
+	Image::Image(VmaAllocator allocator, const std::string& path, vk::ImageUsageFlags usage,
+	             VmaAllocationCreateFlags flags)
 	{
 		int width, height, channels;
 		uint8_t* data = nullptr;
@@ -23,8 +24,6 @@ namespace ciallo::vulkan
 		m_width = width;
 		m_height = height;
 		m_layout = vk::ImageLayout::eUndefined;
-		m_mipLevels = 1;
-		m_arrayLayers = 1;
 
 		VkImageCreateInfo info{};
 		info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -33,8 +32,8 @@ namespace ciallo::vulkan
 		info.extent.width = m_width;
 		info.extent.height = m_height;
 		info.extent.depth = 1;
-		info.mipLevels = m_mipLevels;
-		info.arrayLayers = m_arrayLayers;
+		info.mipLevels = 1;
+		info.arrayLayers = 1;
 		info.samples = VK_SAMPLE_COUNT_1_BIT;
 		info.tiling = VK_IMAGE_TILING_OPTIMAL;
 		info.usage = static_cast<VkImageUsageFlags>(usage);
@@ -42,16 +41,35 @@ namespace ciallo::vulkan
 		info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VmaAllocationCreateInfo allocInfo{};
 		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+		allocInfo.flags = flags;
 
-		vmaCreateImage(allocator, &info, &allocInfo, &m_vkImage, &m_allocation, nullptr);
+		vmaCreateImage(allocator, &info, &allocInfo, &m_image, &m_allocation, nullptr);
+
+
+		free(data);
+	}
+
+	Image::Image(VmaAllocator allocator, vk::ImageCreateInfo info, VmaAllocationCreateInfo allocInfo)
+	{
+		m_allocator = allocator;
+		m_width = info.extent.width;
+		m_height = info.extent.height;
+		m_layout = info.initialLayout;
+		m_format = info.format;
+
+		auto i = static_cast<VkImageCreateInfo>(info);
+		vmaCreateImage(allocator, &i, &allocInfo, &m_image, &m_allocation, nullptr);
 	}
 
 	Image::~Image()
 	{
-		vmaDestroyImage(m_allocator, m_vkImage, m_allocation);
+		vmaDestroyImage(m_allocator, m_image, m_allocation);
 	}
 
-	void Image::setLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectMask)
+	/**
+	 * \brief Change layout of the image.
+	 */
+	void Image::changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectMask)
 	{
 		if (newLayout == m_layout) return;
 		vk::ImageLayout oldLayout = m_layout;
@@ -62,100 +80,14 @@ namespace ciallo::vulkan
 		imageMemoryBarriers.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		imageMemoryBarriers.oldLayout = oldLayout;
 		imageMemoryBarriers.newLayout = newLayout;
-		imageMemoryBarriers.image = m_vkImage;
-		imageMemoryBarriers.subresourceRange = {aspectMask, 0, m_mipLevels, 0, m_arrayLayers};
+		imageMemoryBarriers.image = m_image;
+		imageMemoryBarriers.subresourceRange = {aspectMask, 0, 1, 0, 1};
 
-		// Put barrier on top
-		// https://www.khronos.org/registry/vulkan/specs/1.2/html/chap7.html#synchronization-access-types-supported
-		vk::PipelineStageFlags srcStageMask{vk::PipelineStageFlagBits::eTopOfPipe};
-		vk::PipelineStageFlags dstStageMask{vk::PipelineStageFlagBits::eTopOfPipe};
+		vk::PipelineStageFlags srcStageMask{vk::PipelineStageFlagBits::eTopOfPipe}; // wait for nothing
+		vk::PipelineStageFlags dstStageMask{vk::PipelineStageFlagBits::eBottomOfPipe}; // block nothing
 		vk::DependencyFlags dependencyFlags{};
 		vk::AccessFlags srcMask{};
 		vk::AccessFlags dstMask{};
-
-		typedef vk::ImageLayout il;
-		typedef vk::AccessFlagBits afb;
-
-		// Is it me, or are these the same?
-		switch (oldLayout)
-		{
-		case il::eUndefined: break;
-		case il::eGeneral:
-			srcMask = afb::eTransferWrite;
-			srcStageMask = vk::PipelineStageFlagBits::eTransfer;
-			break;
-		case il::eColorAttachmentOptimal:
-			srcMask = afb::eColorAttachmentWrite;
-			srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-			break;
-		case il::eDepthStencilAttachmentOptimal:
-			srcMask = afb::eDepthStencilAttachmentWrite;
-			srcStageMask = vk::PipelineStageFlagBits::eEarlyFragmentTests;
-			break;
-		case il::eDepthStencilReadOnlyOptimal:
-			srcMask = afb::eDepthStencilAttachmentRead;
-			srcStageMask = vk::PipelineStageFlagBits::eEarlyFragmentTests;
-			break;
-		case il::eShaderReadOnlyOptimal:
-			srcMask = afb::eShaderRead;
-			srcStageMask = vk::PipelineStageFlagBits::eVertexShader;
-			break;
-		case il::eTransferSrcOptimal:
-			srcMask = afb::eTransferRead;
-			srcStageMask = vk::PipelineStageFlagBits::eTransfer;
-			break;
-		case il::eTransferDstOptimal:
-			srcMask = afb::eTransferWrite;
-			srcStageMask = vk::PipelineStageFlagBits::eTransfer;
-			break;
-		case il::ePreinitialized:
-			srcMask = afb::eTransferWrite | afb::eHostWrite;
-			srcStageMask = vk::PipelineStageFlagBits::eTransfer | vk::PipelineStageFlagBits::eHost;
-			break;
-		case il::ePresentSrcKHR:
-			srcMask = afb::eMemoryRead;
-			break;
-		}
-
-		switch (newLayout)
-		{
-		case il::eUndefined: break;
-		case il::eGeneral:
-			dstMask = afb::eTransferWrite;
-			dstStageMask = vk::PipelineStageFlagBits::eTransfer;
-			break;
-		case il::eColorAttachmentOptimal:
-			dstMask = afb::eColorAttachmentWrite;
-			dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-			break;
-		case il::eDepthStencilAttachmentOptimal:
-			dstMask = afb::eDepthStencilAttachmentWrite;
-			dstStageMask = vk::PipelineStageFlagBits::eEarlyFragmentTests;
-			break;
-		case il::eDepthStencilReadOnlyOptimal:
-			dstMask = afb::eDepthStencilAttachmentRead;
-			dstStageMask = vk::PipelineStageFlagBits::eEarlyFragmentTests;
-			break;
-		case il::eShaderReadOnlyOptimal:
-			dstMask = afb::eShaderRead;
-			dstStageMask = vk::PipelineStageFlagBits::eVertexShader;
-			break;
-		case il::eTransferSrcOptimal:
-			dstMask = afb::eTransferRead;
-			dstStageMask = vk::PipelineStageFlagBits::eTransfer;
-			break;
-		case il::eTransferDstOptimal:
-			dstMask = afb::eTransferWrite;
-			dstStageMask = vk::PipelineStageFlagBits::eTransfer;
-			break;
-		case il::ePreinitialized:
-			dstMask = afb::eTransferWrite;
-			dstStageMask = vk::PipelineStageFlagBits::eTransfer;
-			break;
-		case il::ePresentSrcKHR:
-			dstMask = afb::eMemoryRead;
-			break;
-		}
 
 		imageMemoryBarriers.srcAccessMask = srcMask;
 		imageMemoryBarriers.dstAccessMask = dstMask;
@@ -163,5 +95,93 @@ namespace ciallo::vulkan
 		auto bufferMemoryBarriers = nullptr;
 		cb.pipelineBarrier(srcStageMask, dstStageMask, dependencyFlags, memoryBarriers, bufferMemoryBarriers,
 		                   imageMemoryBarriers);
+	}
+
+	// m_layout do not changed in this function
+	vk::ImageMemoryBarrier Image::generateLayoutChangingMemoryBarrier(vk::ImageLayout newLayout,
+	                                                                  vk::ImageAspectFlags aspectMask) const
+	{
+		vk::ImageMemoryBarrier imageMemoryBarrier{};
+		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.oldLayout = m_layout;
+		imageMemoryBarrier.newLayout = newLayout;
+		imageMemoryBarrier.image = m_image;
+		imageMemoryBarrier.subresourceRange = {aspectMask, 0, 1, 0, 1};
+
+		return imageMemoryBarrier;
+	}
+
+	// Warning: mipmap and array layers unsupported
+	void Image::upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size)
+	{
+		if (size == 0) return;
+		if (hostVisible())
+		{
+			uploadLocal(data, size);
+		}
+		else if (!m_stagingBuffer)
+		{
+			createStagingBuffer();
+			uploadStaging(cb, data, size, *m_stagingBuffer);
+		}
+		else
+		{
+			uploadStaging(cb, data, size, *m_stagingBuffer);
+		}
+	}
+
+	vk::DeviceSize Image::size() const
+	{
+		vk::DeviceSize pixelSize = vk::blockSize(m_format) * sizeof(uint8_t);
+		return m_width * m_height * pixelSize;
+	}
+
+	void Image::createStagingBuffer()
+	{
+		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, size(), vk::BufferUsageFlagBits::eTransferSrc,
+		                                           VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+	}
+
+	bool Image::hostVisible() const
+	{
+		VkMemoryPropertyFlags flags;
+		vmaGetAllocationMemoryProperties(m_allocator, m_allocation, &flags);
+		return flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+	}
+
+	void Image::uploadLocal(const void* data, vk::DeviceSize size) const
+	{
+		if (!hostVisible())
+		{
+			throw std::runtime_error("Image is not visible to host");
+		}
+		void* mappedData;
+		vmaMapMemory(m_allocator, m_allocation, &mappedData);
+		memcpy(mappedData, data, size);
+		if (!hostCoherent())
+		{
+			vmaFlushAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
+		}
+		vmaUnmapMemory(m_allocator, m_allocation);
+	}
+
+	// Only color image for now.
+	void Image::uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size,
+	                          vk::Buffer stagingBuffer) const
+	{
+		// Refer to vulkan spec struct VkImageSubresourceRange for aspectMask information
+		vk::BufferImageCopy copy{};
+		copy.setBufferOffset(0);
+		copy.setImageExtent({m_width, m_height, 1u});
+		copy.setImageSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1});
+		cb.copyBufferToImage(stagingBuffer, m_image, m_layout, copy);
+	}
+
+	bool Image::hostCoherent() const
+	{
+		VkMemoryPropertyFlags flags;
+		vmaGetAllocationMemoryProperties(m_allocator, m_allocation, &flags);
+		return flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 	}
 }

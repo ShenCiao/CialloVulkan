@@ -197,14 +197,15 @@ namespace ciallo::vulkan
 
 	bool Window::isPhysicalDeviceValid(vk::PhysicalDevice device)
 	{
-		// need a queue family be able to graphics, compute and presents(unchecked)
+		// need a queue family be able to graphics, compute, transfer and presents(unchecked)
 		auto queueFamilies = device.getQueueFamilyProperties();
 		bool queueFamilyFound = false;
 		for (const auto [i, queueFamily] : views::enumerate(queueFamilies))
 		{
 			if (queueFamily.queueCount > 0 &&
 				queueFamily.queueFlags & vk::QueueFlagBits::eGraphics &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eCompute)
+				queueFamily.queueFlags & vk::QueueFlagBits::eCompute &&
+				queueFamily.queueFlags & vk::QueueFlagBits::eTransfer)
 			{
 				queueFamilyFound = true;
 				break;

@@ -11,7 +11,7 @@ void ciallo::Application::run() const
 	w->setInstance(inst);
 	w->initResources();
 
-	vk::UniqueSemaphore imageAvailableSemaphore = w->device().createSemaphoreUnique({});
+	vk::UniqueSemaphore presentImageAvailableSemaphore = w->device().createSemaphoreUnique({});
 	vulkan::MainPassRenderer mainPassRenderer(w.get());
 	mainPassRenderer.init();
 	w->show();
@@ -20,13 +20,13 @@ void ciallo::Application::run() const
 	{
 		w->pollEvents();
 		vk::Result _;
-		_ = w->device().waitForFences(*mainPassRenderer.m_renderingCompleteFence, VK_TRUE,
+		_ = w->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
 		                              std::numeric_limits<uint64_t>::max());
 
 		uint32_t index;
 		try
 		{
-			index = w->device().acquireNextImageKHR(w->swapchain(), UINT64_MAX, *imageAvailableSemaphore,
+			index = w->device().acquireNextImageKHR(w->swapchain(), UINT64_MAX, *presentImageAvailableSemaphore,
 			                                        VK_NULL_HANDLE).value;
 		}
 		catch (vk::OutOfDateKHRError&)
@@ -39,7 +39,7 @@ void ciallo::Application::run() const
 		{
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
-		w->device().resetFences(*mainPassRenderer.m_renderingCompleteFence);
+		w->device().resetFences(mainPassRenderer.renderingCompleteFence());
 
 		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eSimultaneousUse, nullptr};
 		cb->begin(cbbi);
@@ -59,17 +59,19 @@ void ciallo::Application::run() const
 		mainPassRenderer.render(*cb, index, main_draw_data);
 		cb->end();
 		std::vector<vk::PipelineStageFlags> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
+
+		std::vector<vk::Semaphore> submitSignalSemaphores = {mainPassRenderer.renderingCompleteSemaphore()};
 		vk::SubmitInfo si{
-			*imageAvailableSemaphore,
+			*presentImageAvailableSemaphore,
 			waitStages,
 			*cb,
-			*mainPassRenderer.m_renderingCompleteSemaphore
+			submitSignalSemaphores
 		};
-		w->queue().submit(si, *mainPassRenderer.m_renderingCompleteFence);
-		
+		w->queue().submit(si, mainPassRenderer.renderingCompleteFence());
+
 		auto swapchain = w->swapchain();
 		vk::PresentInfoKHR pi{
-			*mainPassRenderer.m_renderingCompleteSemaphore,
+			submitSignalSemaphores,
 			swapchain,
 			index,
 			{}
