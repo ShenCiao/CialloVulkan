@@ -1,7 +1,6 @@
 #pragma once
 
 #include "vku.hpp"
-#include "vk_mem_alloc.h"
 
 namespace ciallo::vulkan
 {

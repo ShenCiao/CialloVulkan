@@ -1,64 +1,32 @@
 #include "pch.hpp"
 #include "Image.hpp"
-
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 namespace ciallo::vulkan
 {
-	Image::Image(VmaAllocator allocator, const std::string& path, vk::ImageUsageFlags usage,
-	             VmaAllocationCreateFlags flags)
+	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, uint32_t width, uint32_t height,
+		vk::ImageUsageFlags usage)
 	{
-		int width, height, channels;
-		uint8_t* data = nullptr;
-
-		if (stbi_is_hdr(path.c_str()))
-		{
-			data = reinterpret_cast<uint8_t*>(stbi_loadf(path.c_str(), &width, &height, &channels, 4));
-			m_format = vk::Format::eR32G32B32A32Sfloat;
-		}
-		else
-		{
-			data = stbi_load(path.c_str(), &width, &height, &channels, 4);
-			m_format = vk::Format::eR8G8B8A8Unorm;
-		}
-
-		m_allocator = allocator;
-		m_width = width;
-		m_height = height;
-		m_layout = vk::ImageLayout::eUndefined;
-
-		VkImageCreateInfo info{};
-		info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		info.imageType = VK_IMAGE_TYPE_2D;
-		info.format = static_cast<VkFormat>(m_format);
-		info.extent.width = m_width;
-		info.extent.height = m_height;
+		vk::ImageCreateInfo info{};
+		info.imageType = vk::ImageType::e2D;
+		info.format = vk::Format::eR8G8B8A8Unorm;
+		info.extent = vk::Extent3D{width, height, 1u};
 		info.extent.depth = 1;
 		info.mipLevels = 1;
 		info.arrayLayers = 1;
-		info.samples = VK_SAMPLE_COUNT_1_BIT;
-		info.tiling = VK_IMAGE_TILING_OPTIMAL;
-		info.usage = static_cast<VkImageUsageFlags>(usage);
-		info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		VmaAllocationCreateInfo allocInfo{};
-		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
-		allocInfo.flags = flags;
+		info.samples = vk::SampleCountFlagBits::e1;
+		info.tiling = vk::ImageTiling::eOptimal;
+		info.usage = usage;
+		info.sharingMode = vk::SharingMode::eExclusive;
+		info.initialLayout = vk::ImageLayout::eUndefined;
 
-		vmaCreateImage(allocator, &info, &allocInfo, &m_image, &m_allocation, nullptr);
-
-
-		free(data);
-	}
-
-	Image::Image(VmaAllocator allocator, vk::ImageCreateInfo info, VmaAllocationCreateInfo allocInfo)
-	{
 		m_allocator = allocator;
 		m_width = info.extent.width;
 		m_height = info.extent.height;
 		m_layout = info.initialLayout;
 		m_format = info.format;
-
-		auto i = static_cast<VkImageCreateInfo>(info);
-		vmaCreateImage(allocator, &i, &allocInfo, &m_image, &m_allocation, nullptr);
+		createImage(allocator, allocInfo, info);
+		createImageView();
 	}
 
 	Image::~Image()
@@ -97,8 +65,7 @@ namespace ciallo::vulkan
 		                   imageMemoryBarriers);
 	}
 
-	// m_layout do not changed in this function
-	vk::ImageMemoryBarrier Image::generateLayoutChangingMemoryBarrier(vk::ImageLayout newLayout,
+	vk::ImageMemoryBarrier Image::genLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,
 	                                                                  vk::ImageAspectFlags aspectMask) const
 	{
 		vk::ImageMemoryBarrier imageMemoryBarrier{};
@@ -115,7 +82,7 @@ namespace ciallo::vulkan
 	// Warning: mipmap and array layers unsupported
 	void Image::upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size)
 	{
-		if (size == 0) return;
+		if (size == 0) size = this->size();
 		if (hostVisible())
 		{
 			uploadLocal(data, size);
@@ -123,10 +90,12 @@ namespace ciallo::vulkan
 		else if (!m_stagingBuffer)
 		{
 			createStagingBuffer();
+			m_stagingBuffer->uploadLocal(data, size);
 			uploadStaging(cb, data, size, *m_stagingBuffer);
 		}
 		else
 		{
+			m_stagingBuffer->uploadLocal(data, size);
 			uploadStaging(cb, data, size, *m_stagingBuffer);
 		}
 	}
@@ -141,6 +110,24 @@ namespace ciallo::vulkan
 	{
 		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, size(), vk::BufferUsageFlagBits::eTransferSrc,
 		                                           VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+	}
+
+	void Image::createImageView()
+	{
+		vk::ImageViewCreateInfo info{};
+		info.setImage(m_image);
+		info.setViewType(vk::ImageViewType::e2D);
+		info.setFormat(m_format);
+		info.setComponents({});
+		info.setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+		m_imageView = device().createImageViewUnique(info);
+	}
+
+	vk::Device Image::device() const
+	{
+		VmaAllocatorInfo info;
+		vmaGetAllocatorInfo(m_allocator, &info);
+		return info.device;
 	}
 
 	bool Image::hostVisible() const
@@ -176,6 +163,14 @@ namespace ciallo::vulkan
 		copy.setImageExtent({m_width, m_height, 1u});
 		copy.setImageSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1});
 		cb.copyBufferToImage(stagingBuffer, m_image, m_layout, copy);
+	}
+
+	void Image::createImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info)
+	{
+		auto i = static_cast<VkImageCreateInfo>(info);
+		VkImage image;
+		vmaCreateImage(allocator, &i, &allocInfo, &image, &m_allocation, nullptr);
+		m_image = static_cast<vk::Image>(image);
 	}
 
 	bool Image::hostCoherent() const

@@ -1,6 +1,7 @@
 ﻿#include "pch.hpp"
 #include "Application.hpp"
 #include "MainPassRenderer.hpp"
+#include "ScenePanel.hpp"
 
 void ciallo::Application::run() const
 {
@@ -16,6 +17,26 @@ void ciallo::Application::run() const
 	mainPassRenderer.init();
 	w->show();
 	vk::UniqueCommandBuffer cb = std::move(w->createCommandBuffers(vk::CommandBufferLevel::ePrimary, 1)[0]);
+
+	VmaAllocatorCreateInfo allocatorCreateInfo{};
+	allocatorCreateInfo.instance = w->instance();
+	allocatorCreateInfo.device = w->device();
+	allocatorCreateInfo.physicalDevice = w->physicalDevice();
+	allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_3;
+
+	VmaAllocator allocator;
+	vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+
+	gui::ScenePanel sp;
+
+	w->executeImmediately([&](vk::CommandBuffer cb)
+	{
+		sp.createSampler(w->device());
+		sp.createCanvas(allocator, cb);
+	});
+
+	w->device().waitIdle();
+
 	while (!w->shouldClose())
 	{
 		w->pollEvents();
@@ -41,7 +62,7 @@ void ciallo::Application::run() const
 		}
 		w->device().resetFences(mainPassRenderer.renderingCompleteFence());
 
-		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eSimultaneousUse, nullptr};
+		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr};
 		cb->begin(cbbi);
 		ImGui_ImplVulkan_NewFrame();
 		w->imguiNewFrame();
@@ -52,6 +73,7 @@ void ciallo::Application::run() const
 		{
 			ImGui::ShowDemoWindow(&show_demo_window);
 		}
+		sp.draw();
 		// -----------------------------------------------------------------------------
 		ImGui::EndFrame();
 		ImGui::Render();

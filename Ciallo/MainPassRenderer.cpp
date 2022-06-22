@@ -112,9 +112,7 @@ namespace ciallo::vulkan
 	{
 		w->executeImmediately([this](vk::CommandBuffer cb)
 		{
-			cb.begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 			ImGui_ImplVulkan_CreateFontsTexture(cb);
-			cb.end();
 		});
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}

@@ -1,7 +1,5 @@
 #pragma once
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 #include <vulkan/vulkan.hpp>
 
 #include <vk_mem_alloc.h>
@@ -11,6 +9,7 @@
 
 namespace ciallo::vulkan
 {
+	// Suppose to support 2d image only, may add multiple layers support
 	class Image
 	{
 	private:
@@ -20,35 +19,56 @@ namespace ciallo::vulkan
 		vk::ImageLayout m_layout;
 		VmaAllocator m_allocator;
 		VmaAllocation m_allocation;
-		VkImage m_image;
+		vk::Image m_image;
 		std::unique_ptr<Buffer> m_stagingBuffer;
+		vk::UniqueImageView m_imageView;
 	public:
-		Image(VmaAllocator allocator, const std::string& path,
-		      vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-		      VmaAllocationCreateFlags flags = {});
-		Image(VmaAllocator allocator, vk::ImageCreateInfo info, VmaAllocationCreateInfo allocInfo);
+		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, uint32_t width, uint32_t height, vk::ImageUsageFlags usage);
 		~Image();
+		Image(const Image& other) = delete;
+		Image(Image&& other) = default;
+		Image& operator=(const Image& other) = delete;
+		Image& operator=(Image&& other) = default;
+		operator vk::Image() const {return m_image;}
 	public:
 		void changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout,
-		               vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor);
-		vk::ImageMemoryBarrier generateLayoutChangingMemoryBarrier(vk::ImageLayout newLayout,
-		                                                           vk::ImageAspectFlags aspectMask =
-		                                                                  vk::ImageAspectFlagBits::eColor) const;
+		                  vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor);
+		vk::ImageMemoryBarrier genLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor) const;
 
-		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size);
+		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size = 0u);
 		vk::DeviceSize size() const;
 
 		void uploadLocal(const void* data, vk::DeviceSize size) const;
 		// Upload with provided stagingBuffer
 		void uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size, vk::Buffer stagingBuffer) const;
 
-
+	private:
+		void createImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info);
 		void createStagingBuffer();
+		void createImageView();
+		vk::Device device() const;
+	public:
 		bool hostVisible() const;
 		bool hostCoherent() const;
+
 		void setLayout(vk::ImageLayout layout)
 		{
 			m_layout = layout;
+		}
+
+		vk::ImageView imageView() const
+		{
+			return *m_imageView;
+		}
+
+		uint32_t width() const
+		{
+			return m_width;
+		}
+
+		uint32_t height() const
+		{
+			return m_height;
 		}
 	};
 }

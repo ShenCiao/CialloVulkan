@@ -262,7 +262,9 @@ namespace ciallo::vulkan
 			1
 		};
 		auto cb = std::move(m_device->allocateCommandBuffersUnique(info)[0]);
+		cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 		func(*cb);
+		cb->end();
 
 		vk::UniqueFence fence = m_device->createFenceUnique({});
 		vk::SubmitInfo si{};
