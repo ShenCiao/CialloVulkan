@@ -20,40 +20,48 @@ namespace ciallo::gui
 	{
 		int width, height, channels;
 		spdlog::info("Current working directory: {}", std::filesystem::current_path().string());
-		
-		auto data = reinterpret_cast<uint8_t*>(stbi_loadf("images/takagi3.png", &width, &height, &channels, 4));
+
+		auto data = stbi_load("images/takagi3.png", &width, &height, &channels,
+		                                                  STBI_rgb_alpha);
 		if (!data)
 		{
 			throw std::runtime_error("Unable to load image");
 		}
 
-		VmaAllocationCreateInfo info={};
+		VmaAllocationCreateInfo info = {};
 		info.usage = VMA_MEMORY_USAGE_AUTO;
+		
 		m_canvas = std::make_unique<vulkan::Image>(allocator, info, width, height,
 		                                           vk::ImageUsageFlagBits::eSampled |
 		                                           vk::ImageUsageFlagBits::eTransferDst);
+		if(m_canvas->hostVisible())
+		{
+			spdlog::info("it's host visible");
+		}
 		auto barrier = m_canvas->genLayoutTransitionMemoryBarrier(vk::ImageLayout::eGeneral);
 
-		cb.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eAllCommands, {}, {}, {}, barrier);
+		cb.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eAllCommands, {}, {}, {},
+		                   barrier);
 		m_canvas->setLayout(vk::ImageLayout::eGeneral);
 		m_canvas->upload(cb, data);
-		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(), static_cast<VkImageLayout>(vk::ImageLayout::eGeneral));
+		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),
+		                                                static_cast<VkImageLayout>(vk::ImageLayout::eGeneral));
+		stbi_image_free(data);
 	}
 
 	void ScenePanel::createSampler(vk::Device device)
 	{
 		vk::SamplerCreateInfo info{};
-        info.magFilter = vk::Filter::eLinear;
-        info.minFilter = vk::Filter::eLinear;
-        info.addressModeU = vk::SamplerAddressMode::eRepeat;
-        info.addressModeV = vk::SamplerAddressMode::eRepeat;
-        info.addressModeW = vk::SamplerAddressMode::eRepeat;
-        info.anisotropyEnable = VK_FALSE;
-        info.borderColor = vk::BorderColor::eIntOpaqueBlack;
-        info.unnormalizedCoordinates = VK_FALSE;
-        info.compareEnable = VK_FALSE;
-        info.compareOp = vk::CompareOp::eAlways;
-        info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+		info.magFilter = vk::Filter::eNearest;
+		info.minFilter = vk::Filter::eNearest;
+		info.addressModeU = vk::SamplerAddressMode::eClampToBorder;
+		info.addressModeV = vk::SamplerAddressMode::eClampToBorder;
+		info.addressModeW = vk::SamplerAddressMode::eClampToBorder;
+		info.anisotropyEnable = VK_FALSE;
+		info.borderColor = vk::BorderColor::eIntOpaqueBlack;
+		info.unnormalizedCoordinates = VK_FALSE;
+		info.compareEnable = VK_FALSE;
+		info.compareOp = vk::CompareOp::eAlways;
 		m_sampler = device.createSamplerUnique(info);
 	}
 }

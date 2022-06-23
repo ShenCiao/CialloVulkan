@@ -102,7 +102,7 @@ namespace ciallo::vulkan
 
 	vk::DeviceSize Image::size() const
 	{
-		vk::DeviceSize pixelSize = vk::blockSize(m_format) * sizeof(uint8_t);
+		vk::DeviceSize pixelSize = vk::blockSize(m_format);
 		return m_width * m_height * pixelSize;
 	}
 
