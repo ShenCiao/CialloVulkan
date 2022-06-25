@@ -2,7 +2,7 @@
 #include "Application.hpp"
 #include "MainPassRenderer.hpp"
 #include "Device.hpp"
-
+#include <implot.h>
 #include "ScenePanel.hpp"
 
 void ciallo::Application::run() const
@@ -69,6 +69,12 @@ void ciallo::Application::run() const
 		{
 			ImGui::ShowDemoWindow(&show_demo_window);
 		}
+		static bool show_demo = true;
+		if (show_demo)
+		{
+			ImPlot::ShowDemoWindow(&show_demo);
+		}
+
 		sp.draw();
 		// -----------------------------------------------------------------------------
 		ImGui::EndFrame();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vku.hpp"
+#include <vulkan/vulkan.hpp>
 
 namespace ciallo::vulkan
 {

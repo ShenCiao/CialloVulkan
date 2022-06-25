@@ -1,9 +1,8 @@
 #pragma once
 #include "Window.hpp"
 #include "Device.hpp"
-#include <imgui.h>
+
 #include <imgui_impl_vulkan.h>
-#include "vku.hpp"
 
 namespace ciallo::vulkan
 {

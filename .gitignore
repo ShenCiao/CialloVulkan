@@ -1,4 +1,5 @@
 vcpkg_installed/
+Ciallo/imgui.ini
 
 # User-specific files
 *.rsuser
@@ -393,4 +394,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-Ciallo/imgui.ini
+

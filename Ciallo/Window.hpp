@@ -10,8 +10,9 @@
 namespace ciallo::vulkan
 {
 	/**
-	 * \brief Wrap up glfw and vulkan infrastructure for ciallo, will be changed into platform native api or something else.
-	 *	Since the imgui_impl_glfw(for vulkan) introduce extra lag and supporting tablet and stylus is a rabbit hole.
+	 * \brief Class wraps up glfw. Include windows object and swapchain related object.
+	 * Glfw will be changed into platform native window api or something else. Since the imgui_impl_glfw(for vulkan) introduce extra lag and supporting tablet and stylus is a rabbit hole.
+	 * 
 	 */
 	class Window
 	{
@@ -60,7 +61,6 @@ namespace ciallo::vulkan
 	public:
 		void onWindowResize();
 
-	public:
 		void show() const;
 		void hide() const;
 		bool shouldClose() const;

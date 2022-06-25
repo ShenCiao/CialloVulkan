@@ -1,5 +1,8 @@
 #include "pch.hpp"
 #include "MainPassRenderer.hpp"
+#include <implot.h>
+#include <imgui.h>
+#include "vku.hpp"
 
 namespace ciallo::vulkan
 {
@@ -7,6 +10,7 @@ namespace ciallo::vulkan
 	{
 		d = w->m_device.get();
 		ImGui::CreateContext();
+		ImPlot::CreateContext();
 		init();
 	}
 
@@ -17,6 +21,7 @@ namespace ciallo::vulkan
 			ImGui_ImplVulkan_Shutdown();
 			w->imguiShutdownWindow();
 		}
+		ImPlot::DestroyContext();
 		ImGui::DestroyContext();
 	}
 
@@ -55,6 +60,7 @@ namespace ciallo::vulkan
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.FontGlobalScale = 1.5f;
 		w->imguiInitWindow();
 
 		genDescriptorPool();
