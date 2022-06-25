@@ -39,7 +39,7 @@ namespace ciallo::vulkan
 		throw std::runtime_error("no required queue in physical device");
 	}
 
-	void Window::createDevice()
+	void Window::genDevice()
 	{
 		vku::DeviceMaker dm{};
 		dm.queue(m_queueFamilyIndex, 1.0f);
@@ -51,7 +51,7 @@ namespace ciallo::vulkan
 		m_device = dm.createUnique(m_physicalDevice);
 	}
 
-	void Window::createCommandPool()
+	void Window::genCommandPool()
 	{
 		vk::CommandPoolCreateInfo poolInfo{};
 		poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
@@ -59,7 +59,7 @@ namespace ciallo::vulkan
 		m_commandPool = m_device->createCommandPoolUnique(poolInfo);
 	}
 
-	void Window::createPhysicalDevice(int index)
+	void Window::pickPhysicalDevice(int index)
 	{
 		auto devices = m_instance->m_instance->enumeratePhysicalDevices();
 		m_physicalDevice = devices[index];
@@ -82,14 +82,14 @@ namespace ciallo::vulkan
 
 	void Window::initResources()
 	{
-		createPhysicalDevice(1);
+		pickPhysicalDevice(1);
 		pickQueueFamily();
-		createDevice();
-		createCommandPool();
+		genDevice();
+		genCommandPool();
 
-		createSurface();
+		genSurface();
 		pickSurfaceFormat();
-		createSwapchain();
+		genSwapchain();
 	}
 
 	void Window::setInstance(const std::shared_ptr<Instance>& instance)
@@ -97,7 +97,7 @@ namespace ciallo::vulkan
 		m_instance = instance;
 	}
 
-	void Window::createSurface()
+	void Window::genSurface()
 	{
 		VkSurfaceKHR rawSurface;
 		if (glfwCreateWindowSurface(*m_instance->m_instance, m_glfwWindow, nullptr, &rawSurface) != VK_SUCCESS)
@@ -113,17 +113,17 @@ namespace ciallo::vulkan
 		auto surfaceFormats = m_physicalDevice.getSurfaceFormatsKHR(*m_surface);
 		for (auto surface : surfaceFormats)
 		{
-			std::cout << to_string(surface.format) << std::endl;
-			std::cout << to_string(surface.colorSpace) << std::endl;
+			std::cout << vk::to_string(surface.format) << std::endl;
+			std::cout << vk::to_string(surface.colorSpace) << std::endl;
 		}
-		m_swapchainImageFormat = vk::Format::eB8G8R8A8Srgb;
+		m_swapchainImageFormat = vk::Format::eB8G8R8A8Unorm;
 		m_swapchainImageColorSpace = vk::ColorSpaceKHR::eSrgbNonlinear;
 	}
 
 	/**
 	 * \brief create swapchain and its extent, images, image views, framebuffers;
 	 */
-	void Window::createSwapchain()
+	void Window::genSwapchain()
 	{
 		int width = 0, height = 0;
 		glfwGetFramebufferSize(m_glfwWindow, &width, &height);
@@ -181,16 +181,16 @@ namespace ciallo::vulkan
 	{
 		m_device->waitIdle();
 
-		createSwapchain();
+		genSwapchain();
 	}
 
 	std::vector<vk::UniqueCommandBuffer> Window::createCommandBuffers(
-		const vk::CommandBufferLevel level, const int n) const
+		const vk::CommandBufferLevel level, const uint32_t n) const
 	{
 		vk::CommandBufferAllocateInfo info{
 			*m_commandPool,
 			level,
-			static_cast<uint32_t>(n)
+			n
 		};
 		return m_device->allocateCommandBuffersUnique(info);
 	}

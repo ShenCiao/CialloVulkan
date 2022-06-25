@@ -1,11 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-
 #include <vk_mem_alloc.h>
-
 #include "Buffer.hpp"
-
 
 namespace ciallo::vulkan
 {
@@ -33,7 +30,7 @@ namespace ciallo::vulkan
 	public:
 		void changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout,
 		                  vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor);
-		vk::ImageMemoryBarrier genLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor) const;
+		vk::ImageMemoryBarrier createLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor) const;
 
 		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size = 0u);
 		vk::DeviceSize size() const;
@@ -43,9 +40,9 @@ namespace ciallo::vulkan
 		void uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size, vk::Buffer stagingBuffer) const;
 
 	private:
-		void createImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info);
-		void createStagingBuffer();
-		void createImageView();
+		void genImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info);
+		void genStagingBuffer();
+		void genImageView();
 		vk::Device device() const;
 	public:
 		bool hostVisible() const;

@@ -20,10 +20,10 @@ namespace ciallo::vulkan
 
 	void MainPassRenderer::init()
 	{
-		createRenderPass();
-		createFramebuffers();
+		genRenderPass();
+		genFramebuffers();
 		initImGui();
-		createSyncObject();
+		genSyncObject();
 		uploadFonts();
 	}
 
@@ -55,7 +55,7 @@ namespace ciallo::vulkan
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		w->imguiInitWindow();
 
-		createDescriptorPool();
+		genDescriptorPool();
 		// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 		ImGui_ImplVulkan_InitInfo init_info{};
 		init_info.Instance = w->instance();
@@ -78,7 +78,7 @@ namespace ciallo::vulkan
 		}
 	}
 
-	void MainPassRenderer::createDescriptorPool()
+	void MainPassRenderer::genDescriptorPool()
 	{
 		vk::DescriptorPoolCreateInfo poolInfo(
 			{},
@@ -88,7 +88,7 @@ namespace ciallo::vulkan
 		m_descriptorPool = w->device().createDescriptorPoolUnique(poolInfo);
 	}
 
-	void MainPassRenderer::createSyncObject()
+	void MainPassRenderer::genSyncObject()
 	{
 		vk::FenceCreateInfo fci(vk::FenceCreateFlagBits::eSignaled);
 		m_renderingCompleteFence = w->device().createFenceUnique(fci);
@@ -96,7 +96,7 @@ namespace ciallo::vulkan
 		m_renderingCompleteSemaphore = w->device().createSemaphoreUnique(sci);
 	}
 
-	void MainPassRenderer::createRenderPass()
+	void MainPassRenderer::genRenderPass()
 	{
 		vku::RenderpassMaker rpm;
 		rpm.attachmentBegin(w->swapchainImageFormat())
@@ -120,7 +120,7 @@ namespace ciallo::vulkan
 	/**
 	 * \brief Create or recreate Framebuffers
 	 */
-	void MainPassRenderer::createFramebuffers()
+	void MainPassRenderer::genFramebuffers()
 	{
 		auto imageView2framebuffer = [this](const vk::UniqueImageView& imv)
 		{

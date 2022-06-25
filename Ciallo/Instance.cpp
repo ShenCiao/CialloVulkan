@@ -1,14 +1,22 @@
 #include "pch.hpp"
 
-#define VMA_IMPLEMENTATION
-#include <vk_mem_alloc.h>
 #include "Instance.hpp"
 
 namespace ciallo::vulkan
 {
+	Instance::Instance()
+	{
+		genInstance();
+	}
+
 	Instance::~Instance()
 	{
 		m_instance->destroyDebugUtilsMessengerEXT(m_debugMessenger, nullptr, m_dldi);
+	}
+
+	Instance::operator vk::Instance()
+	{
+		return *m_instance;
 	}
 
 	VkBool32 Instance::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -29,7 +37,7 @@ namespace ciallo::vulkan
 		return VK_FALSE;
 	}
 
-	void Instance::create()
+	void Instance::genInstance()
 	{
 		auto appInfo = vk::ApplicationInfo(
 			"Ciallo",
@@ -55,19 +63,11 @@ namespace ciallo::vulkan
 			m_instanceExtensions // enabled extensions
 		);
 
-		vk::StructureChain<vk::InstanceCreateInfo, vk::DebugUtilsMessengerCreateInfoEXT> c{
-			createInfo, messengerCreateInfo
-		};
+		vk::StructureChain c{createInfo, messengerCreateInfo};
 
 		m_instance = vk::createInstanceUnique(c.get<vk::InstanceCreateInfo>());
 
 		m_dldi = vk::DispatchLoaderDynamic(*m_instance, vkGetInstanceProcAddr);
 		m_debugMessenger = m_instance->createDebugUtilsMessengerEXT(messengerCreateInfo, nullptr, m_dldi);
-	}
-
-
-	void Instance::addInstanceExtensions(std::vector<const char*> extensions)
-	{
-		m_instanceExtensions.insert(m_instanceExtensions.end(), extensions.begin(), extensions.end());
 	}
 }

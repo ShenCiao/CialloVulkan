@@ -61,7 +61,7 @@ namespace ciallo::vulkan
 		}
 		else
 		{
-			createStagingBuffer();
+			genStagingBuffer();
 			uploadStaging(cb, data, size, *m_stagingBuffer);
 		}
 	}

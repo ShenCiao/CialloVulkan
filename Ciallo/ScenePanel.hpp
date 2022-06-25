@@ -9,10 +9,9 @@ namespace ciallo::gui
 	{
 	public:
 		void draw() const;
-
 	public:
-		void createCanvas(VmaAllocator allocator, vk::CommandBuffer cb);
-		void createSampler(vk::Device device);
+		void genCanvas(VmaAllocator allocator, vk::CommandBuffer cb);
+		void genSampler(vk::Device device);
 	private:
 		std::unique_ptr<vulkan::Image> m_canvas;
 		vk::UniqueSampler m_sampler;

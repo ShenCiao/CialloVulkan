@@ -95,6 +95,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="Device.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainPassRenderer.cpp" />
@@ -108,6 +109,7 @@
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="Buffer.hpp" />
+    <ClInclude Include="Device.hpp" />
     <ClInclude Include="Image.hpp" />
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />

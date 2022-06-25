@@ -1,14 +1,18 @@
 ﻿#include "pch.hpp"
 #include "Application.hpp"
 #include "MainPassRenderer.hpp"
+#include "Device.hpp"
+
 #include "ScenePanel.hpp"
 
 void ciallo::Application::run() const
 {
 	auto w = std::make_unique<vulkan::Window>(1000, 1000, "hi");
+	vulkan::Instance::addExtensions(w->getRequiredInstanceExtensions());
 	auto inst = std::make_shared<vulkan::Instance>();
-	inst->addInstanceExtensions(w->getRequiredInstanceExtensions());
-	inst->create();
+	int physicalDeviceIndex = vulkan::Device::pickPhysicalDevice(*inst);
+	auto device = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
+
 	w->setInstance(inst);
 	w->initResources();
 
@@ -29,10 +33,10 @@ void ciallo::Application::run() const
 
 	gui::ScenePanel sp;
 
-	w->executeImmediately([&](vk::CommandBuffer cb)
+	w->executeImmediately([&](vk::CommandBuffer c)
 	{
-		sp.createSampler(w->device());
-		sp.createCanvas(allocator, cb);
+		sp.genSampler(w->device());
+		sp.genCanvas(allocator, c);
 	});
 
 	w->device().waitIdle();
@@ -53,7 +57,7 @@ void ciallo::Application::run() const
 		catch (vk::OutOfDateKHRError&)
 		{
 			w->onWindowResize();
-			mainPassRenderer.createFramebuffers();
+			mainPassRenderer.genFramebuffers();
 			continue;
 		}
 		catch (vk::SystemError&)
@@ -106,7 +110,7 @@ void ciallo::Application::run() const
 		catch (vk::OutOfDateKHRError&)
 		{
 			w->onWindowResize();
-			mainPassRenderer.createFramebuffers();
+			mainPassRenderer.genFramebuffers();
 			continue;
 		}
 		catch (vk::SystemError&)
@@ -116,6 +120,7 @@ void ciallo::Application::run() const
 	}
 
 	w->device().waitIdle();
+	vmaDestroyAllocator(allocator);
 }
 
 void ciallo::Application::loadSettings()

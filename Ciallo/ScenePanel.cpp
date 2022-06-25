@@ -16,13 +16,13 @@ namespace ciallo::gui
 		ImGui::End();
 	}
 
-	void ScenePanel::createCanvas(VmaAllocator allocator, vk::CommandBuffer cb)
+	void ScenePanel::genCanvas(VmaAllocator allocator, vk::CommandBuffer cb)
 	{
 		int width, height, channels;
 		spdlog::info("Current working directory: {}", std::filesystem::current_path().string());
 
-		auto data = stbi_load("images/takagi3.png", &width, &height, &channels,
-		                                                  STBI_rgb_alpha);
+		auto data = stbi_load("images/myaamori.jpg", &width, &height, &channels,
+		                      STBI_rgb_alpha);
 		if (!data)
 		{
 			throw std::runtime_error("Unable to load image");
@@ -30,15 +30,15 @@ namespace ciallo::gui
 
 		VmaAllocationCreateInfo info = {};
 		info.usage = VMA_MEMORY_USAGE_AUTO;
-		
+
 		m_canvas = std::make_unique<vulkan::Image>(allocator, info, width, height,
 		                                           vk::ImageUsageFlagBits::eSampled |
 		                                           vk::ImageUsageFlagBits::eTransferDst);
-		if(m_canvas->hostVisible())
+		if (m_canvas->hostVisible())
 		{
 			spdlog::info("it's host visible");
 		}
-		auto barrier = m_canvas->genLayoutTransitionMemoryBarrier(vk::ImageLayout::eGeneral);
+		auto barrier = m_canvas->createLayoutTransitionMemoryBarrier(vk::ImageLayout::eGeneral);
 
 		cb.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eAllCommands, {}, {}, {},
 		                   barrier);
@@ -49,7 +49,7 @@ namespace ciallo::gui
 		stbi_image_free(data);
 	}
 
-	void ScenePanel::createSampler(vk::Device device)
+	void ScenePanel::genSampler(vk::Device device)
 	{
 		vk::SamplerCreateInfo info{};
 		info.magFilter = vk::Filter::eNearest;

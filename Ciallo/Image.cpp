@@ -25,8 +25,8 @@ namespace ciallo::vulkan
 		m_height = info.extent.height;
 		m_layout = info.initialLayout;
 		m_format = info.format;
-		createImage(allocator, allocInfo, info);
-		createImageView();
+		genImage(allocator, allocInfo, info);
+		genImageView();
 	}
 
 	Image::~Image()
@@ -35,7 +35,7 @@ namespace ciallo::vulkan
 	}
 
 	/**
-	 * \brief Change layout of the image.
+	 * \brief Change layout of the image. Barrier do not wait or block command.
 	 */
 	void Image::changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectMask)
 	{
@@ -65,7 +65,7 @@ namespace ciallo::vulkan
 		                   imageMemoryBarriers);
 	}
 
-	vk::ImageMemoryBarrier Image::genLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,
+	vk::ImageMemoryBarrier Image::createLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,
 	                                                                  vk::ImageAspectFlags aspectMask) const
 	{
 		vk::ImageMemoryBarrier imageMemoryBarrier{};
@@ -89,7 +89,7 @@ namespace ciallo::vulkan
 		}
 		else if (!m_stagingBuffer)
 		{
-			createStagingBuffer();
+			genStagingBuffer();
 			m_stagingBuffer->uploadLocal(data, size);
 			uploadStaging(cb, data, size, *m_stagingBuffer);
 		}
@@ -106,13 +106,13 @@ namespace ciallo::vulkan
 		return m_width * m_height * pixelSize;
 	}
 
-	void Image::createStagingBuffer()
+	void Image::genStagingBuffer()
 	{
 		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, size(), vk::BufferUsageFlagBits::eTransferSrc,
 		                                           VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 	}
 
-	void Image::createImageView()
+	void Image::genImageView()
 	{
 		vk::ImageViewCreateInfo info{};
 		info.setImage(m_image);
@@ -165,7 +165,7 @@ namespace ciallo::vulkan
 		cb.copyBufferToImage(stagingBuffer, m_image, m_layout, copy);
 	}
 
-	void Image::createImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info)
+	void Image::genImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info)
 	{
 		auto i = static_cast<VkImageCreateInfo>(info);
 		VkImage image;

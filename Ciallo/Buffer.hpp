@@ -29,13 +29,14 @@ namespace ciallo::vulkan
 		Buffer(Buffer&& other) = default;
 		Buffer& operator=(const Buffer& other) = delete;
 		Buffer& operator=(Buffer&& other) = default;
+		~Buffer();
 
 		void uploadLocal(const void* data, vk::DeviceSize size) const;
 
 		// Upload with provided stagingBuffer
 		void uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size, vk::Buffer stagingBuffer) const;
 
-		void createStagingBuffer()
+		void genStagingBuffer()
 		{
 			m_stagingBuffer = std::make_unique<Buffer>(m_allocator, m_size, vk::BufferUsageFlagBits::eTransferSrc,
 		                                           VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
@@ -52,6 +53,7 @@ namespace ciallo::vulkan
 		template <typename T>
 		void upload(vk::CommandBuffer cb, std::vector<T>& data);
 
+		
 		template <typename T>
 		void upload(vk::CommandBuffer cb, T& data);
 
@@ -60,7 +62,5 @@ namespace ciallo::vulkan
 		bool hostCoherent() const;
 
 		void destroyStagingBuffer();
-
-		~Buffer();
 	};
 }
