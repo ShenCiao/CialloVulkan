@@ -22,6 +22,8 @@ namespace ciallo::vulkan
 		Device& operator=(const Device& other) = delete;
 		Device& operator=(Device&& other) = default;
 		~Device();
+		operator vk::Device(){return *m_device;}
+		
 	private:
 		static inline std::vector<const char*> m_extensions{
 			"VK_KHR_swapchain"
@@ -38,8 +40,12 @@ namespace ciallo::vulkan
 		static bool isPhysicalDeviceValid(vk::PhysicalDevice device);
 		static int pickPhysicalDevice(vk::Instance instance);
 
+		vk::CommandBuffer createCommandBuffer(vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 		void executeImmediately(const std::function<void(vk::CommandBuffer)>& func);
 		vk::Queue queue() const;
+		vk::Device device() const {return *m_device;}
+		vk::PhysicalDevice physicalDevice() const {return m_physicalDevice;}
 		VmaAllocator allocator() const {return m_allocator;}
+		uint32_t queueFamilyIndex() const { return m_queueFamilyIndex; }
 	};
 }

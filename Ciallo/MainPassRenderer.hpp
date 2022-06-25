@@ -1,5 +1,6 @@
 #pragma once
 #include "Window.hpp"
+#include "Device.hpp"
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 #include "vku.hpp"
@@ -30,6 +31,7 @@ namespace ciallo::vulkan
 		void genFramebuffers();
 	private:
 		Window* w;
+		Device* d;
 		bool m_imguiInitialized = false;
 		constexpr static int MAX_SIZE = 128;
 		std::vector<vk::DescriptorPoolSize> m_descriptorPoolSizes{

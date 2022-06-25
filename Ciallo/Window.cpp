@@ -22,49 +22,6 @@ namespace ciallo::vulkan
 		glfwTerminate();
 	}
 
-	void Window::pickQueueFamily()
-	{
-		auto queueFamilies = m_physicalDevice.getQueueFamilyProperties();
-
-		for (const auto [i, queueFamily] : views::enumerate(queueFamilies))
-		{
-			if (queueFamily.queueCount > 0 &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eGraphics &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eCompute)
-			{
-				m_queueFamilyIndex = static_cast<uint32_t>(i);
-				return;
-			}
-		}
-		throw std::runtime_error("no required queue in physical device");
-	}
-
-	void Window::genDevice()
-	{
-		vku::DeviceMaker dm{};
-		dm.queue(m_queueFamilyIndex, 1.0f);
-		for (const char* ext : m_deviceExtensions)
-		{
-			dm.extension(ext);
-		}
-		dm.extension(m_deviceExtensions[0]);
-		m_device = dm.createUnique(m_physicalDevice);
-	}
-
-	void Window::genCommandPool()
-	{
-		vk::CommandPoolCreateInfo poolInfo{};
-		poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
-		poolInfo.queueFamilyIndex = m_queueFamilyIndex;
-		m_commandPool = m_device->createCommandPoolUnique(poolInfo);
-	}
-
-	void Window::pickPhysicalDevice(int index)
-	{
-		auto devices = m_instance->m_instance->enumeratePhysicalDevices();
-		m_physicalDevice = devices[index];
-	}
-
 	void Window::imguiInitWindow() const
 	{
 		ImGui_ImplGlfw_InitForVulkan(m_glfwWindow, true);
@@ -82,11 +39,6 @@ namespace ciallo::vulkan
 
 	void Window::initResources()
 	{
-		pickPhysicalDevice(1);
-		pickQueueFamily();
-		genDevice();
-		genCommandPool();
-
 		genSurface();
 		pickSurfaceFormat();
 		genSwapchain();
@@ -95,6 +47,11 @@ namespace ciallo::vulkan
 	void Window::setInstance(const std::shared_ptr<Instance>& instance)
 	{
 		m_instance = instance;
+	}
+
+	void Window::setDevice(const std::shared_ptr<Device>& device)
+	{
+		m_device = device;
 	}
 
 	void Window::genSurface()
@@ -110,7 +67,7 @@ namespace ciallo::vulkan
 	void Window::pickSurfaceFormat()
 	{
 		//TODO: make it portable, it's a dirty hack for ShenCiao's laptop only
-		auto surfaceFormats = m_physicalDevice.getSurfaceFormatsKHR(*m_surface);
+		auto surfaceFormats = m_device->physicalDevice().getSurfaceFormatsKHR(*m_surface);
 		for (auto surface : surfaceFormats)
 		{
 			std::cout << vk::to_string(surface.format) << std::endl;
@@ -153,8 +110,8 @@ namespace ciallo::vulkan
 		ci.oldSwapchain = *m_swapchain;
 
 		//WARNING: ignore querying device support for swapchain extent, present mode, image formats and device's pre transform.
-		m_swapchain = m_device->createSwapchainKHRUnique(ci);
-		m_swapchainImages = m_device->getSwapchainImagesKHR(*m_swapchain);
+		m_swapchain = device().createSwapchainKHRUnique(ci);
+		m_swapchainImages = device().getSwapchainImagesKHR(*m_swapchain);
 		spdlog::info("number of swapchain images: {}", m_swapchainImages.size());
 
 		auto image2imageView = [this](const vk::Image im)
@@ -172,59 +129,16 @@ namespace ciallo::vulkan
 			ci.subresourceRange.levelCount = 1;
 			ci.subresourceRange.baseArrayLayer = 0;
 			ci.subresourceRange.layerCount = 1;
-			return m_device->createImageViewUnique(ci);
+			return device().createImageViewUnique(ci);
 		};
 		m_swapchainImageViews = m_swapchainImages | views::transform(image2imageView) | ranges::to_vector;
 	}
 
 	void Window::onWindowResize()
 	{
-		m_device->waitIdle();
+		device().waitIdle();
 
 		genSwapchain();
-	}
-
-	std::vector<vk::UniqueCommandBuffer> Window::createCommandBuffers(
-		const vk::CommandBufferLevel level, const uint32_t n) const
-	{
-		vk::CommandBufferAllocateInfo info{
-			*m_commandPool,
-			level,
-			n
-		};
-		return m_device->allocateCommandBuffersUnique(info);
-	}
-
-	bool Window::isPhysicalDeviceValid(vk::PhysicalDevice device)
-	{
-		// need a queue family be able to graphics, compute, transfer and presents(unchecked)
-		auto queueFamilies = device.getQueueFamilyProperties();
-		bool queueFamilyFound = false;
-		for (const auto [i, queueFamily] : views::enumerate(queueFamilies))
-		{
-			if (queueFamily.queueCount > 0 &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eGraphics &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eCompute &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eTransfer)
-			{
-				queueFamilyFound = true;
-				break;
-			}
-		}
-
-		// device extension support
-		auto extensions = device.enumerateDeviceExtensionProperties();
-		std::unordered_set<std::string> requiredExtensions{m_deviceExtensions.begin(), m_deviceExtensions.end()};
-
-		for (const auto& extension : extensions)
-		{
-			requiredExtensions.erase(extension.extensionName);
-		}
-		bool extensionsFound = requiredExtensions.empty();
-
-
-		// may need check swapchain
-		return queueFamilyFound && extensionsFound;
 	}
 
 	void Window::show() const
@@ -247,30 +161,11 @@ namespace ciallo::vulkan
 		glfwPollEvents();
 	}
 
-	std::vector<const char*> Window::getRequiredInstanceExtensions() const
+	std::vector<const char*> Window::getRequiredInstanceExtensions()
 	{
 		uint32_t extensionsCount = 0;
 		const char** extensions = glfwGetRequiredInstanceExtensions(&extensionsCount);
 		return {extensions, extensions + extensionsCount};
-	}
-
-	void Window::executeImmediately(const std::function<void(vk::CommandBuffer)>& func)
-	{
-		vk::CommandBufferAllocateInfo info{
-			*m_commandPool,
-			vk::CommandBufferLevel::ePrimary,
-			1
-		};
-		auto cb = std::move(m_device->allocateCommandBuffersUnique(info)[0]);
-		cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-		func(*cb);
-		cb->end();
-
-		vk::UniqueFence fence = m_device->createFenceUnique({});
-		vk::SubmitInfo si{};
-		si.setCommandBuffers(*cb);
-		queue().submit(si, *fence);
-		m_device->waitForFences(*fence, VK_TRUE, std::numeric_limits<uint64_t>::max());
 	}
 
 	vk::SwapchainKHR Window::swapchain() const
@@ -293,25 +188,12 @@ namespace ciallo::vulkan
 		return static_cast<int>(m_swapchainImages.size());
 	}
 
-	vk::Queue Window::queue() const
-	{
-		return m_device->getQueue(m_queueFamilyIndex, 0);
-	}
 
 	vk::Instance Window::instance() const
 	{
 		return m_instance->instance();
 	}
 
-	vk::PhysicalDevice Window::physicalDevice() const
-	{
-		return m_physicalDevice;
-	}
-
-	uint32_t Window::queueFamilyIndex() const
-	{
-		return m_queueFamilyIndex;
-	}
 
 	vk::Format Window::swapchainImageFormat() const
 	{

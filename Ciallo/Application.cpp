@@ -8,50 +8,42 @@
 void ciallo::Application::run() const
 {
 	auto w = std::make_unique<vulkan::Window>(1000, 1000, "hi");
-	vulkan::Instance::addExtensions(w->getRequiredInstanceExtensions());
+	vulkan::Instance::addExtensions(vulkan::Window::getRequiredInstanceExtensions());
 	auto inst = std::make_shared<vulkan::Instance>();
 	int physicalDeviceIndex = vulkan::Device::pickPhysicalDevice(*inst);
-	auto device = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
+	auto d = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
+	
 
 	w->setInstance(inst);
+	w->setDevice(d);
 	w->initResources();
 
-	vk::UniqueSemaphore presentImageAvailableSemaphore = w->device().createSemaphoreUnique({});
+	vk::UniqueSemaphore presentImageAvailableSemaphore = d->device().createSemaphoreUnique({});
 	vulkan::MainPassRenderer mainPassRenderer(w.get());
-	mainPassRenderer.init();
 	w->show();
-	vk::UniqueCommandBuffer cb = std::move(w->createCommandBuffers(vk::CommandBufferLevel::ePrimary, 1)[0]);
-
-	VmaAllocatorCreateInfo allocatorCreateInfo{};
-	allocatorCreateInfo.instance = w->instance();
-	allocatorCreateInfo.device = w->device();
-	allocatorCreateInfo.physicalDevice = w->physicalDevice();
-	allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_3;
-
-	VmaAllocator allocator;
-	vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+	vk::CommandBuffer cb = d->createCommandBuffer();
 
 	gui::ScenePanel sp;
 
-	w->executeImmediately([&](vk::CommandBuffer c)
+	d->executeImmediately([&](vk::CommandBuffer c)
 	{
-		sp.genSampler(w->device());
-		sp.genCanvas(allocator, c);
+		sp.genSampler(*d);
+		sp.genCanvas(d->allocator(), c);
 	});
 
-	w->device().waitIdle();
+	d->device().waitIdle();
 
 	while (!w->shouldClose())
 	{
 		w->pollEvents();
 		vk::Result _;
-		_ = w->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
+		_ = d->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
 		                              std::numeric_limits<uint64_t>::max());
 
 		uint32_t index;
 		try
 		{
-			index = w->device().acquireNextImageKHR(w->swapchain(), UINT64_MAX, *presentImageAvailableSemaphore,
+			index = d->device().acquireNextImageKHR(w->swapchain(), UINT64_MAX, *presentImageAvailableSemaphore,
 			                                        VK_NULL_HANDLE).value;
 		}
 		catch (vk::OutOfDateKHRError&)
@@ -64,10 +56,10 @@ void ciallo::Application::run() const
 		{
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
-		w->device().resetFences(mainPassRenderer.renderingCompleteFence());
+		d->device().resetFences(mainPassRenderer.renderingCompleteFence());
 
 		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr};
-		cb->begin(cbbi);
+		cb.begin(cbbi);
 		ImGui_ImplVulkan_NewFrame();
 		w->imguiNewFrame();
 		ImGui::NewFrame();
@@ -82,18 +74,18 @@ void ciallo::Application::run() const
 		ImGui::EndFrame();
 		ImGui::Render();
 		ImDrawData* main_draw_data = ImGui::GetDrawData();
-		mainPassRenderer.render(*cb, index, main_draw_data);
-		cb->end();
+		mainPassRenderer.render(cb, index, main_draw_data);
+		cb.end();
 		std::vector<vk::PipelineStageFlags> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
 		std::vector<vk::Semaphore> submitSignalSemaphores = {mainPassRenderer.renderingCompleteSemaphore()};
 		vk::SubmitInfo si{
 			*presentImageAvailableSemaphore,
 			waitStages,
-			*cb,
+			cb,
 			submitSignalSemaphores
 		};
-		w->queue().submit(si, mainPassRenderer.renderingCompleteFence());
+		d->queue().submit(si, mainPassRenderer.renderingCompleteFence());
 
 		auto swapchain = w->swapchain();
 		vk::PresentInfoKHR pi{
@@ -105,7 +97,7 @@ void ciallo::Application::run() const
 
 		try
 		{
-			_ = w->queue().presentKHR(pi);
+			_ = d->queue().presentKHR(pi);
 		}
 		catch (vk::OutOfDateKHRError&)
 		{
@@ -119,8 +111,7 @@ void ciallo::Application::run() const
 		}
 	}
 
-	w->device().waitIdle();
-	vmaDestroyAllocator(allocator);
+	d->device().waitIdle();
 }
 
 void ciallo::Application::loadSettings()

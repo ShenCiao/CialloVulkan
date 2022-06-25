@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.hpp>
 
+#include "Device.hpp"
 #include "Instance.hpp"
 
 namespace ciallo::vulkan
@@ -16,16 +17,9 @@ namespace ciallo::vulkan
 	{
 		friend class MainPassRenderer;
 
-		vk::UniqueDevice m_device;
-		vk::PhysicalDevice m_physicalDevice;
-		uint32_t m_queueFamilyIndex;
-		vk::UniqueCommandPool m_commandPool;
-		std::vector<const char*> m_deviceExtensions{
-			"VK_KHR_swapchain"
-		};
-
 		GLFWwindow* m_glfwWindow;
 		std::shared_ptr<Instance> m_instance;
+		std::shared_ptr<Device> m_device;
 		vk::UniqueSurfaceKHR m_surface;
 		vk::UniqueSwapchainKHR m_swapchain;
 		std::vector<vk::Image> m_swapchainImages;
@@ -48,6 +42,7 @@ namespace ciallo::vulkan
 			spdlog::error("Glfw error: {}", description);
 		}
 
+		vk::Device device() const;
 
 	public:
 		void imguiInitWindow() const;
@@ -55,38 +50,28 @@ namespace ciallo::vulkan
 		void imguiNewFrame();
 		void initResources();
 	public:
-		void pickPhysicalDevice(int index);
 		// supposed to be private
 		void setInstance(const std::shared_ptr<Instance>& instance);
-		void pickQueueFamily();
-		void genDevice();
-		void genCommandPool();
+		void setDevice(const std::shared_ptr<Device>& device);
+	private:
 		void genSurface();
 		void pickSurfaceFormat();
 		void genSwapchain();
 	public:
-		bool isPhysicalDeviceValid(vk::PhysicalDevice device);
 		void onWindowResize();
-		std::vector<vk::UniqueCommandBuffer>
-		createCommandBuffers(vk::CommandBufferLevel level, uint32_t n) const;
 
 	public:
 		void show() const;
 		void hide() const;
 		bool shouldClose() const;
 		void pollEvents() const;
-		std::vector<const char*> getRequiredInstanceExtensions() const;
-		void executeImmediately(const std::function<void(vk::CommandBuffer)>& func);
+		static std::vector<const char*> getRequiredInstanceExtensions();
 
 	public:
 		vk::SwapchainKHR swapchain() const;
 		vk::Extent2D swapchainExtent() const;
-		vk::Device device() const;
 		int swapchainImageCount() const;
-		vk::Queue queue() const;
 		vk::Instance instance() const;
-		vk::PhysicalDevice physicalDevice() const;
-		uint32_t queueFamilyIndex() const;
 		vk::Format swapchainImageFormat() const;
 	};
 }

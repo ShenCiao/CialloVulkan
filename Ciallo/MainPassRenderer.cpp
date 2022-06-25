@@ -3,9 +3,11 @@
 
 namespace ciallo::vulkan
 {
-	MainPassRenderer::MainPassRenderer(Window* const w): w(w)
+	MainPassRenderer::MainPassRenderer(Window* w): w(w)
 	{
+		d = w->m_device.get();
 		ImGui::CreateContext();
+		init();
 	}
 
 	MainPassRenderer::~MainPassRenderer()
@@ -59,14 +61,14 @@ namespace ciallo::vulkan
 		// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 		ImGui_ImplVulkan_InitInfo init_info{};
 		init_info.Instance = w->instance();
-		init_info.PhysicalDevice = w->physicalDevice();
-		init_info.Device = w->device();
-		init_info.QueueFamily = w->queueFamilyIndex();
-		init_info.Queue = w->queue();
+		init_info.PhysicalDevice = d->physicalDevice();
+		init_info.Device = d->device();
+		init_info.QueueFamily = d->queueFamilyIndex();
+		init_info.Queue = d->queue();
 		init_info.PipelineCache = VK_NULL_HANDLE;
 		init_info.DescriptorPool = *m_descriptorPool;
 		init_info.Subpass = 0;
-		init_info.MinImageCount = 3;
+		init_info.MinImageCount = 3; // Warning: should retrieve from window swapchain
 		init_info.ImageCount = w->swapchainImageCount();
 		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		init_info.Allocator = nullptr;
@@ -85,15 +87,15 @@ namespace ciallo::vulkan
 			MAX_SIZE * static_cast<uint32_t>(m_descriptorPoolSizes.size()),
 			m_descriptorPoolSizes
 		);
-		m_descriptorPool = w->device().createDescriptorPoolUnique(poolInfo);
+		m_descriptorPool = d->device().createDescriptorPoolUnique(poolInfo);
 	}
 
 	void MainPassRenderer::genSyncObject()
 	{
 		vk::FenceCreateInfo fci(vk::FenceCreateFlagBits::eSignaled);
-		m_renderingCompleteFence = w->device().createFenceUnique(fci);
+		m_renderingCompleteFence = d->device().createFenceUnique(fci);
 		vk::SemaphoreCreateInfo sci({});
-		m_renderingCompleteSemaphore = w->device().createSemaphoreUnique(sci);
+		m_renderingCompleteSemaphore = d->device().createSemaphoreUnique(sci);
 	}
 
 	void MainPassRenderer::genRenderPass()
@@ -105,12 +107,12 @@ namespace ciallo::vulkan
 		   .attachmentFinalLayout(vk::ImageLayout::ePresentSrcKHR);
 		rpm.subpassBegin(vk::PipelineBindPoint::eGraphics)
 		   .subpassColorAttachment(vk::ImageLayout::eAttachmentOptimal, 0);
-		m_renderPass = rpm.createUnique(w->device());
+		m_renderPass = rpm.createUnique(d->device());
 	}
 
 	void MainPassRenderer::uploadFonts() const
 	{
-		w->executeImmediately([this](vk::CommandBuffer cb)
+		d->executeImmediately([this](vk::CommandBuffer cb)
 		{
 			ImGui_ImplVulkan_CreateFontsTexture(cb);
 		});
@@ -132,7 +134,7 @@ namespace ciallo::vulkan
 				w->swapchainExtent().height,
 				1
 			};
-			return w->device().createFramebufferUnique(info);
+			return d->device().createFramebufferUnique(info);
 		};
 		m_framebuffers = w->m_swapchainImageViews | views::transform(imageView2framebuffer) | ranges::to_vector;
 	}

@@ -16,6 +16,7 @@ namespace ciallo::vulkan
 		m_queueFamilyIndex = index;
 		genDevice();
 		genCommandPool();
+		genAllocator(instance, physicalDevice, *m_device);
 	}
 
 	Device::~Device()
@@ -113,6 +114,16 @@ namespace ciallo::vulkan
 		{
 			isPhysicalDeviceValid(device);
 		}
+	}
+
+	vk::CommandBuffer Device::createCommandBuffer(vk::CommandBufferLevel level)
+	{
+		vk::CommandBufferAllocateInfo info{
+			*m_commandPool,
+			level,
+			1u
+		};
+		return m_device->allocateCommandBuffers(info)[0];
 	}
 
 	void Device::genCommandPool()
