@@ -106,10 +106,11 @@ namespace ciallo::vulkan
 
 	void MainPassRenderer::genRenderPass()
 	{
-		vku::RenderpassMaker rpm;
+		vku::RenderPassMaker rpm;
 		rpm.attachmentBegin(w->swapchainImageFormat())
 		   .attachmentLoadOp(vk::AttachmentLoadOp::eClear)
 		   .attachmentStoreOp(vk::AttachmentStoreOp::eStore)
+		   .attachmentInitialLayout(vk::ImageLayout::eUndefined)
 		   .attachmentFinalLayout(vk::ImageLayout::ePresentSrcKHR);
 		rpm.subpassBegin(vk::PipelineBindPoint::eGraphics)
 		   .subpassColorAttachment(vk::ImageLayout::eAttachmentOptimal, 0);
@@ -142,6 +143,7 @@ namespace ciallo::vulkan
 			};
 			return d->device().createFramebufferUnique(info);
 		};
+
 		m_framebuffers = w->m_swapchainImageViews | views::transform(imageView2framebuffer) | ranges::to_vector;
 	}
 }

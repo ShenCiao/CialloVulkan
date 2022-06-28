@@ -2,11 +2,8 @@
 #include <iostream>
 #include <memory>
 
-#include <functional>
 #include <optional>
-#include <list>
 #include <vector>
-#include <unordered_map>
 #include <unordered_set>
 #include <string>
 
@@ -17,3 +14,4 @@
 namespace views = ranges::views;
 
 #include <spdlog/spdlog.h>
+#include <vulkan/vulkan.hpp>

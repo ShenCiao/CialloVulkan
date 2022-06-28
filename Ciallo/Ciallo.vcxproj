@@ -94,6 +94,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="ArticulatedRenderer.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -108,13 +109,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
+    <ClInclude Include="ArticulatedRenderer.hpp" />
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="Device.hpp" />
     <ClInclude Include="Image.hpp" />
+    <ClInclude Include="imconfig.h" />
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="ScenePanel.hpp" />
+    <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>
   <ItemGroup>

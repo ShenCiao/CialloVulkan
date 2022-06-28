@@ -13,6 +13,7 @@
       "range-v3",
       "stb",
       "implot",
-      "vulkan-memory-allocator"
+      "vulkan-memory-allocator",
+      "entt"
     ]
   }

@@ -63,6 +63,7 @@ void ciallo::Application::run() const
 		ImGui_ImplVulkan_NewFrame();
 		w->imguiNewFrame();
 		ImGui::NewFrame();
+		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// -----------------------------------------------------------------------------
 		static bool show_demo_window = true;
 		if (show_demo_window)

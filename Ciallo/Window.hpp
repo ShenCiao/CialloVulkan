@@ -51,7 +51,6 @@ namespace ciallo::vulkan
 		void imguiNewFrame();
 		void initResources();
 	public:
-		// supposed to be private
 		void setInstance(const std::shared_ptr<Instance>& instance);
 		void setDevice(const std::shared_ptr<Device>& device);
 	private:

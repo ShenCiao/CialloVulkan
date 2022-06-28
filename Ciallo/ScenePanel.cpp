@@ -21,7 +21,7 @@ namespace ciallo::gui
 		int width, height, channels;
 		spdlog::info("Current working directory: {}", std::filesystem::current_path().string());
 
-		auto data = stbi_load("images/myaamori.jpg", &width, &height, &channels,
+		auto data = stbi_load("images/takagi3.png", &width, &height, &channels,
 		                      STBI_rgb_alpha);
 		if (!data)
 		{
