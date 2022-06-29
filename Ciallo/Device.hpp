@@ -6,7 +6,7 @@
 namespace ciallo::vulkan
 {
 	/**
-	 * \brief Class for logical device, physical device, command pool and memory allocator
+	 * \brief Class for logical device, physical device, command pool and memory allocator, can be implicitly converted to the allocator since allocator is nothing more than the device.
 	 */
 	class Device
 	{
@@ -23,11 +23,13 @@ namespace ciallo::vulkan
 		Device& operator=(const Device& other) = delete;
 		Device& operator=(Device&& other) = default;
 		~Device();
-		operator vk::Device(){return *m_device;}
-		
+		operator vk::Device() { return *m_device; }
+		operator VmaAllocator() const { return m_allocator; }
+
 	private:
 		static inline std::vector<const char*> m_extensions{
-			"VK_KHR_swapchain"
+			"VK_KHR_swapchain",
+			"VK_EXT_blend_operation_advanced"
 		};
 
 		void genDevice();
@@ -44,9 +46,9 @@ namespace ciallo::vulkan
 		vk::CommandBuffer createCommandBuffer(vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 		void executeImmediately(const std::function<void(vk::CommandBuffer)>& func);
 		vk::Queue queue() const;
-		vk::Device device() const {return *m_device;}
-		vk::PhysicalDevice physicalDevice() const {return m_physicalDevice;}
-		VmaAllocator allocator() const {return m_allocator;}
+		vk::Device device() const { return *m_device; }
+		vk::PhysicalDevice physicalDevice() const { return m_physicalDevice; }
+		VmaAllocator allocator() const { return m_allocator; }
 		uint32_t queueFamilyIndex() const { return m_queueFamilyIndex; }
 	};
 }

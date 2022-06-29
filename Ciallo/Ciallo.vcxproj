@@ -105,6 +105,7 @@
     </ClCompile>
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="ScenePanel.cpp" />
+    <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -113,17 +114,17 @@
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="Device.hpp" />
     <ClInclude Include="Image.hpp" />
-    <ClInclude Include="imconfig.h" />
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="ScenePanel.hpp" />
+    <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\frag.spv" />
-    <None Include="shaders\vert.spv" />
+    <None Include="shaders\articulated.frag" />
+    <None Include="shaders\articulated.vert" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">

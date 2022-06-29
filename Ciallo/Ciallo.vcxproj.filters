@@ -54,6 +54,9 @@
     <ClCompile Include="ArticulatedRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
@@ -86,18 +89,18 @@
     <ClInclude Include="ArticulatedRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imconfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="vku.hpp">
       <Filter>Third Party</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderModule.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\frag.spv">
+    <None Include="shaders\articulated.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\vert.spv">
+    <None Include="shaders\articulated.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

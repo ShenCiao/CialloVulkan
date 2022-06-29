@@ -7,6 +7,29 @@ namespace ciallo::vulkan
 	Instance::Instance()
 	{
 		genInstance();
+
+		//TODO: Delete this after ...
+		auto devices = m_instance->enumeratePhysicalDevices();
+		for (auto const& d : devices)
+		{
+			auto properties = d.getProperties2<vk::PhysicalDeviceProperties2, vk::PhysicalDeviceSubgroupProperties,
+			                                   vk::PhysicalDeviceSubgroupSizeControlProperties>();
+			auto physicalDeviceProperties = properties.get<vk::PhysicalDeviceProperties2>().properties;
+			auto subgroupProperties = properties.get<vk::PhysicalDeviceSubgroupProperties>();
+			auto& physicalDeviceSubgroupSizeControlProperties = properties.get<
+				vk::PhysicalDeviceSubgroupSizeControlProperties>();
+
+			std::cout << "Device name: " << physicalDeviceProperties.deviceName << std::endl;
+			std::cout << "Device type: " << vk::to_string(physicalDeviceProperties.deviceType) << std::endl;
+			std::cout << "Min subgroup size: " << physicalDeviceSubgroupSizeControlProperties.minSubgroupSize <<
+				std::endl;
+			std::cout << "Max subgroup size: " << physicalDeviceSubgroupSizeControlProperties.maxSubgroupSize <<
+				std::endl;
+			std::cout << "Max number of subgroups inside workgroup: " << physicalDeviceSubgroupSizeControlProperties.
+				maxComputeWorkgroupSubgroups << std::endl;
+			std::cout << "Subgroup supported stages: " << vk::to_string(subgroupProperties.supportedStages) << std::endl;
+			std::cout << "Subgroup size: " << subgroupProperties.subgroupSize << std::endl;
+		}
 	}
 
 	Instance::~Instance()

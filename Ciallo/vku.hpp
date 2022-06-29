@@ -2,9 +2,10 @@
 // Modified version by Ciallo:
 //
 // Renamed "Renderpass" to "RenderPass".
+// Create pipeline with vk::ShaderModule instead of vku::ShaderModule
 // Add support for dynamic rendering.
 // Delete class Image and Buffer, we use our own.
-// Clean up unused #include and reformat
+// Clean up unused #include and reformat whole code
 // -----------------------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +119,7 @@ namespace vku
 		uint8_t blockHeight;
 		uint8_t bytesPerBlock;
 	};
-	
+
 	/// Get the details of vulkan texture formats.
 	inline BlockParams getBlockParams(vk::Format format)
 	{
@@ -1045,6 +1046,7 @@ namespace vku
 		                                const vk::RenderPass& renderPass, bool defaultBlend = true)
 		{
 			// Add default colour blend attachment if necessary.
+			// Warning: createUnique with dynamic rendering copy from this function
 			if (colorBlendAttachments_.empty() && defaultBlend)
 			{
 				vk::PipelineColorBlendAttachmentState blend{};
@@ -1095,12 +1097,69 @@ namespace vku
 			return device.createGraphicsPipelineUnique(pipelineCache, pipelineInfo).value;
 		}
 
+		// Dynamic rendering api
+		vk::UniquePipeline createUnique(const vk::Device& device,
+		                                const vk::PipelineCache& pipelineCache,
+		                                const vk::PipelineLayout& pipelineLayout,
+		                                const vk::PipelineRenderingCreateInfo& pipelineRenderingCreateInfo,
+		                                bool defaultBlend = true)
+		{
+			if (colorBlendAttachments_.empty() && defaultBlend)
+			{
+				vk::PipelineColorBlendAttachmentState blend{};
+				blend.blendEnable = 0;
+				blend.srcColorBlendFactor = vk::BlendFactor::eOne;
+				blend.dstColorBlendFactor = vk::BlendFactor::eZero;
+				blend.colorBlendOp = vk::BlendOp::eAdd;
+				blend.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+				blend.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+				blend.alphaBlendOp = vk::BlendOp::eAdd;
+				typedef vk::ColorComponentFlagBits ccbf;
+				blend.colorWriteMask = ccbf::eR | ccbf::eG | ccbf::eB | ccbf::eA;
+				colorBlendAttachments_.push_back(blend);
+			}
+
+			auto count = (uint32_t)colorBlendAttachments_.size();
+			colorBlendState_.attachmentCount = count;
+			colorBlendState_.pAttachments = count ? colorBlendAttachments_.data() : nullptr;
+
+			vk::PipelineViewportStateCreateInfo viewportState{
+				{}, 1, &viewport_, 1, &scissor_
+			};
+
+			vk::PipelineVertexInputStateCreateInfo vertexInputState;
+			vertexInputState.vertexAttributeDescriptionCount = (uint32_t)vertexAttributeDescriptions_.size();
+			vertexInputState.pVertexAttributeDescriptions = vertexAttributeDescriptions_.data();
+			vertexInputState.vertexBindingDescriptionCount = (uint32_t)vertexBindingDescriptions_.size();
+			vertexInputState.pVertexBindingDescriptions = vertexBindingDescriptions_.data();
+
+			vk::PipelineDynamicStateCreateInfo dynState{{}, (uint32_t)dynamicState_.size(), dynamicState_.data()};
+
+			vk::GraphicsPipelineCreateInfo pipelineInfo{};
+			pipelineInfo.pNext = &pipelineRenderingCreateInfo;
+			pipelineInfo.pVertexInputState = &vertexInputState;
+			pipelineInfo.stageCount = (uint32_t)modules_.size();
+			pipelineInfo.pStages = modules_.data();
+			pipelineInfo.pInputAssemblyState = &inputAssemblyState_;
+			pipelineInfo.pViewportState = &viewportState;
+			pipelineInfo.pRasterizationState = &rasterizationState_;
+			pipelineInfo.pMultisampleState = &multisampleState_;
+			pipelineInfo.pColorBlendState = &colorBlendState_;
+			pipelineInfo.pDepthStencilState = &depthStencilState_;
+			pipelineInfo.layout = pipelineLayout;
+			pipelineInfo.renderPass = VK_NULL_HANDLE;
+			pipelineInfo.pDynamicState = dynamicState_.empty() ? nullptr : &dynState;
+			pipelineInfo.pTessellationState = &tessellationState_;
+
+			return device.createGraphicsPipelineUnique(pipelineCache, pipelineInfo).value;
+		}
+
 		/// Add a shader module to the pipeline.
-		PipelineMaker& shader(vk::ShaderStageFlagBits stage, const vku::ShaderModule& shader,
+		PipelineMaker& shader(vk::ShaderStageFlagBits stage, const vk::ShaderModule& shader,
 		                      const char* entryPoint = "main")
 		{
 			vk::PipelineShaderStageCreateInfo info{};
-			info.module = shader.module();
+			info.module = shader;
 			info.pName = entryPoint;
 			info.stage = stage;
 			modules_.emplace_back(info);
@@ -1108,13 +1167,13 @@ namespace vku
 		}
 
 		/// Add a shader module with specialized constants to the pipeline.
-		PipelineMaker& shader(vk::ShaderStageFlagBits stage, vku::ShaderModule& shader,
+		PipelineMaker& shader(vk::ShaderStageFlagBits stage, vk::ShaderModule& shader,
 		                      SpecData specConstants,
 		                      const char* entryPoint = "main")
 		{
 			auto data = std::unique_ptr<SpecData>{new SpecData{std::move(specConstants)}};
 			vk::PipelineShaderStageCreateInfo info{};
-			info.module = shader.module();
+			info.module = shader;
 			info.pName = entryPoint;
 			info.stage = stage;
 			info.pSpecializationInfo = &data->specializationInfo_;
@@ -2043,7 +2102,6 @@ namespace vku
 		}
 		return vk::Format::eUndefined;
 	}
-
 } // namespace vku
 
 #endif // VKU_HPP

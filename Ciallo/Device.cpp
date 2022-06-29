@@ -54,10 +54,11 @@ namespace ciallo::vulkan
 		m_physicalDevice = device;
 	}
 
+	// need a queue family be able to graphics, compute, transfer and presents(unchecked)
 	int Device::findRequiredQueueFamily(vk::PhysicalDevice device)
 	{
 		auto queueFamilies = device.getQueueFamilyProperties();
-		// need a queue family be able to graphics, compute, transfer and presents(unchecked)
+		
 		vk::QueueFlags req = vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
 		for (const auto [i, queueFamily] : views::enumerate(queueFamilies))
 		{
@@ -102,8 +103,8 @@ namespace ciallo::vulkan
 
 	/**
 	 * \brief Choose from available physical device
-	 * \param instance vulkan instance
-	 * \return physical device index
+	 * \param instance Vulkan instance
+	 * \return Physical device index
 	 */
 	int Device::pickPhysicalDevice(vk::Instance instance)
 	{

@@ -188,12 +188,10 @@ namespace ciallo::vulkan
 		return static_cast<int>(m_swapchainImages.size());
 	}
 
-
 	vk::Instance Window::instance() const
 	{
 		return m_instance->instance();
 	}
-
 
 	vk::Format Window::swapchainImageFormat() const
 	{
