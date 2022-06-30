@@ -72,7 +72,7 @@ void ciallo::Application::run() const
 		{
 			if (ImGui::MenuItem("LoadShader"))
 			{
-				vulkan::ShaderModule(*d, vk::ShaderStageFlagBits::eVertex, "./shaders/articulated.vert");
+				auto test = vulkan::ShaderModule(*d, vk::ShaderStageFlagBits::eVertex, "./shaders/articulated.vert");
 				spdlog::info("successfully loaded");
 			}
 			ImGui::EndMainMenuBar();
