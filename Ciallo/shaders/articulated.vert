@@ -1,7 +1,7 @@
 #version 460
 
-layout(location = 0) in vec2 pos;
-layout(location = 1) in float pressure;
+layout (location = 0) in vec2 pos;
+layout (location = 1) in float pressure;
 
 layout(location = 0) out float outWidth;
 

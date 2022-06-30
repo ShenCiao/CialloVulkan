@@ -2,8 +2,7 @@
 #include "ShaderModule.hpp"
 
 #include <fstream>
-#include <glslang/Public/ShaderLang.h>
-#include <shaderc/shaderc.hpp>
+#include <glslang/SPIRV/GlslangToSpv.h>
 
 namespace ciallo::vulkan
 {
@@ -23,7 +22,7 @@ namespace ciallo::vulkan
 	{
 		std::vector<char> buffer = loadFile(*m_filePath);
 
-		auto data = compileShader2SPIRV(static_cast<glslang_stage_t>(m_shaderStage), buffer.data(),
+		auto data = compileShader2SPIRV(GLSLANG_STAGE_VERTEX, buffer.data(),
 		                                m_filePath->filename().string().c_str());
 		m_shaderModule = m_device.createShaderModuleUnique({{}, data});
 	}
@@ -171,6 +170,7 @@ namespace ciallo::vulkan
 			.messages = GLSLANG_MSG_DEFAULT_BIT,
 			.resource = reinterpret_cast<const glslang_resource_t*>(&DefaultTBuiltInResource)
 		};
+		glslang_initialize_process();
 
 		glslang_shader_t* shader = glslang_shader_create(&input);
 
@@ -218,6 +218,7 @@ namespace ciallo::vulkan
 
 		glslang_program_delete(program);
 		glslang_shader_delete(shader);
+		glslang_finalize_process();
 
 		return outShaderModule;
 	}
