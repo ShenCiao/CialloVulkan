@@ -1,6 +1,6 @@
 #pragma once
 #include <filesystem>
-#include <glslang/Include/glslang_c_interface.h>
+#include <shaderc/shaderc.h>
 
 namespace ciallo::vulkan
 {
@@ -8,7 +8,7 @@ namespace ciallo::vulkan
 	{
 		vk::Device m_device;
 		vk::UniqueShaderModule m_shaderModule;
-		vk::ShaderStageFlagBits m_shaderStage;
+		vk::ShaderStageFlagBits m_stage;
 		std::optional<std::filesystem::path> m_filePath;
 	public:
 		ShaderModule(vk::Device device, vk::ShaderStageFlagBits stage, const std::filesystem::path& path);
@@ -18,8 +18,9 @@ namespace ciallo::vulkan
 	public:
 		void reload();
 
-		static std::vector<char> loadFile(const std::filesystem::path& path);
-		static std::vector<uint32_t> compileShader2SPIRV(glslang_stage_t stage, const char* shaderSource,
-		                                                 const char* fileName);
+		static std::string loadFile(const std::filesystem::path& path);
+		static std::string preprocessShader(const std::string& source_name,
+                              vk::ShaderStageFlagBits stage,
+                              const std::string& source);
 	};
 }
