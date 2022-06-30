@@ -37,14 +37,11 @@ namespace ciallo::brush::articulated
 
 		vk::UniqueDescriptorSetLayout createDescriptorSetLayout()
 		{
+			// width + offset curve
+			// color + opacity falloff
 			vku::DescriptorSetLayoutMaker maker{};
-			maker.buffer(0, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, 1) // width
-			     .buffer(1, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, 1)
-			     // width offset curve
-			     .buffer(2, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment, 1) // color
-			     .buffer(3, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment, 1);
-			//opacity falloff
-
+			maker.buffer(0, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, 1)
+			     .buffer(1, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment, 1);
 
 			return maker.createUnique(m_device);
 		}

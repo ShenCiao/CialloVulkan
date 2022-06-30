@@ -1,9 +1,12 @@
 ﻿#include "pch.hpp"
 #include "Application.hpp"
-#include "MainPassRenderer.hpp"
-#include "Device.hpp"
+
 #include <implot.h>
+
+#include "Device.hpp"
+#include "MainPassRenderer.hpp"
 #include "ScenePanel.hpp"
+#include "ShaderModule.hpp"
 
 void ciallo::Application::run() const
 {
@@ -12,7 +15,7 @@ void ciallo::Application::run() const
 	auto inst = std::make_shared<vulkan::Instance>();
 	int physicalDeviceIndex = vulkan::Device::pickPhysicalDevice(*inst);
 	auto d = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
-	
+
 
 	w->setInstance(inst);
 	w->setDevice(d);
@@ -65,6 +68,16 @@ void ciallo::Application::run() const
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// -----------------------------------------------------------------------------
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::MenuItem("LoadShader"))
+			{
+				vulkan::ShaderModule(*d, vk::ShaderStageFlagBits::eVertex, "./shaders/articulated.vert");
+				spdlog::info("successfully loaded");
+			}
+			ImGui::EndMainMenuBar();
+		}
+
 		static bool show_demo_window = true;
 		if (show_demo_window)
 		{
