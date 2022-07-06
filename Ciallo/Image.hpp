@@ -22,6 +22,8 @@ namespace ciallo::vulkan
 	public:
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, uint32_t width, uint32_t height, vk::ImageUsageFlags usage);
 		~Image();
+		
+		Image() = default;
 		Image(const Image& other) = delete;
 		Image(Image&& other) = default;
 		Image& operator=(const Image& other) = delete;
@@ -48,9 +50,14 @@ namespace ciallo::vulkan
 		bool hostVisible() const;
 		bool hostCoherent() const;
 
-		void setLayout(vk::ImageLayout layout)
+		void setImageLayout(vk::ImageLayout layout)
 		{
 			m_layout = layout;
+		}
+
+		vk::ImageLayout imageLayout() const
+		{
+			return m_layout;
 		}
 
 		vk::ImageView imageView() const
@@ -67,5 +74,9 @@ namespace ciallo::vulkan
 		{
 			return m_height;
 		}
+		vk::Extent2D extent() const
+		{
+			return {m_width, m_height};
+		};
 	};
 }

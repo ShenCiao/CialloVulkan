@@ -15,3 +15,4 @@ namespace views = ranges::views;
 
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>
+#include <vk_mem_alloc.h>

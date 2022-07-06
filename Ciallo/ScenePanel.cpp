@@ -40,9 +40,9 @@ namespace ciallo::gui
 		}
 		auto barrier = m_canvas->createLayoutTransitionMemoryBarrier(vk::ImageLayout::eGeneral);
 
-		cb.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eAllCommands, {}, {}, {},
+		cb.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe, {}, {}, {},
 		                   barrier);
-		m_canvas->setLayout(vk::ImageLayout::eGeneral);
+		m_canvas->setImageLayout(vk::ImageLayout::eGeneral);
 		m_canvas->upload(cb, data);
 		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),
 		                                                static_cast<VkImageLayout>(vk::ImageLayout::eGeneral));

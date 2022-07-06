@@ -12,49 +12,37 @@ namespace ciallo::vulkan
 	 */
 	class MainPassRenderer
 	{
+	private:
+		Window* w;
+		Device* d;
+		bool m_imguiInitialized = false;
+
+		//Semaphores needed to wait from other renderers(e.g. scene renderer). Need add and remove manually. [Unused for now].
+		std::vector<vk::Semaphore> m_waitSemaphores{};
+		vk::UniqueFence m_renderingCompleteFence;
+		vk::UniqueSemaphore m_renderingCompleteSemaphore;
+		vk::UniqueRenderPass m_renderPass;
+		std::vector<vk::UniqueFramebuffer> m_framebuffers;
 	public:
 		explicit MainPassRenderer(Window* const w);
+		MainPassRenderer(const MainPassRenderer& other) = delete;
+		MainPassRenderer(MainPassRenderer&& other) = default;
+		MainPassRenderer& operator=(const MainPassRenderer& other) = delete;
+		MainPassRenderer& operator=(MainPassRenderer&& other) = default;
 		~MainPassRenderer();
+
 		void init();
 		void render(vk::CommandBuffer cb, uint32_t framebufferIndex, ImDrawData* drawData);
-	private:
 		static void imguiCheckVkResult(VkResult err);
-
+	private:
 		void initImGui();
-		void genDescriptorPool();
 		void genSyncObject();
 		void genRenderPass();
 		void uploadFonts() const;
 
 	public:
 		void genFramebuffers();
-	private:
-		Window* w;
-		Device* d;
-		bool m_imguiInitialized = false;
-		constexpr static int MAX_SIZE = 128;
-		std::vector<vk::DescriptorPoolSize> m_descriptorPoolSizes{
-			{vk::DescriptorType::eSampler, MAX_SIZE},
-            {vk::DescriptorType::eCombinedImageSampler, MAX_SIZE},
-            {vk::DescriptorType::eSampledImage, MAX_SIZE},
-            {vk::DescriptorType::eStorageImage, MAX_SIZE},
-            {vk::DescriptorType::eUniformTexelBuffer, MAX_SIZE},
-			{vk::DescriptorType::eStorageTexelBuffer, MAX_SIZE},
-            {vk::DescriptorType::eUniformBuffer, MAX_SIZE},
-            {vk::DescriptorType::eStorageBuffer, MAX_SIZE},
-            {vk::DescriptorType::eUniformBufferDynamic, MAX_SIZE},
-            {vk::DescriptorType::eStorageBufferDynamic, MAX_SIZE},
-            {vk::DescriptorType::eInputAttachment, MAX_SIZE},
-		};
-		vk::UniqueDescriptorPool m_descriptorPool;
 
-		std::vector<vk::Semaphore> m_waitSemaphores{}; //Semaphores needed to wait from other renderers(e.g. scene renderer). Need add and remove manually.
-
-	private:
-		vk::UniqueFence m_renderingCompleteFence;
-		vk::UniqueSemaphore m_renderingCompleteSemaphore;
-		vk::UniqueRenderPass m_renderPass;
-		std::vector<vk::UniqueFramebuffer> m_framebuffers;
 	public:
 		vk::Fence renderingCompleteFence() const
 		{

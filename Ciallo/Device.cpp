@@ -16,6 +16,7 @@ namespace ciallo::vulkan
 		m_queueFamilyIndex = index;
 		genDevice();
 		genCommandPool();
+		genDescriptorPool();
 		genAllocator(instance, physicalDevice, *m_device);
 	}
 
@@ -37,16 +38,16 @@ namespace ciallo::vulkan
 		};
 
 		// Warning: may encounter features do not supported
-		vk::PhysicalDeviceFeatures physicalDeviceFeatures;
+		vk::PhysicalDeviceFeatures physicalDeviceFeatures{};
 		physicalDeviceFeatures.setGeometryShader(VK_TRUE);
 		physicalDeviceFeatures.setTessellationShader(VK_TRUE);
-		deviceCreateInfo.setPEnabledFeatures(&physicalDeviceFeatures);
+		vk::PhysicalDeviceFeatures2 physicalDeviceFeatures2{physicalDeviceFeatures};
+		vk::PhysicalDeviceVulkan13Features physicalDeviceVulkan13Features{};
+		
+		physicalDeviceVulkan13Features.setDynamicRendering(VK_TRUE);
 
-		vk::PhysicalDeviceMultiviewFeatures physicalDeviceMultiviewFeatures;
-		physicalDeviceMultiviewFeatures.setMultiview(VK_TRUE);
-		deviceCreateInfo.pNext = &physicalDeviceMultiviewFeatures;
-
-		m_device = m_physicalDevice.createDeviceUnique(deviceCreateInfo);
+		vk::StructureChain c(deviceCreateInfo, physicalDeviceFeatures2, physicalDeviceVulkan13Features);
+		m_device = m_physicalDevice.createDeviceUnique(c.get<vk::DeviceCreateInfo>());
 	}
 
 	void Device::setPhysicalDevice(vk::PhysicalDevice device)
@@ -133,6 +134,16 @@ namespace ciallo::vulkan
 		poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
 		poolInfo.queueFamilyIndex = m_queueFamilyIndex;
 		m_commandPool = m_device->createCommandPoolUnique(poolInfo);
+	}
+
+	void Device::genDescriptorPool()
+	{
+		vk::DescriptorPoolCreateInfo poolInfo(
+			{},
+			MAX_SIZE * static_cast<uint32_t>(m_descriptorPoolSizes.size()),
+			m_descriptorPoolSizes
+		);
+		m_descriptorPool = m_device->createDescriptorPoolUnique(poolInfo);
 	}
 
 	void Device::genAllocator(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device device)

@@ -1,6 +1,5 @@
 #pragma once
 #include <filesystem>
-#include <shaderc/shaderc.h>
 
 namespace ciallo::vulkan
 {
@@ -13,14 +12,11 @@ namespace ciallo::vulkan
 	public:
 		ShaderModule(vk::Device device, vk::ShaderStageFlagBits stage, const std::filesystem::path& path);
 		operator vk::ShaderModule() const { return *m_shaderModule; }
-
+		ShaderModule() = delete;
 
 	public:
 		void reload();
 
-		static std::string loadFile(const std::filesystem::path& path);
-		static std::string preprocessShader(const std::string& source_name,
-                              vk::ShaderStageFlagBits stage,
-                              const std::string& source);
+		static std::vector<char> loadSpv(const std::filesystem::path& path);
 	};
 }

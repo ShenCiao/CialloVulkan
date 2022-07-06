@@ -1,57 +1,31 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include "vku.hpp"
+#include "ShaderModule.hpp"
 
 namespace ciallo::brush::articulated
 {
-	class Creator
+	/**
+	 * \brief For simplicity, I use a renderer class here for brush. Of course it's a bad design, the brush system is supposed to act like a material system.
+	 */
+	class Renderer
 	{
-		uint32_t m_width;
-		uint32_t m_height;
 		vk::Device m_device;
+		std::unique_ptr<vulkan::ShaderModule> m_vert;
+		std::unique_ptr<vulkan::ShaderModule> m_geom;
+		std::unique_ptr<vulkan::ShaderModule> m_frag;
+		vk::UniquePipeline m_pipeline;
+		vk::UniquePipelineLayout m_pipelineLayout;
+		vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
+		vk::UniqueDescriptorSet m_descriptorSet;
 	public:
-		Creator() = delete;
-
-		vk::UniquePipeline createPipeline(uint32_t width, uint32_t height, vk::ShaderModule vert, vk::ShaderModule geom,
-		                                  vk::ShaderModule frag, vk::PipelineLayout layout,
-		                                  vk::PipelineRenderingCreateInfo dynamicInfo)
-		{
-			vku::PipelineMaker maker(width, height);
-			maker.topology(vk::PrimitiveTopology::eLineStrip)
-			     .shader(vk::ShaderStageFlagBits::eVertex, vert)
-			     .shader(vk::ShaderStageFlagBits::eGeometry, geom)
-			     .shader(vk::ShaderStageFlagBits::eFragment, frag)
-			     .vertexBinding(0, 12)
-			     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, 0)
-			     .vertexAttribute(1, 0, vk::Format::eR32Sfloat, vk::blockSize(vk::Format::eR32G32Sfloat));
-			return maker.createUnique(m_device, VK_NULL_HANDLE, layout, dynamicInfo);
-		}
-
-		vk::UniquePipelineLayout createPipelineLayout(vk::DescriptorSetLayout layout)
-		{
-			vk::PipelineLayoutCreateInfo info{};
-			info.setSetLayouts(layout);
-			return m_device.createPipelineLayoutUnique(info);
-		}
-
-		vk::UniqueDescriptorSetLayout createDescriptorSetLayout()
-		{
-			// width + offset curve
-			// color + opacity falloff
-			vku::DescriptorSetLayoutMaker maker{};
-			maker.buffer(0, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, 1)
-			     .buffer(1, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment, 1);
-
-			return maker.createUnique(m_device);
-		}
-
-		vk::DescriptorSet createDescriptorSet(vk::DescriptorPool pool, vk::DescriptorSetLayout layout)
-		{
-			vk::DescriptorSetAllocateInfo info{pool, layout};
-			auto descriptorSets = m_device.allocateDescriptorSets(info);
-
-			vku::DescriptorSetUpdater updater;
-		}
+		explicit Renderer(vk::Device device);
+		void reloadShaders();
+		vk::UniquePipeline createPipeline(vk::ShaderModule vert, vk::ShaderModule geom, vk::ShaderModule frag,
+		                                  vk::PipelineLayout layout, vk::PipelineRenderingCreateInfo dynamicInfo);
+		vk::UniquePipelineLayout createPipelineLayout(vk::DescriptorSetLayout layout);
+		vk::UniqueDescriptorSetLayout createDescriptorSetLayout();
+		vk::DescriptorSet createDescriptorSet(vk::DescriptorPool pool,
+		                                      vk::Buffer bufferVert, vk::Buffer bufferFrag);
 	};
 }

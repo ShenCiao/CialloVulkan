@@ -7,6 +7,7 @@
 #include "MainPassRenderer.hpp"
 #include "ScenePanel.hpp"
 #include "ShaderModule.hpp"
+#include "ArticulatedRenderer.hpp"
 
 void ciallo::Application::run() const
 {
@@ -27,6 +28,8 @@ void ciallo::Application::run() const
 	vk::CommandBuffer cb = d->createCommandBuffer();
 
 	gui::ScenePanel sp;
+	brush::articulated::Renderer lineBrushRenderer(*d);
+	vk::DescriptorSet lineBrushDescriptorSet = lineBrushRenderer.createDescriptorSet(d->descriptorPool(), VK_NULL_HANDLE, VK_NULL_HANDLE);
 
 	d->executeImmediately([&](vk::CommandBuffer c)
 	{
@@ -72,7 +75,7 @@ void ciallo::Application::run() const
 		{
 			if (ImGui::MenuItem("LoadShader"))
 			{
-				auto test = vulkan::ShaderModule(*d, vk::ShaderStageFlagBits::eVertex, "./shaders/articulated.vert");
+				auto test = vulkan::ShaderModule(*d, vk::ShaderStageFlagBits::eVertex, "./shaders/articulated.vert.spv");
 				spdlog::info("successfully loaded");
 			}
 			ImGui::EndMainMenuBar();

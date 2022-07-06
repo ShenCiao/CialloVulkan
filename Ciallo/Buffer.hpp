@@ -7,24 +7,25 @@ namespace ciallo::vulkan
 	class Buffer
 	{
 	private:
-		vk::DeviceSize m_size;
-		VkBuffer m_buffer;
-		VmaAllocation m_allocation;
 		VmaAllocator m_allocator;
+		VmaAllocation m_allocation;
+		vk::Buffer m_buffer;
+		vk::DeviceSize m_size;
 		std::unique_ptr<Buffer> m_stagingBuffer;
 	public:
 		/**
-		 * \brief Create buffer with vulkan memory allocator, host INVISIBLE by default.
+		 * \brief Create buffer with vulkan memory allocator
 		 * \param allocator allocator
+		 * \param allocInfo VmaAllocationCreateInfo. Set VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT for being host writable;
 		 * \param size Size of buffer
-		 * \param usage Usage in VkBufferCreateInfo
-		 * \param flags Flags in VmaAllocationCreateInfo. Set VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT for being host writable;
+		 * \param usage Usage of buffer
 		 */
-		Buffer(VmaAllocator allocator, vk::DeviceSize size, vk::BufferUsageFlags usage,
-		       VmaAllocationCreateFlags flags = {});
+		Buffer(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::DeviceSize size,
+		       vk::BufferUsageFlags usage);
 
 		operator vk::Buffer() const { return m_buffer; }
 
+		Buffer() = delete;
 		Buffer(const Buffer& other) = delete;
 		Buffer(Buffer&& other) = default;
 		Buffer& operator=(const Buffer& other) = delete;
@@ -38,22 +39,22 @@ namespace ciallo::vulkan
 
 		void genStagingBuffer()
 		{
-			m_stagingBuffer = std::make_unique<Buffer>(m_allocator, m_size, vk::BufferUsageFlagBits::eTransferSrc,
-		                                           VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+			VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
+			m_stagingBuffer = std::make_unique<Buffer>(m_allocator, info, m_size, vk::BufferUsageFlagBits::eTransferSrc);
 		}
 
 		/**
 		 * \brief Upload data to buffer
 		 * \param cb Command buffer for recording copy command
-		 * \param data Pointer to data
-		 * \param size Size of data
+		 * \param data Pointer to the data
+		 * \param size Size of the data
 		 */
 		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size);
 
 		template <typename T>
 		void upload(vk::CommandBuffer cb, std::vector<T>& data);
 
-		
+
 		template <typename T>
 		void upload(vk::CommandBuffer cb, T& data);
 

@@ -4,23 +4,14 @@
 
 namespace ciallo::vulkan
 {
-	Buffer::Buffer(VmaAllocator allocator, vk::DeviceSize size, vk::BufferUsageFlags usage,
-		VmaAllocationCreateFlags flags)
+	Buffer::Buffer(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::DeviceSize size,
+	               vk::BufferUsageFlags usage): m_allocator(allocator), m_size(size)
 	{
-		m_allocator = allocator;
-		VkBufferCreateInfo bufferCreateInfo;
-		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferCreateInfo.pNext = nullptr;
-		bufferCreateInfo.flags = {};
-		bufferCreateInfo.size = m_size = size;
-		bufferCreateInfo.usage = static_cast<VkBufferUsageFlags>(usage);
-		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		vk::BufferCreateInfo info{{}, size, usage};
+		auto i = static_cast<VkBufferCreateInfo>(info);
 
-		VmaAllocationCreateInfo allocInfo{};
-		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
-		allocInfo.flags = flags;
-
-		vmaCreateBuffer(allocator, &bufferCreateInfo, &allocInfo, &m_buffer, &m_allocation, nullptr);
+		VkBuffer buffer;
+		vmaCreateBuffer(allocator, &i, &allocInfo, &buffer, &m_allocation, nullptr);
 	}
 
 	void Buffer::uploadLocal(const void* data, vk::DeviceSize size) const
@@ -40,7 +31,7 @@ namespace ciallo::vulkan
 	}
 
 	void Buffer::uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size,
-		vk::Buffer stagingBuffer) const
+	                           vk::Buffer stagingBuffer) const
 	{
 		m_stagingBuffer->uploadLocal(data, size);
 		vk::BufferCopy bc{0, 0, size};

@@ -57,6 +57,9 @@
     <ClCompile Include="ShaderModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CanvasRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
@@ -95,17 +98,21 @@
     <ClInclude Include="ShaderModule.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\articulated.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\articulated.vert">
-      <Filter>Resource Files</Filter>
-    </None>
+    <ClInclude Include="CanvasRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulated.frag.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulated.geom.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulated.vert.spv">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
   </ItemGroup>

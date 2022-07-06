@@ -63,7 +63,6 @@ namespace ciallo::vulkan
 		io.FontGlobalScale = 1.5f;
 		w->imguiInitWindow();
 
-		genDescriptorPool();
 		// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 		ImGui_ImplVulkan_InitInfo init_info{};
 		init_info.Instance = w->instance();
@@ -72,7 +71,7 @@ namespace ciallo::vulkan
 		init_info.QueueFamily = d->queueFamilyIndex();
 		init_info.Queue = d->queue();
 		init_info.PipelineCache = VK_NULL_HANDLE;
-		init_info.DescriptorPool = *m_descriptorPool;
+		init_info.DescriptorPool = d->descriptorPool();
 		init_info.Subpass = 0;
 		init_info.MinImageCount = 3; // Warning: should retrieve from window swapchain
 		init_info.ImageCount = w->swapchainImageCount();
@@ -84,16 +83,6 @@ namespace ciallo::vulkan
 		{
 			throw std::runtime_error("Cannot initialize imgui!");
 		}
-	}
-
-	void MainPassRenderer::genDescriptorPool()
-	{
-		vk::DescriptorPoolCreateInfo poolInfo(
-			{},
-			MAX_SIZE * static_cast<uint32_t>(m_descriptorPoolSizes.size()),
-			m_descriptorPoolSizes
-		);
-		m_descriptorPool = d->device().createDescriptorPoolUnique(poolInfo);
 	}
 
 	void MainPassRenderer::genSyncObject()

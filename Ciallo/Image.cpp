@@ -2,10 +2,11 @@
 #include "Image.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
 namespace ciallo::vulkan
 {
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, uint32_t width, uint32_t height,
-		vk::ImageUsageFlags usage)
+	             vk::ImageUsageFlags usage)
 	{
 		vk::ImageCreateInfo info{};
 		info.imageType = vk::ImageType::e2D;
@@ -108,8 +109,8 @@ namespace ciallo::vulkan
 
 	void Image::genStagingBuffer()
 	{
-		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, size(), vk::BufferUsageFlagBits::eTransferSrc,
-		                                           VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+		VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
+		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, info, size(), vk::BufferUsageFlagBits::eTransferSrc);
 	}
 
 	void Image::genImageView()
@@ -170,7 +171,7 @@ namespace ciallo::vulkan
 		auto i = static_cast<VkImageCreateInfo>(info);
 		VkImage image;
 		vmaCreateImage(allocator, &i, &allocInfo, &image, &m_allocation, nullptr);
-		m_image = static_cast<vk::Image>(image);
+		m_image = image;
 	}
 
 	bool Image::hostCoherent() const
