@@ -51,7 +51,7 @@
     <ClCompile Include="Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ArticulatedRenderer.cpp">
+    <ClCompile Include="ArticulatedBrush.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderModule.cpp">
@@ -89,7 +89,7 @@
     <ClInclude Include="Device.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ArticulatedRenderer.hpp">
+    <ClInclude Include="ArticulatedBrush.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vku.hpp">

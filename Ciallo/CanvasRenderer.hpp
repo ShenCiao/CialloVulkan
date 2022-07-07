@@ -32,7 +32,8 @@ namespace ciallo::rendering
 				colorAttchment
 			};
 			cb.beginRendering(renderingInfo);
-
+			// cb.bindPipeline(vk::PipelineBindPoint::eGraphics, )
+			
 		}
 
 		void genVertexBuffer(VmaAllocator allocator)

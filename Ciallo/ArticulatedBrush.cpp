@@ -1,12 +1,12 @@
 #include "pch.hpp"
-#include "ArticulatedRenderer.hpp"
+#include "ArticulatedBrush.hpp"
 
 #include "vku.hpp"
 #include "Buffer.hpp"
 
-namespace ciallo::brush::articulated
+namespace ciallo::brush
 {
-	Renderer::Renderer(vk::Device device): m_device(device)
+	Articulated::Articulated(vk::Device device): m_device(device)
 	{
 		m_vert = std::make_unique<vulkan::ShaderModule>(device, vk::ShaderStageFlagBits::eVertex,
 		                                                "./shaders/articulated.vert.spv");
@@ -22,7 +22,7 @@ namespace ciallo::brush::articulated
 		m_pipeline = createPipeline(*m_vert, *m_geom, *m_frag, *m_pipelineLayout, info);
 	}
 
-	void Renderer::reloadShaders()
+	void Articulated::reloadShaders()
 	{
 		m_vert = std::make_unique<vulkan::ShaderModule>(m_device, vk::ShaderStageFlagBits::eVertex,
 		                                                "./shaders/articulated.vert.spv");
@@ -32,7 +32,7 @@ namespace ciallo::brush::articulated
 		                                                "./shaders/articulated.frag.spv");
 	}
 
-	vk::UniquePipeline Renderer::createPipeline(vk::ShaderModule vert, vk::ShaderModule geom, vk::ShaderModule frag,
+	vk::UniquePipeline Articulated::createPipeline(vk::ShaderModule vert, vk::ShaderModule geom, vk::ShaderModule frag,
 	                                            vk::PipelineLayout layout, vk::PipelineRenderingCreateInfo dynamicInfo)
 	{
 		vku::PipelineMaker maker(0, 0);
@@ -48,14 +48,14 @@ namespace ciallo::brush::articulated
 		return maker.createUnique(m_device, VK_NULL_HANDLE, layout, dynamicInfo);
 	}
 
-	vk::UniquePipelineLayout Renderer::createPipelineLayout(vk::DescriptorSetLayout layout)
+	vk::UniquePipelineLayout Articulated::createPipelineLayout(vk::DescriptorSetLayout layout)
 	{
 		vk::PipelineLayoutCreateInfo info{};
 		info.setSetLayouts(layout);
 		return m_device.createPipelineLayoutUnique(info);
 	}
 
-	vk::UniqueDescriptorSetLayout Renderer::createDescriptorSetLayout()
+	vk::UniqueDescriptorSetLayout Articulated::createDescriptorSetLayout()
 	{
 		// width + offset curve
 		// color + opacity falloff
@@ -66,7 +66,7 @@ namespace ciallo::brush::articulated
 		return maker.createUnique(m_device);
 	}
 
-	vk::DescriptorSet Renderer::createDescriptorSet(vk::DescriptorPool pool,
+	vk::DescriptorSet Articulated::createDescriptorSet(vk::DescriptorPool pool,
 	                                                vk::Buffer bufferVert, vk::Buffer bufferFrag)
 	{
 		vk::DescriptorSetAllocateInfo info{pool, *m_descriptorSetLayout};

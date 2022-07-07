@@ -3,12 +3,12 @@
 #include <vulkan/vulkan.hpp>
 #include "ShaderModule.hpp"
 
-namespace ciallo::brush::articulated
+namespace ciallo::brush
 {
 	/**
-	 * \brief For simplicity, I use a renderer class here for brush. Of course it's a bad design, the brush system is supposed to act like a material system.
+	 * \brief For simplicity, I use a single class here for brush. Of course it's a bad design, the brush system is supposed to act like a material system.
 	 */
-	class Renderer
+	class Articulated
 	{
 		vk::Device m_device;
 		std::unique_ptr<vulkan::ShaderModule> m_vert;
@@ -19,7 +19,7 @@ namespace ciallo::brush::articulated
 		vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
 		vk::UniqueDescriptorSet m_descriptorSet;
 	public:
-		explicit Renderer(vk::Device device);
+		explicit Articulated(vk::Device device);
 		void reloadShaders();
 		vk::UniquePipeline createPipeline(vk::ShaderModule vert, vk::ShaderModule geom, vk::ShaderModule frag,
 		                                  vk::PipelineLayout layout, vk::PipelineRenderingCreateInfo dynamicInfo);

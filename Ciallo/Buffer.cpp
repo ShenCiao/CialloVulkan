@@ -12,6 +12,7 @@ namespace ciallo::vulkan
 
 		VkBuffer buffer;
 		vmaCreateBuffer(allocator, &i, &allocInfo, &buffer, &m_allocation, nullptr);
+		m_buffer = buffer;
 	}
 
 	void Buffer::uploadLocal(const void* data, vk::DeviceSize size) const
