@@ -10,5 +10,5 @@ layout(set = 0, binding = 1) uniform Color{
 } color;
 
 void main() {
-    outColor = color.value;
+    outColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

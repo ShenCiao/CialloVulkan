@@ -1,8 +1,11 @@
 ﻿#include "pch.hpp"
 #include "ScenePanel.hpp"
-#include <stb_image.h>
-#include <imgui_impl_vulkan.h>
+
 #include <filesystem>
+#include <imgui_impl_vulkan.h>
+#include <stb_image.h>
+
+#include "Device.hpp"
 
 namespace ciallo::gui
 {
@@ -16,7 +19,7 @@ namespace ciallo::gui
 		ImGui::End();
 	}
 
-	void ScenePanel::genCanvas(VmaAllocator allocator, vk::CommandBuffer cb)
+	void ScenePanel::genCanvas(vulkan::Device* d, vk::CommandBuffer cb)
 	{
 		int width, height, channels;
 		spdlog::info("Current working directory: {}", std::filesystem::current_path().string());
@@ -31,9 +34,10 @@ namespace ciallo::gui
 		VmaAllocationCreateInfo info = {};
 		info.usage = VMA_MEMORY_USAGE_AUTO;
 
-		m_canvas = std::make_unique<vulkan::Image>(allocator, info, width, height,
+		m_canvas = std::make_unique<vulkan::Image>(*d, info, width, height,
 		                                           vk::ImageUsageFlagBits::eSampled |
-		                                           vk::ImageUsageFlagBits::eTransferDst);
+		                                           vk::ImageUsageFlagBits::eTransferDst|
+		                                           vk::ImageUsageFlagBits::eColorAttachment);
 		if (m_canvas->hostVisible())
 		{
 			spdlog::info("it's host visible");
@@ -47,6 +51,10 @@ namespace ciallo::gui
 		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),
 		                                                static_cast<VkImageLayout>(vk::ImageLayout::eGeneral));
 		stbi_image_free(data);
+
+		m_canvasRenderer = std::make_unique<rendering::CanvasRenderer>(d);
+		m_canvasRenderer->setTarget(m_canvas.get());
+		m_canvasRenderer->render(cb);
 	}
 
 	void ScenePanel::genSampler(vk::Device device)

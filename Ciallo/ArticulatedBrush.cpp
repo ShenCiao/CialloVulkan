@@ -4,7 +4,7 @@
 #include "vku.hpp"
 #include "Buffer.hpp"
 
-namespace ciallo::brush
+namespace ciallo::rendering
 {
 	Articulated::Articulated(vk::Device device): m_device(device)
 	{
@@ -32,8 +32,14 @@ namespace ciallo::brush
 		                                                "./shaders/articulated.frag.spv");
 	}
 
+	void Articulated::genDescriptorSet(vk::DescriptorPool pool, vk::Buffer uniformVert, vk::Buffer uniformFrag)
+	{
+		m_descriptorSet = createDescriptorSet(pool, uniformVert, uniformFrag);
+	}
+
 	vk::UniquePipeline Articulated::createPipeline(vk::ShaderModule vert, vk::ShaderModule geom, vk::ShaderModule frag,
-	                                            vk::PipelineLayout layout, vk::PipelineRenderingCreateInfo dynamicInfo)
+	                                               vk::PipelineLayout layout,
+	                                               vk::PipelineRenderingCreateInfo dynamicInfo)
 	{
 		vku::PipelineMaker maker(0, 0);
 		maker.dynamicState(vk::DynamicState::eScissor)
@@ -67,7 +73,7 @@ namespace ciallo::brush
 	}
 
 	vk::DescriptorSet Articulated::createDescriptorSet(vk::DescriptorPool pool,
-	                                                vk::Buffer bufferVert, vk::Buffer bufferFrag)
+	                                                   vk::Buffer uniformVert, vk::Buffer uniformFrag)
 	{
 		vk::DescriptorSetAllocateInfo info{pool, *m_descriptorSetLayout};
 		auto descriptorSets = m_device.allocateDescriptorSets(info);
@@ -75,9 +81,9 @@ namespace ciallo::brush
 		vku::DescriptorSetUpdater updater;
 		updater.beginDescriptorSet(descriptorSets[0])
 		       .beginBuffers(0, 0, vk::DescriptorType::eUniformBuffer)
-		       .buffer(bufferVert, 0, VK_WHOLE_SIZE)
+		       .buffer(uniformVert, 0, VK_WHOLE_SIZE)
 		       .beginBuffers(1, 0, vk::DescriptorType::eUniformBuffer)
-		       .buffer(bufferFrag, 0, VK_WHOLE_SIZE);
+		       .buffer(uniformFrag, 0, VK_WHOLE_SIZE);
 
 		return descriptorSets[0];
 	}

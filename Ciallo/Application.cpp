@@ -28,13 +28,11 @@ void ciallo::Application::run() const
 	vk::CommandBuffer cb = d->createCommandBuffer();
 
 	gui::ScenePanel sp;
-	brush::articulated::Renderer lineBrushRenderer(*d);
-	vk::DescriptorSet lineBrushDescriptorSet = lineBrushRenderer.createDescriptorSet(d->descriptorPool(), VK_NULL_HANDLE, VK_NULL_HANDLE);
 
 	d->executeImmediately([&](vk::CommandBuffer c)
 	{
 		sp.genSampler(*d);
-		sp.genCanvas(d->allocator(), c);
+		sp.genCanvas(d.get(), c);
 	});
 
 	d->device().waitIdle();

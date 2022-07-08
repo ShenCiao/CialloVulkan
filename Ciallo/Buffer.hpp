@@ -32,6 +32,12 @@ namespace ciallo::vulkan
 		Buffer& operator=(Buffer&& other) = default;
 		~Buffer();
 
+	public:
+		vk::Buffer buffer() const
+		{
+			return m_buffer;
+		}
+
 		void uploadLocal(const void* data, vk::DeviceSize size) const;
 
 		// Upload with provided stagingBuffer

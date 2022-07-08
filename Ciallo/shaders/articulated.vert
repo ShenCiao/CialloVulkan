@@ -23,5 +23,5 @@ layout (set = 0, binding = 0) uniform Width{
 void main() {
     gl_Position = vec4(pos, 0.0, 1.0);
     // width = w.value*multiplier(w.pos0, w.pos1, pressure);
-    outWidth = width.value;
+    outWidth = 0.2;
 }
