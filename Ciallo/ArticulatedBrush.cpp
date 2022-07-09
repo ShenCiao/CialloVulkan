@@ -16,7 +16,7 @@ namespace ciallo::rendering
 		m_descriptorSetLayout = createDescriptorSetLayout();
 		m_pipelineLayout = createPipelineLayout(*m_descriptorSetLayout);
 
-		auto colorFormat = {vk::Format::eR8G8B8A8Unorm};
+		std::vector colorFormat = {vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo info{{}, colorFormat};
 		m_pipeline = createPipeline(*m_vert, *m_geom, *m_frag, *m_pipelineLayout, info);
 	}

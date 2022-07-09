@@ -24,7 +24,7 @@ namespace ciallo::rendering
 			m_frag = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/triangle.frag.spv");
 			genPipelineLayout();
 			genRenderPass();
-			genPipeline(target->width(), target->height());
+			genPipelineDynamic();
 			genFrameBuffer(target);
 		}
 
@@ -34,12 +34,17 @@ namespace ciallo::rendering
 			m_pipelineLayout = maker.createUnique(m_device);
 		}
 
-		void genPipeline(uint32_t width, uint32_t height)
+		void genPipelineDynamic()
 		{
+			uint32_t width = m_target->width();
+			uint32_t height = m_target->height(); 
+			
+			std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
+			vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
 			vku::PipelineMaker maker(width, height);
 			maker.shader(vk::ShaderStageFlagBits::eVertex, m_vert)
 			     .shader(vk::ShaderStageFlagBits::eFragment, m_frag);
-			m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, *m_renderPass);
+			m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 		}
 
 		void genRenderPass()
@@ -78,6 +83,18 @@ namespace ciallo::rendering
 			cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
 			cb.draw(3, 1, 0, 0);
 			cb.endRenderPass();
+		}
+
+		void renderDynamic(vk::CommandBuffer cb)
+		{
+			vk::Rect2D area{{0,0}, m_target->extent()};
+			vk::RenderingAttachmentInfo renderingAttachmentInfo{m_target->imageView(), m_target->imageLayout()};
+			std::vector colorAttachments{renderingAttachmentInfo};
+			vk::RenderingInfo renderingInfo{{}, area, 1, 0, colorAttachments, {}, {}};
+			cb.beginRendering(renderingInfo);
+			cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
+			cb.draw(3, 1, 0, 0);
+			cb.endRendering();
 		}
 	};
 }

@@ -1,5 +1,5 @@
 vcpkg_installed/
-Ciallo/imgui.ini
+./Ciallo/imgui.ini
 
 # User-specific files
 *.rsuser

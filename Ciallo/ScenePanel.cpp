@@ -56,7 +56,7 @@ namespace ciallo::gui
 		                   {});
 
 		m_triangleTest = std::make_unique<rendering::TriangleTest>(d, m_canvas.get());
-		m_triangleTest->render(cb);
+		m_triangleTest->renderDynamic(cb);
 		// m_canvasRenderer = std::make_unique<rendering::CanvasRenderer>(d);
 		// m_canvasRenderer->setTarget(m_canvas.get());
 		// m_canvasRenderer->render(cb);
