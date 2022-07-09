@@ -108,6 +108,7 @@
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="ScenePanel.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
+    <ClCompile Include="TriangleTest.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -122,6 +123,7 @@
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="ScenePanel.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
+    <ClInclude Include="TriangleTest.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

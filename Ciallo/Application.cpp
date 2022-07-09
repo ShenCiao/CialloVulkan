@@ -29,10 +29,10 @@ void ciallo::Application::run() const
 
 	gui::ScenePanel sp;
 
-	d->executeImmediately([&](vk::CommandBuffer c)
+	d->executeImmediately([&](vk::CommandBuffer tmpcb)
 	{
 		sp.genSampler(*d);
-		sp.genCanvas(d.get(), c);
+		sp.genCanvas(d.get(), tmpcb);
 	});
 
 	d->device().waitIdle();

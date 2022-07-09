@@ -42,8 +42,8 @@ namespace ciallo::vulkan
 		physicalDeviceFeatures.setGeometryShader(VK_TRUE);
 		physicalDeviceFeatures.setTessellationShader(VK_TRUE);
 		vk::PhysicalDeviceFeatures2 physicalDeviceFeatures2{physicalDeviceFeatures};
+
 		vk::PhysicalDeviceVulkan13Features physicalDeviceVulkan13Features{};
-		
 		physicalDeviceVulkan13Features.setDynamicRendering(VK_TRUE);
 
 		vk::StructureChain c(deviceCreateInfo, physicalDeviceFeatures2, physicalDeviceVulkan13Features);

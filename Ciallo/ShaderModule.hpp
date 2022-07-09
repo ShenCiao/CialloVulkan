@@ -12,11 +12,16 @@ namespace ciallo::vulkan
 	public:
 		ShaderModule(vk::Device device, vk::ShaderStageFlagBits stage, const std::filesystem::path& path);
 		operator vk::ShaderModule() const { return *m_shaderModule; }
-		ShaderModule() = delete;
+		ShaderModule() = default;
 
 	public:
 		void reload();
 
 		static std::vector<char> loadSpv(const std::filesystem::path& path);
+
+		vk::ShaderStageFlagBits stage() const
+		{
+			return m_stage;
+		}
 	};
 }

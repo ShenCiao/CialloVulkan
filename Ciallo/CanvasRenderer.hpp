@@ -54,13 +54,13 @@ namespace ciallo::rendering
 			};
 			cb.beginRendering(renderingInfo);
 			cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_articulated->m_pipeline);
-			vk::Viewport fullViewport{0, 0, static_cast<float>(m_target->width()), static_cast<float>(m_target->height())};
+			vk::Viewport fullViewport{0, 0, static_cast<float>(m_target->width()), static_cast<float>(m_target->height()), 0.0f, 1.0f};
 			cb.setViewport(0, fullViewport);
 			vk::Rect2D fullScissor{{0, 0}, m_target->extent()};
 			cb.setScissor(0, fullScissor);
 			cb.bindVertexBuffers(0, m_vertexBuffer->buffer(), {0u});
 			cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *m_articulated->m_pipelineLayout, 0, 1, &m_articulated->m_descriptorSet, 0, nullptr);
-			cb.draw(1024, 1, 0, 0);
+			cb.draw(1, 1, 0, 0);
 			cb.endRendering();
 		}
 

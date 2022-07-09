@@ -2,7 +2,6 @@
 
 #include <vulkan/vulkan.hpp>
 #include "ShaderModule.hpp"
-#include "Buffer.hpp"
 
 namespace ciallo::rendering
 {

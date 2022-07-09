@@ -13,7 +13,7 @@ namespace ciallo::vulkan
 
 		uint32_t m_version = VK_MAKE_VERSION(0, 0, 0);
 		static inline std::vector<const char*> m_validationLayers{
-			"VK_LAYER_KHRONOS_validation"
+			"VK_LAYER_KHRONOS_validation",
 		};
 		static inline std::vector<const char*> m_instanceExtensions{
 			"VK_EXT_debug_utils"

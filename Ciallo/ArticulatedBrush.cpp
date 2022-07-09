@@ -2,7 +2,6 @@
 #include "ArticulatedBrush.hpp"
 
 #include "vku.hpp"
-#include "Buffer.hpp"
 
 namespace ciallo::rendering
 {
