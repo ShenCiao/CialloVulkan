@@ -32,7 +32,8 @@ namespace ciallo::vulkan
 
 	Image::~Image()
 	{
-		vmaDestroyImage(m_allocator, m_image, m_allocation);
+		if(m_allocator)
+			vmaDestroyImage(m_allocator, m_image, m_allocation);
 	}
 
 	/**

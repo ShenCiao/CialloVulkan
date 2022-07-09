@@ -10,13 +10,14 @@ namespace ciallo::rendering
 	class TriangleTest
 	{
 		vk::Device m_device;
-		vulkan::ShaderModule m_vert;
-		vulkan::ShaderModule m_frag;
+		vulkan::ShaderModule m_vertShader;
+		vulkan::ShaderModule m_fragShader;
 		vk::UniquePipeline m_pipeline;
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vk::UniqueRenderPass m_renderPass;
 		vk::UniqueFramebuffer m_framebuffer;
 		vulkan::Image* m_target;
+		vulkan::Buffer m_vertBuffer;
 	public:
 		TriangleTest(vulkan::Device* device, vulkan::Image* target);
 
@@ -31,5 +32,6 @@ namespace ciallo::rendering
 		void render(vk::CommandBuffer cb);
 
 		void renderDynamic(vk::CommandBuffer cb);
+		void genVertexBuffer(VmaAllocator allocator);
 	};
 }

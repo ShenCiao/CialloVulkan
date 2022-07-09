@@ -39,6 +39,12 @@ namespace ciallo::vulkan
 		cb.copyBuffer(stagingBuffer, m_buffer, bc);
 	}
 
+	void Buffer::genStagingBuffer()
+	{
+		VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
+		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, info, m_size, vk::BufferUsageFlagBits::eTransferSrc);
+	}
+
 
 	void Buffer::upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size)
 	{
@@ -64,12 +70,6 @@ namespace ciallo::vulkan
 		upload(cb, data.data(), data.size() * sizeof(T));
 	}
 
-	template <typename T>
-	void Buffer::upload(vk::CommandBuffer cb, T& data)
-	{
-		upload(cb, data.data(), data.size() * sizeof(T));
-	}
-
 	bool Buffer::hostVisible() const
 	{
 		VkMemoryPropertyFlags flags;
@@ -89,8 +89,26 @@ namespace ciallo::vulkan
 		m_stagingBuffer.reset();
 	}
 
+	Buffer::Buffer(Buffer&& other) noexcept
+	{
+		*this = std::move(other);
+	}
+
+	Buffer& Buffer::operator=(Buffer&& other) noexcept
+	{
+		std::swap(m_allocator, other.m_allocator);
+		std::swap(m_buffer, other.m_buffer);
+		std::swap(m_allocation, other.m_allocation);
+		std::swap(m_size, other.m_size);
+		std::swap(m_stagingBuffer, other.m_stagingBuffer);
+		return *this;
+	}
+
 	Buffer::~Buffer()
 	{
-		vmaDestroyBuffer(m_allocator, m_buffer, m_allocation);
+		if (m_allocator)
+		{
+			vmaDestroyBuffer(m_allocator, m_buffer, m_allocation);
+		}
 	}
 }

@@ -7,10 +7,10 @@ namespace ciallo::vulkan
 	class Buffer
 	{
 	private:
-		VmaAllocator m_allocator;
-		VmaAllocation m_allocation;
-		vk::Buffer m_buffer;
-		vk::DeviceSize m_size;
+		VmaAllocator m_allocator = nullptr;
+		VmaAllocation m_allocation = nullptr;
+		vk::Buffer m_buffer = VK_NULL_HANDLE;
+		vk::DeviceSize m_size{};
 		std::unique_ptr<Buffer> m_stagingBuffer;
 	public:
 		/**
@@ -25,11 +25,11 @@ namespace ciallo::vulkan
 
 		operator vk::Buffer() const { return m_buffer; }
 
-		Buffer() = delete;
+		Buffer() = default;
 		Buffer(const Buffer& other) = delete;
-		Buffer(Buffer&& other) = default;
+		Buffer(Buffer&& other) noexcept;
 		Buffer& operator=(const Buffer& other) = delete;
-		Buffer& operator=(Buffer&& other) = default;
+		Buffer& operator=(Buffer&& other) noexcept;
 		~Buffer();
 
 	public:
@@ -43,11 +43,7 @@ namespace ciallo::vulkan
 		// Upload with provided stagingBuffer
 		void uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size, vk::Buffer stagingBuffer) const;
 
-		void genStagingBuffer()
-		{
-			VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
-			m_stagingBuffer = std::make_unique<Buffer>(m_allocator, info, m_size, vk::BufferUsageFlagBits::eTransferSrc);
-		}
+		void genStagingBuffer();
 
 		/**
 		 * \brief Upload data to buffer
@@ -59,10 +55,6 @@ namespace ciallo::vulkan
 
 		template <typename T>
 		void upload(vk::CommandBuffer cb, std::vector<T>& data);
-
-
-		template <typename T>
-		void upload(vk::CommandBuffer cb, T& data);
 
 		bool hostVisible() const;
 
