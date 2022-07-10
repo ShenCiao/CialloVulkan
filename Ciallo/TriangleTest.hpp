@@ -12,6 +12,7 @@ namespace ciallo::rendering
 		vk::Device m_device;
 		vulkan::ShaderModule m_vertShader;
 		vulkan::ShaderModule m_fragShader;
+		vulkan::ShaderModule m_geomShader;
 		vk::UniquePipeline m_pipeline;
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vk::UniqueRenderPass m_renderPass;

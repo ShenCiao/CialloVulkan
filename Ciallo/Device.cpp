@@ -39,8 +39,10 @@ namespace ciallo::vulkan
 
 		// Warning: may encounter features do not supported
 		vk::PhysicalDeviceFeatures physicalDeviceFeatures{};
-		physicalDeviceFeatures.setGeometryShader(VK_TRUE);
-		physicalDeviceFeatures.setTessellationShader(VK_TRUE);
+		physicalDeviceFeatures.setGeometryShader(VK_TRUE)
+		                      .setTessellationShader(VK_TRUE)
+		                      .setWideLines(VK_TRUE)
+		                      .setShaderClipDistance(VK_TRUE);
 		vk::PhysicalDeviceFeatures2 physicalDeviceFeatures2{physicalDeviceFeatures};
 
 		vk::PhysicalDeviceVulkan13Features physicalDeviceVulkan13Features{};
@@ -59,7 +61,7 @@ namespace ciallo::vulkan
 	int Device::findRequiredQueueFamily(vk::PhysicalDevice device)
 	{
 		auto queueFamilies = device.getQueueFamilyProperties();
-		
+
 		vk::QueueFlags req = vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
 		for (const auto [i, queueFamily] : views::enumerate(queueFamilies))
 		{

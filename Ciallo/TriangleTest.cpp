@@ -10,10 +10,9 @@ namespace ciallo::rendering
 	{
 		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex, "./shaders/triangle.vert.spv");
 		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/triangle.frag.spv");
+		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry, "./shaders/triangle.geom.spv");
 		genPipelineLayout();
-		genRenderPass();
 		genPipelineDynamic();
-		genFrameBuffer(target);
 		genVertexBuffer(*device);
 	}
 
@@ -31,10 +30,13 @@ namespace ciallo::rendering
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
 		vku::PipelineMaker maker(0, 0);
-		maker.dynamicState(vk::DynamicState::eViewport)
+		maker.topology(vk::PrimitiveTopology::eTriangleStrip)
+		     .dynamicState(vk::DynamicState::eViewport)
 		     .dynamicState(vk::DynamicState::eScissor)
 		     .shader(vk::ShaderStageFlagBits::eVertex, m_vertShader)
 		     .shader(vk::ShaderStageFlagBits::eFragment, m_fragShader)
+		     .shader(vk::ShaderStageFlagBits::eGeometry, m_geomShader)
+		     .cullMode(vk::CullModeFlagBits::eNone)
 		     .vertexBinding(0, 5 * sizeof(float))
 		     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, 0)
 		     .vertexAttribute(1, 0, vk::Format::eR32G32B32Sfloat, vk::blockSize(vk::Format::eR32G32Sfloat));

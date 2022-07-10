@@ -33,4 +33,6 @@ void main(){
     vertPos = p1 + ( -n*width[1] + v*width[1]);
     gl_Position = vec4(vertPos, 0.0, 1.0);
     EmitVertex();
+
+    EndPrimitive();
 }

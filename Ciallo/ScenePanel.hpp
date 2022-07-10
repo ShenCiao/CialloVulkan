@@ -19,6 +19,7 @@ namespace ciallo::gui
 	private:
 		std::unique_ptr<vulkan::Image> m_canvas;
 		std::unique_ptr<rendering::TriangleTest> m_triangleTest;
+		std::unique_ptr<rendering::CanvasRenderer> m_canvasRenderer;
 		vk::UniqueSampler m_sampler;
 		ImTextureID m_canvasTextureId = nullptr;
 	};
