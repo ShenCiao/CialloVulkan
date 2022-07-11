@@ -118,13 +118,13 @@
     <CopyFileToFolders Include="images\takagi3.png">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulated.frag.spv">
+    <CopyFileToFolders Include="shaders\articulatedProgress.frag.spv">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulated.geom.spv">
+    <CopyFileToFolders Include="shaders\articulatedProgress.geom.spv">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulated.vert.spv">
+    <CopyFileToFolders Include="shaders\articulatedProgress.vert.spv">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
   </ItemGroup>

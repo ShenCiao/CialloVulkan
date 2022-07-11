@@ -48,12 +48,12 @@ namespace ciallo::rendering
 		std::vector colorAttachments{renderingAttachmentInfo};
 		vk::RenderingInfo renderingInfo{{}, area, 1, 0, colorAttachments, {}, {}};
 		cb.beginRendering(renderingInfo);
-		vk::Viewport allViewport{
+		vk::Viewport fullViewport{
 			0, 0, static_cast<float>(target->width()), static_cast<float>(target->height()), 0.0f, 1.0f
 		};
-		cb.setViewport(0, allViewport);
-		vk::Rect2D allScissor{{0, 0}, target->extent()};
-		cb.setScissor(0, allScissor);
+		cb.setViewport(0, fullViewport);
+		vk::Rect2D zeroScissor{{0, 0}, target->extent()};
+		cb.setScissor(0, zeroScissor);
 		std::vector<vk::Buffer> vertexBuffers{m_vertBuffer};
 		cb.bindVertexBuffers(0, vertexBuffers, {0});
 		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
