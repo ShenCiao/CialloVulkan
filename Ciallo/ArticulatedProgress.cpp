@@ -9,9 +9,9 @@ namespace ciallo::rendering
 {
 	ArticulatedProgress::ArticulatedProgress(vulkan::Device* device): m_device(*device)
 	{
-		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex, "./shaders/triangle.vert.spv");
-		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/triangle.frag.spv");
-		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry, "./shaders/triangle.geom.spv");
+		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex, "./shaders/articulatedProgress.vert.spv");
+		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/articulatedProgress.frag.spv");
+		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry, "./shaders/articulatedProgress.geom.spv");
 		genPipelineLayout();
 		genPipelineDynamic();
 		genVertexBuffer(*device);
@@ -28,7 +28,7 @@ namespace ciallo::rendering
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
 		vku::PipelineMaker maker(0, 0);
-		maker.topology(vk::PrimitiveTopology::eTriangleStrip)
+		maker.topology(vk::PrimitiveTopology::eLineStrip)
 		     .dynamicState(vk::DynamicState::eViewport)
 		     .dynamicState(vk::DynamicState::eScissor)
 		     .shader(vk::ShaderStageFlagBits::eVertex, m_vertShader)
@@ -57,7 +57,7 @@ namespace ciallo::rendering
 		std::vector<vk::Buffer> vertexBuffers{m_vertBuffer};
 		cb.bindVertexBuffers(0, vertexBuffers, {0});
 		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
-		cb.draw(3, 1, 0, 0);
+		cb.draw(4, 1, 0, 0);
 		cb.endRendering();
 	}
 
@@ -72,7 +72,8 @@ namespace ciallo::rendering
 		const std::vector<Vertex> vertices = {
 			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 		};
 		VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
 
