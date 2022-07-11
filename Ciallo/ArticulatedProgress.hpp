@@ -6,7 +6,7 @@
 
 namespace ciallo::rendering
 {
-	class TriangleTest
+	class ArticulatedProgress
 	{
 		vk::Device m_device;
 		vulkan::ShaderModule m_vertShader;
@@ -16,22 +16,15 @@ namespace ciallo::rendering
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vk::UniqueRenderPass m_renderPass;
 		vk::UniqueFramebuffer m_framebuffer;
-		vulkan::Image* m_target;
 		vulkan::Buffer m_vertBuffer;
 	public:
-		TriangleTest(vulkan::Device* device, vulkan::Image* target);
+		ArticulatedProgress(vulkan::Device* device);
 
 		void genPipelineLayout();
 
 		void genPipelineDynamic();
 
-		void genRenderPass();
-
-		void genFrameBuffer(const vulkan::Image* image);
-
-		void render(vk::CommandBuffer cb);
-
-		void renderDynamic(vk::CommandBuffer cb);
+		void renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target);
 		void genVertexBuffer(VmaAllocator allocator);
 	};
 }

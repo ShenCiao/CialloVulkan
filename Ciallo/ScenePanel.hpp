@@ -5,7 +5,7 @@
 #include "Device.hpp"
 #include "Image.hpp"
 #include "CanvasRenderer.hpp"
-#include "TriangleTest.hpp"
+#include "ArticulatedProgress.hpp"
 
 namespace ciallo::gui
 {
@@ -18,7 +18,6 @@ namespace ciallo::gui
 		void genSampler(vk::Device device);
 	private:
 		std::unique_ptr<vulkan::Image> m_canvas;
-		std::unique_ptr<rendering::TriangleTest> m_triangleTest;
 		std::unique_ptr<rendering::CanvasRenderer> m_canvasRenderer;
 		vk::UniqueSampler m_sampler;
 		ImTextureID m_canvasTextureId = nullptr;

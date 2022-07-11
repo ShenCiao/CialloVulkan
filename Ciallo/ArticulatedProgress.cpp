@@ -1,5 +1,5 @@
 #include "pch.hpp"
-#include "TriangleTest.hpp"
+#include "ArticulatedProgress.hpp"
 
 #include <glm/glm.hpp>
 
@@ -7,7 +7,7 @@
 
 namespace ciallo::rendering
 {
-	TriangleTest::TriangleTest(vulkan::Device* device, vulkan::Image* target): m_device(*device), m_target(target)
+	ArticulatedProgress::ArticulatedProgress(vulkan::Device* device): m_device(*device)
 	{
 		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex, "./shaders/triangle.vert.spv");
 		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/triangle.frag.spv");
@@ -17,17 +17,14 @@ namespace ciallo::rendering
 		genVertexBuffer(*device);
 	}
 
-	void TriangleTest::genPipelineLayout()
+	void ArticulatedProgress::genPipelineLayout()
 	{
 		vku::PipelineLayoutMaker maker;
 		m_pipelineLayout = maker.createUnique(m_device);
 	}
 
-	void TriangleTest::genPipelineDynamic()
+	void ArticulatedProgress::genPipelineDynamic()
 	{
-		uint32_t width = m_target->width();
-		uint32_t height = m_target->height();
-
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
 		vku::PipelineMaker maker(0, 0);
@@ -44,56 +41,18 @@ namespace ciallo::rendering
 		m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 	}
 
-	void TriangleTest::genRenderPass()
+	void ArticulatedProgress::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
 	{
-		std::vector<vk::AttachmentDescription> attachments;
-		std::vector<vk::SubpassDescription> subpasses;
-
-		vk::AttachmentDescription attachment{{}, vk::Format::eR8G8B8A8Unorm};
-		attachment.setInitialLayout(vk::ImageLayout::eGeneral);
-		attachment.setFinalLayout(vk::ImageLayout::eGeneral);
-		attachments.push_back(attachment);
-		std::vector<vk::AttachmentReference> colorAttachments;
-		colorAttachments.push_back({0, vk::ImageLayout::eGeneral});
-		subpasses.push_back({{}, vk::PipelineBindPoint::eGraphics, {}, colorAttachments, {}, {}, {}});
-
-		vk::RenderPassCreateInfo info{
-			{},
-			attachments,
-			subpasses,
-			{}
-		};
-		m_renderPass = m_device.createRenderPassUnique(info);
-	}
-
-	void TriangleTest::genFrameBuffer(const vulkan::Image* image)
-	{
-		auto imageView = image->imageView();
-		vk::FramebufferCreateInfo info{{}, *m_renderPass, imageView, image->width(), image->height(), 1};
-		m_framebuffer = m_device.createFramebufferUnique(info);
-	}
-
-	void TriangleTest::render(vk::CommandBuffer cb)
-	{
-		vk::RenderPassBeginInfo rpbi{*m_renderPass, *m_framebuffer, {{0, 0}, m_target->extent()}, {}};
-		cb.beginRenderPass(rpbi, vk::SubpassContents::eInline);
-		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
-		cb.draw(3, 1, 0, 0);
-		cb.endRenderPass();
-	}
-
-	void TriangleTest::renderDynamic(vk::CommandBuffer cb)
-	{
-		vk::Rect2D area{{0, 0}, m_target->extent()};
-		vk::RenderingAttachmentInfo renderingAttachmentInfo{m_target->imageView(), m_target->imageLayout()};
+		vk::Rect2D area{{0, 0}, target->extent()};
+		vk::RenderingAttachmentInfo renderingAttachmentInfo{target->imageView(), target->imageLayout()};
 		std::vector colorAttachments{renderingAttachmentInfo};
 		vk::RenderingInfo renderingInfo{{}, area, 1, 0, colorAttachments, {}, {}};
 		cb.beginRendering(renderingInfo);
 		vk::Viewport allViewport{
-			0, 0, static_cast<float>(m_target->width()), static_cast<float>(m_target->height()), 0.0f, 1.0f
+			0, 0, static_cast<float>(target->width()), static_cast<float>(target->height()), 0.0f, 1.0f
 		};
 		cb.setViewport(0, allViewport);
-		vk::Rect2D allScissor{{0, 0}, m_target->extent()};
+		vk::Rect2D allScissor{{0, 0}, target->extent()};
 		cb.setScissor(0, allScissor);
 		std::vector<vk::Buffer> vertexBuffers{m_vertBuffer};
 		cb.bindVertexBuffers(0, vertexBuffers, {0});
@@ -102,7 +61,7 @@ namespace ciallo::rendering
 		cb.endRendering();
 	}
 
-	void TriangleTest::genVertexBuffer(VmaAllocator allocator)
+	void ArticulatedProgress::genVertexBuffer(VmaAllocator allocator)
 	{
 		struct Vertex
 		{

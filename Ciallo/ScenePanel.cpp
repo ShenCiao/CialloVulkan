@@ -55,11 +55,8 @@ namespace ciallo::gui
 		cb.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, {}, {}, {},
 		                   {});
 
-		m_triangleTest = std::make_unique<rendering::TriangleTest>(d, m_canvas.get());
-		m_triangleTest->renderDynamic(cb);
-		// m_canvasRenderer = std::make_unique<rendering::CanvasRenderer>(d);
-		// m_canvasRenderer->setTarget(m_canvas.get());
-		// m_canvasRenderer->render(cb);
+		m_canvasRenderer = std::make_unique<rendering::CanvasRenderer>(d);
+		m_canvasRenderer->render(cb, m_canvas.get());
 	}
 
 	void ScenePanel::genSampler(vk::Device device)
