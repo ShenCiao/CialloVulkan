@@ -71,11 +71,7 @@ void ciallo::Application::run() const
 		// -----------------------------------------------------------------------------
 		if (ImGui::BeginMainMenuBar())
 		{
-			if (ImGui::MenuItem("LoadShader"))
-			{
-				auto test = vulkan::ShaderModule(*d, vk::ShaderStageFlagBits::eVertex, "./shaders/articulated.vert.spv");
-				spdlog::info("successfully loaded");
-			}
+			
 			ImGui::EndMainMenuBar();
 		}
 
@@ -84,10 +80,10 @@ void ciallo::Application::run() const
 		{
 			ImGui::ShowDemoWindow(&show_demo_window);
 		}
-		static bool show_demo = true;
-		if (show_demo)
+		static bool show_demo_plot = true;
+		if (show_demo_plot)
 		{
-			ImPlot::ShowDemoWindow(&show_demo);
+			ImPlot::ShowDemoWindow(&show_demo_plot);
 		}
 
 		sp.draw();

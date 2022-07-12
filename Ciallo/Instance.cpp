@@ -51,6 +51,11 @@ namespace ciallo::vulkan
 			spdlog::error("{}", pCallbackData->pMessage);
 		}
 
+		if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT && 
+			messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT)
+		{
+			spdlog::info("{}", pCallbackData->pMessage);
+		}
 		return VK_FALSE;
 	}
 
@@ -74,9 +79,10 @@ namespace ciallo::vulkan
 		};
 
 		std::vector<vk::ValidationFeatureEnableEXT> enableValidateFeatures{
-			vk::ValidationFeatureEnableEXT::eGpuAssisted,
+			// vk::ValidationFeatureEnableEXT::eGpuAssisted,
 			// vk::ValidationFeatureEnableEXT::eBestPractices,
 			vk::ValidationFeatureEnableEXT::eSynchronizationValidation,
+			vk::ValidationFeatureEnableEXT::eDebugPrintf,
 		};
 		vk::ValidationFeaturesEXT validationFeatures{enableValidateFeatures};
 
