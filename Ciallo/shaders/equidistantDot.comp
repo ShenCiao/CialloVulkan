@@ -1,0 +1,24 @@
+#version 460
+#extension GL_EXT_debug_printf : enable
+
+layout(local_size_x = 4) in;
+
+
+struct Point {
+    vec2 pos;
+    float pressure;
+    float _pad0;
+};
+
+layout(std430, binding = 0) buffer Input{
+    Point[] p;
+};
+
+layout(std430, binding = 1) buffer Output{
+    Point[] d;
+};
+
+void main(){
+    debugPrintfEXT("length: %d", p.length());
+    debugPrintfEXT("pos: %f", p[gl_LocalInvocationID.x].pressure);
+}

@@ -21,39 +21,27 @@ namespace ciallo::gui
 
 	void ScenePanel::genCanvas(vulkan::Device* d, vk::CommandBuffer cb)
 	{
-		int width, height, channels;
-		spdlog::info("Current working directory: {}", std::filesystem::current_path().string());
-
-		auto data = stbi_load("images/takagi3.png", &width, &height, &channels,
-		                      STBI_rgb_alpha);
-		if (!data)
-		{
-			throw std::runtime_error("Unable to load image");
-		}
-
-		VmaAllocationCreateInfo info = {};
-		info.usage = VMA_MEMORY_USAGE_AUTO;
+		int width = 1024, height = 1024;
+		VmaAllocationCreateInfo info = {{}, VMA_MEMORY_USAGE_AUTO};
 
 		m_canvas = std::make_unique<vulkan::Image>(*d, info, width, height,
 		                                           vk::ImageUsageFlagBits::eSampled |
-		                                           vk::ImageUsageFlagBits::eTransferDst|
+		                                           vk::ImageUsageFlagBits::eTransferDst |
 		                                           vk::ImageUsageFlagBits::eColorAttachment);
+		
+		auto imageMemoryBarrier = m_canvas->createLayoutTransitionMemoryBarrier(vk::ImageLayout::eGeneral);
+		m_canvas->setImageLayout(vk::ImageLayout::eGeneral);
+		cb.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, 
+			{}, {}, {}, imageMemoryBarrier);
+
+
 		if (m_canvas->hostVisible())
 		{
-			spdlog::info("it's host visible");
+			spdlog::info("Canvas is host visible");
 		}
-		auto barrier = m_canvas->createLayoutTransitionMemoryBarrier(vk::ImageLayout::eGeneral);
 
-		cb.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe, {}, {}, {},
-		                   barrier);
-		m_canvas->setImageLayout(vk::ImageLayout::eGeneral);
-		m_canvas->upload(cb, data);
 		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),
-		                                                static_cast<VkImageLayout>(vk::ImageLayout::eGeneral));
-		stbi_image_free(data);
-
-		cb.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, {}, {}, {},
-		                   {});
+		                                                static_cast<VkImageLayout>(m_canvas->imageLayout()));
 
 		m_canvasRenderer = std::make_unique<rendering::CanvasRenderer>(d);
 		m_canvasRenderer->render(cb, m_canvas.get());

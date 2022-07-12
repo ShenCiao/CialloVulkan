@@ -101,6 +101,7 @@
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="EquidistantDot.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainPassRenderer.cpp" />
     <ClCompile Include="pch.cpp">
@@ -120,6 +121,7 @@
     <ClInclude Include="CanvasRenderer.hpp" />
     <ClInclude Include="Device.hpp" />
     <ClInclude Include="Image.hpp" />
+    <ClInclude Include="EquidistantDot.hpp" />
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />

@@ -1,0 +1,1 @@
+glslc equidistantDot.comp -o equidistantDot.comp.spv

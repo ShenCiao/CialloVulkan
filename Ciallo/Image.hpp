@@ -22,8 +22,9 @@ namespace ciallo::vulkan
 	public:
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, uint32_t width, uint32_t height, vk::ImageUsageFlags usage);
 		~Image();
-		
-		Image() = default;
+
+		// TODO: better layout changing and turn it into a default creatable object like vulkan::buffer.
+		Image() = delete;
 		Image(const Image& other) = delete;
 		Image(Image&& other) = default;
 		Image& operator=(const Image& other) = delete;

@@ -66,6 +66,9 @@
     <ClCompile Include="ArticulatedProgress.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EquidistantDot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ArticulatedProgress.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EquidistantDot.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

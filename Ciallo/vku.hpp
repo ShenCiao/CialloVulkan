@@ -2,7 +2,7 @@
 // Modified version by Ciallo:
 //
 // Renamed "Renderpass" to "RenderPass".
-// Create pipeline with vk::ShaderModule instead of vku::ShaderModule
+// Create pipeline and compute pipeline with vk::ShaderModule instead of vku::ShaderModule
 // Add support for dynamic rendering.
 // Delete class Image and Buffer, we use our own.
 // Clean up unused #include and reformat whole code
@@ -1659,10 +1659,10 @@ namespace vku
 		}
 
 		/// Add a shader module to the pipeline.
-		ComputePipelineMaker& shader(vk::ShaderStageFlagBits stage, vku::ShaderModule& shader,
+		ComputePipelineMaker& shader(vk::ShaderStageFlagBits stage, const vk::ShaderModule& shader,
 		                             const char* entryPoint = "main")
 		{
-			stage_.module = shader.module();
+			stage_.module = shader;
 			stage_.pName = entryPoint;
 			stage_.stage = stage;
 			return *this;
@@ -1677,7 +1677,7 @@ namespace vku
 
 		/// Create a managed handle to a compute shader.
 		vk::UniquePipeline createUnique(vk::Device device, const vk::PipelineCache& pipelineCache,
-		                                const vk::PipelineLayout& pipelineLayout)
+		                                const vk::PipelineLayout& pipelineLayout) const
 		{
 			vk::ComputePipelineCreateInfo pipelineInfo{};
 

@@ -6,8 +6,6 @@
 #include "Device.hpp"
 #include "MainPassRenderer.hpp"
 #include "ScenePanel.hpp"
-#include "ShaderModule.hpp"
-#include "ArticulatedBrush.hpp"
 
 void ciallo::Application::run() const
 {
