@@ -2,6 +2,7 @@
 #include "EquidistantDot.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include "vku.hpp"
 
 namespace ciallo::rendering
@@ -102,12 +103,15 @@ namespace ciallo::rendering
 
 	void EquidistantDot::genInputBuffer(VmaAllocator allocator)
 	{
-		const std::vector<Vertex> vertices = {
-			{{0.0f, -0.5f}, 0.124f, {}},
-			{{0.5f, 0.5f}, 0.424f, {}},
-			{{-0.5f, 0.5f}, 0.666f, {}},
-			{{0.0f, -0.5f}, 0.890f, {}},
-		};
+		std::vector<Vertex> vertices{};
+		int n = 16;
+		vertices.reserve(n);
+		for (float i : views::iota(0, n))
+		{
+			float x = glm::mix(-1.0f, 1.0f, i/n);
+			float y = x;
+			vertices.push_back({{x, y}, 1.0f, {}});
+		}
 
 
 		VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};

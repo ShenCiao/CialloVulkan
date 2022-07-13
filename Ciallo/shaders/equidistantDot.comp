@@ -1,7 +1,7 @@
 #version 460
 #extension GL_EXT_debug_printf : enable
 
-layout(local_size_x = 4) in;
+layout(local_size_x = 1024) in;
 
 
 struct Point {
@@ -11,14 +11,62 @@ struct Point {
 };
 
 layout(std430, binding = 0) buffer Input{
-    Point[] p;
+    Point[] points;
 };
 
 layout(std430, binding = 1) buffer Output{
-    Point[] d;
+    Point[] dots;
 };
 
+shared float[gl_WorkGroupSize.x * 2] segmentLengths;
+shared uint n_totDots;
+
 void main(){
-    debugPrintfEXT("length: %d", p.length());
-    debugPrintfEXT("pos: %f", p[gl_LocalInvocationID.x].pressure);
+    uint id = gl_LocalInvocationID.x;
+    vec2 p0 = points[id].pos;
+    vec2 p1 = id == 0 ? p0:points[id - 1].pos;
+    // length of each segment
+    float curLength = distance(p0, p1);
+    segmentLengths[id] = curLength;
+
+    barrier();
+	memoryBarrierShared();
+
+    // Prefix sum on segment length
+    const uint n_steps = uint(log2(gl_WorkGroupSize.x)) + 1;
+	uint s = 0;
+
+    for(s = 0; s < n_steps; s++){
+        uint mask = (1 << s) - 1;
+		uint rd_id = ((id >> s) << (s + 1)) + mask;
+		uint wr_id = rd_id + 1 + (id & mask);
+		
+		segmentLengths[wr_id] += segmentLengths[rd_id];
+		
+		barrier();
+		memoryBarrierShared();
+    }
+    // Prefix sum done! segmentLengths now is the distance from starting point
+
+    float dotDistance = 0.05;
+    
+    if (id != 0) {
+        float tDistance = dotDistance - mod(segmentLengths[id - 1], dotDistance);
+        uint idDot = uint( segmentLengths[id - 1]/dotDistance ) + 1;
+
+        while (tDistance + segmentLengths[id - 1] < segmentLengths[id]){
+            float t = tDistance/curLength;
+            // interpolate everything with t value
+            dots[idDot].pos = mix(points[id-1].pos, points[id].pos, t);
+            dots[idDot].pressure = mix(points[id-1].pressure, points[id].pressure, t);
+
+            tDistance += dotDistance;
+            idDot += 1;
+        }
+    }
+    else{
+        dots[0].pos = points[0].pos;
+        dots[0].pressure = points[0].pressure;
+    }
+
 }
