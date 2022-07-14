@@ -93,9 +93,7 @@ namespace ciallo::rendering
 			vk::PipelineStageFlagBits2::eVertexInput, vk::AccessFlagBits2::eVertexAttributeRead
 		};
 		std::vector barriers = {drawIndirectBarrier, vertexBarrier};
-		vk::DependencyInfo depInfo{{}, barriers, {}, {}};
-
-		cb.pipelineBarrier2(depInfo);
+		cb.pipelineBarrier2({{}, barriers, {}, {}});
 
 		vk::Rect2D area{{0, 0}, target->extent()};
 		vk::RenderingAttachmentInfo renderingAttachmentInfo{target->imageView(), target->imageLayout()};
@@ -129,7 +127,7 @@ namespace ciallo::rendering
 		vertices.reserve(n);
 		for (float i : views::iota(0, n))
 		{
-			float x = glm::mix(-1.0f, 1.0f, i / n);
+			float x = glm::mix(-1.0f, 0.5f, i / n);
 			float y = x;
 			vertices.push_back({{x, y}, 1.0f, {}});
 		}

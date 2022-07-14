@@ -54,31 +54,37 @@ void main(){
     }
     // Prefix sum done! For now segmentLengths is the distance from the starting point of polyline
 
-    float dotDistance = 0.05;
+    float dotDistance = 0.5;
     
-    if (id != 0) {
+    // Only invocation id within [0, points.length()) supposed to be dealed with
+    if (id != 0 && id < points.length()) {
         float tDistance = dotDistance - mod(segmentLengths[id - 1], dotDistance);
-        uint idDot = uint( segmentLengths[id - 1]/dotDistance ) + 1;
+        uint idDot = uint( segmentLengths[id - 1]/dotDistance );
 
         while (tDistance + segmentLengths[id - 1] < segmentLengths[id]){
+            idDot += 1;
             float t = tDistance/curLength;
             // interpolate everything with t value
             dots[idDot].pos = mix(points[id-1].pos, points[id].pos, t);
             dots[idDot].pressure = mix(points[id-1].pressure, points[id].pressure, t);
 
             tDistance += dotDistance;
-            idDot += 1;
         }
 
-        atomicMax(draw.vertexCount, idDot-1);
+        if (id == points.length() - 1) // endpoint of poyline
+        {
+            // pad one dot at the end of stroke for direction
+            draw.vertexCount = idDot+1; 
+            dots[idDot+1].pos = dots[idDot].pos + points[id].pos - points[id-1].pos;
+        }
     }
-    else{
+    else if(id == 0){
         dots[0].pos = points[0].pos;
         dots[0].pressure = points[0].pressure;
 
         draw.instanceCount = 1;
         draw.firstVertex = 0;
-        draw.firstVertex = 0;
+        draw.firstInstance = 0;
     }
 
 }
