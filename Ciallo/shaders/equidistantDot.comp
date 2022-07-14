@@ -18,6 +18,13 @@ layout(std430, binding = 1) buffer Output{
     Point[] dots;
 };
 
+layout(std430, binding = 2) buffer DrawIndirectCommand{
+    uint vertexCount;
+    uint instanceCount;
+    uint firstVertex;
+    uint firstInstance;
+} draw;
+
 shared float[gl_WorkGroupSize.x * 2] segmentLengths;
 shared uint n_totDots;
 
@@ -34,9 +41,8 @@ void main(){
 
     // Prefix sum on segment length
     const uint n_steps = uint(log2(gl_WorkGroupSize.x)) + 1;
-	uint s = 0;
 
-    for(s = 0; s < n_steps; s++){
+    for(uint s = 0; s < n_steps; s++){
         uint mask = (1 << s) - 1;
 		uint rd_id = ((id >> s) << (s + 1)) + mask;
 		uint wr_id = rd_id + 1 + (id & mask);
@@ -46,7 +52,7 @@ void main(){
 		barrier();
 		memoryBarrierShared();
     }
-    // Prefix sum done! segmentLengths now is the distance from starting point
+    // Prefix sum done! For now segmentLengths is the distance from the starting point of polyline
 
     float dotDistance = 0.05;
     
@@ -63,10 +69,16 @@ void main(){
             tDistance += dotDistance;
             idDot += 1;
         }
+
+        atomicMax(draw.vertexCount, idDot-1);
     }
     else{
         dots[0].pos = points[0].pos;
         dots[0].pressure = points[0].pressure;
+
+        draw.instanceCount = 1;
+        draw.firstVertex = 0;
+        draw.firstVertex = 0;
     }
 
 }

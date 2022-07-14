@@ -9,22 +9,26 @@ namespace ciallo::rendering
 {
 	EquidistantDot::EquidistantDot(vulkan::Device* device): m_device(*device)
 	{
-		m_computeShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eCompute,
-		                                       "./shaders/equidistantDot.comp.spv");
+		m_compShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eCompute,
+		                                    "./shaders/equidistantDot.comp.spv");
+		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex,
+		                                    "./shaders/equidistantDot.vert.spv");
+		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment,
+		                                    "./shaders/equidistantDot.frag.spv");
+		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry,
+		                                    "./shaders/equidistantDot.geom.spv");
 		genInputBuffer(*device);
-		genVertexBuffer(*device);
-		genComputeDescriptorSet(device->descriptorPool());
-		genComputePipeline();
-	}
-
-	void EquidistantDot::genPipelineLayout()
-	{
-		vku::PipelineLayoutMaker maker;
-		m_pipelineLayout = maker.createUnique(m_device);
+		genAuxiliaryBuffer(*device);
+		genCompDescriptorSet(device->descriptorPool());
+		genCompPipeline();
+		genPipelineDynamic();
 	}
 
 	void EquidistantDot::genPipelineDynamic()
 	{
+		vku::PipelineLayoutMaker layoutMaker;
+		m_pipelineLayout = layoutMaker.createUnique(m_device);
+
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
 		vku::PipelineMaker maker(0, 0);
@@ -35,47 +39,64 @@ namespace ciallo::rendering
 		     .shader(vk::ShaderStageFlagBits::eFragment, m_fragShader)
 		     .shader(vk::ShaderStageFlagBits::eGeometry, m_geomShader)
 		     .cullMode(vk::CullModeFlagBits::eNone)
-		     .vertexBinding(0, 5 * sizeof(float))
+		     .vertexBinding(0, 4 * sizeof(float))
 		     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, 0)
-		     .vertexAttribute(1, 0, vk::Format::eR32G32B32Sfloat, vk::blockSize(vk::Format::eR32G32Sfloat));
+		     .vertexAttribute(1, 0, vk::Format::eR32Sfloat, vk::blockSize(vk::Format::eR32G32Sfloat));
 		m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 	}
 
-	void EquidistantDot::genComputeDescriptorSet(vk::DescriptorPool pool)
+	void EquidistantDot::genCompDescriptorSet(vk::DescriptorPool pool)
 	{
 		vku::DescriptorSetLayoutMaker layoutMaker;
 		layoutMaker.buffer(0, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eCompute, 1)
-		           .buffer(1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eCompute, 1);
-		m_computeDescriptorSetLayout = layoutMaker.createUnique(m_device);
+		           .buffer(1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eCompute, 1)
+		           .buffer(2, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eCompute, 1);
+		m_compDescriptorSetLayout = layoutMaker.createUnique(m_device);
 
 		vku::DescriptorSetMaker maker;
-		maker.layout(*m_computeDescriptorSetLayout);
+		maker.layout(*m_compDescriptorSetLayout);
 		auto descriptorSets = maker.create(m_device, pool);
-		m_computeDescriptorSet = descriptorSets[0];
+		m_compDescriptorSet = descriptorSets[0];
 
 		vku::DescriptorSetUpdater updater;
-		updater.beginDescriptorSet(m_computeDescriptorSet)
+		updater.beginDescriptorSet(m_compDescriptorSet)
 		       .beginBuffers(0, 0, vk::DescriptorType::eStorageBuffer)
-		       .buffer(m_inputBuffer, 0, VK_WHOLE_SIZE)
+		       .buffer(m_inputBuffer)
 		       .beginBuffers(1, 0, vk::DescriptorType::eStorageBuffer)
-		       .buffer(m_dotBuffer, 0, VK_WHOLE_SIZE);
+		       .buffer(m_dotBuffer)
+		       .beginBuffers(2, 0, vk::DescriptorType::eStorageBuffer)
+		       .buffer(m_indirectDrawBuffer);
 		updater.update(m_device);
 	}
 
 	// gen compute layout and pipeline
-	void EquidistantDot::genComputePipeline()
+	void EquidistantDot::genCompPipeline()
 	{
 		vku::PipelineLayoutMaker layoutMaker;
-		layoutMaker.descriptorSetLayout(*m_computeDescriptorSetLayout);
-		m_computePipelineLayout = layoutMaker.createUnique(m_device);
+		layoutMaker.descriptorSetLayout(*m_compDescriptorSetLayout);
+		m_compPipelineLayout = layoutMaker.createUnique(m_device);
 
 		vku::ComputePipelineMaker maker{};
-		maker.shader(vk::ShaderStageFlagBits::eCompute, m_computeShader);
-		m_computePipeline = maker.createUnique(m_device, nullptr, *m_computePipelineLayout);
+		maker.shader(vk::ShaderStageFlagBits::eCompute, m_compShader);
+		m_compPipeline = maker.createUnique(m_device, nullptr, *m_compPipelineLayout);
 	}
 
 	void EquidistantDot::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
 	{
+		compute(cb);
+		vk::MemoryBarrier2 drawIndirectBarrier{
+			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
+			vk::PipelineStageFlagBits2::eDrawIndirect, vk::AccessFlagBits2::eIndirectCommandRead
+		};
+		vk::MemoryBarrier2 vertexBarrier{
+			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
+			vk::PipelineStageFlagBits2::eVertexInput, vk::AccessFlagBits2::eVertexAttributeRead
+		};
+		std::vector barriers = {drawIndirectBarrier, vertexBarrier};
+		vk::DependencyInfo depInfo{{}, barriers, {}, {}};
+
+		cb.pipelineBarrier2(depInfo);
+
 		vk::Rect2D area{{0, 0}, target->extent()};
 		vk::RenderingAttachmentInfo renderingAttachmentInfo{target->imageView(), target->imageLayout()};
 		std::vector colorAttachments{renderingAttachmentInfo};
@@ -90,7 +111,7 @@ namespace ciallo::rendering
 		std::vector<vk::Buffer> vertexBuffers{m_dotBuffer};
 		cb.bindVertexBuffers(0, vertexBuffers, {0});
 		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
-		cb.draw(4, 1, 0, 0);
+		cb.drawIndirect(m_indirectDrawBuffer, 0, 1, {});
 		cb.endRendering();
 	}
 
@@ -108,7 +129,7 @@ namespace ciallo::rendering
 		vertices.reserve(n);
 		for (float i : views::iota(0, n))
 		{
-			float x = glm::mix(-1.0f, 1.0f, i/n);
+			float x = glm::mix(-1.0f, 1.0f, i / n);
 			float y = x;
 			vertices.push_back({{x, y}, 1.0f, {}});
 		}
@@ -120,20 +141,24 @@ namespace ciallo::rendering
 		m_inputBuffer.uploadLocal(vertices.data(), size);
 	}
 
-	void EquidistantDot::genVertexBuffer(VmaAllocator allocator)
+	void EquidistantDot::genAuxiliaryBuffer(VmaAllocator allocator)
 	{
 		VmaAllocationCreateInfo info{{}, VMA_MEMORY_USAGE_AUTO};
 		constexpr int MAX_DOT = 1024 * 8;
 		auto size = MAX_DOT * sizeof(Vertex);
 		m_dotBuffer = vulkan::Buffer(allocator, info, size,
 		                             vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eStorageBuffer);
+
+		m_indirectDrawBuffer = vulkan::Buffer(allocator, info, sizeof(vk::DrawIndirectCommand),
+		                                      vk::BufferUsageFlagBits::eStorageBuffer |
+		                                      vk::BufferUsageFlagBits::eIndirectBuffer);
 	}
 
 	void EquidistantDot::compute(vk::CommandBuffer cb)
 	{
-		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, *m_computePipelineLayout, 0, m_computeDescriptorSet,
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, *m_compPipelineLayout, 0, m_compDescriptorSet,
 		                      nullptr);
-		cb.bindPipeline(vk::PipelineBindPoint::eCompute, *m_computePipeline);
+		cb.bindPipeline(vk::PipelineBindPoint::eCompute, *m_compPipeline);
 		cb.dispatch(1, 1, 1);
 	}
 }

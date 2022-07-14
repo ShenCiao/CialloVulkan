@@ -46,7 +46,8 @@ namespace ciallo::vulkan
 		vk::PhysicalDeviceFeatures2 physicalDeviceFeatures2{physicalDeviceFeatures};
 
 		vk::PhysicalDeviceVulkan13Features physicalDeviceVulkan13Features{};
-		physicalDeviceVulkan13Features.setDynamicRendering(VK_TRUE);
+		physicalDeviceVulkan13Features.setDynamicRendering(VK_TRUE)
+		                              .setSynchronization2(VK_TRUE);
 
 		vk::StructureChain c(deviceCreateInfo, physicalDeviceFeatures2, physicalDeviceVulkan13Features);
 		m_device = m_physicalDevice.createDeviceUnique(c.get<vk::DeviceCreateInfo>());

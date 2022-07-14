@@ -133,5 +133,17 @@
     <CopyFileToFolders Include="shaders\articulatedProgress.vert.spv">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\equidistantDot.comp.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\equidistantDot.frag.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\equidistantDot.geom.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\equidistantDot.vert.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

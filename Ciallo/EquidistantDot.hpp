@@ -15,28 +15,27 @@ namespace ciallo::rendering
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vulkan::Image* m_target = nullptr;
 
+		vulkan::Buffer m_indirectDrawBuffer;
 		vulkan::Buffer m_dotBuffer;// buffer for rendered quad
 		vulkan::Buffer m_inputBuffer;// buffer for data points input
 
-		vulkan::ShaderModule m_computeShader;
-		vk::UniquePipelineLayout m_computePipelineLayout;
-		vk::UniquePipeline m_computePipeline;
-		vk::UniqueDescriptorSetLayout m_computeDescriptorSetLayout;
-		vk::DescriptorSet m_computeDescriptorSet;
+		vulkan::ShaderModule m_compShader;
+		vk::UniquePipelineLayout m_compPipelineLayout;
+		vk::UniquePipeline m_compPipeline;
+		vk::UniqueDescriptorSetLayout m_compDescriptorSetLayout;
+		vk::DescriptorSet m_compDescriptorSet;
 	public:
 		explicit EquidistantDot(vulkan::Device* device);
-
-		void genPipelineLayout();
 
 		vk::UniquePipeline m_pipeline;
 		void genPipelineDynamic();
 
-		void genComputeDescriptorSet(vk::DescriptorPool pool);
-		void genComputePipeline();
+		void genCompDescriptorSet(vk::DescriptorPool pool);
+		void genCompPipeline();
 
 		void renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target);
 		void genInputBuffer(VmaAllocator allocator);
-		void genVertexBuffer(VmaAllocator allocator);
+		void genAuxiliaryBuffer(VmaAllocator allocator);
 		void compute(vk::CommandBuffer cb);
 	};
 }

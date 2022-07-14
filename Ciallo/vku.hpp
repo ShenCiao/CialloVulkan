@@ -5,7 +5,8 @@
 // Create pipeline and compute pipeline with vk::ShaderModule instead of vku::ShaderModule
 // Add support for dynamic rendering.
 // Delete class Image and Buffer, we use our own.
-// Clean up unused #include and reformat whole code
+// Clean up unused #include and reformat whole code.
+// Add default offset and range to DescriptorUpdater::buffer.
 // -----------------------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1756,7 +1757,7 @@ namespace vku
 		}
 
 		/// Call this to add a new buffer.
-		DescriptorSetUpdater& buffer(vk::Buffer buffer, vk::DeviceSize offset, vk::DeviceSize range)
+		DescriptorSetUpdater& buffer(vk::Buffer buffer, vk::DeviceSize offset = 0, vk::DeviceSize range = VK_WHOLE_SIZE)
 		{
 			if (!descriptorWrites_.empty() && numBuffers_ != bufferInfo_.size() && descriptorWrites_.back().pBufferInfo)
 			{
