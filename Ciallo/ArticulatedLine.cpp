@@ -1,5 +1,5 @@
 #include "pch.hpp"
-#include "ArticulatedProgress.hpp"
+#include "ArticulatedLine.hpp"
 
 #include <glm/glm.hpp>
 
@@ -7,23 +7,23 @@
 
 namespace ciallo::rendering
 {
-	ArticulatedProgress::ArticulatedProgress(vulkan::Device* device): m_device(*device)
+	ArticulatedLine::ArticulatedLine(vulkan::Device* device): m_device(*device)
 	{
-		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex, "./shaders/articulatedProgress.vert.spv");
-		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/articulatedProgress.frag.spv");
-		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry, "./shaders/articulatedProgress.geom.spv");
+		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex, "./shaders/articulatedLine.vert.spv");
+		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/articulatedLine.frag.spv");
+		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry, "./shaders/articulatedLine.geom.spv");
 		genPipelineLayout();
 		genPipelineDynamic();
 		genVertexBuffer(*device);
 	}
 
-	void ArticulatedProgress::genPipelineLayout()
+	void ArticulatedLine::genPipelineLayout()
 	{
 		vku::PipelineLayoutMaker maker;
 		m_pipelineLayout = maker.createUnique(m_device);
 	}
 
-	void ArticulatedProgress::genPipelineDynamic()
+	void ArticulatedLine::genPipelineDynamic()
 	{
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
@@ -41,7 +41,7 @@ namespace ciallo::rendering
 		m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 	}
 
-	void ArticulatedProgress::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
+	void ArticulatedLine::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
 	{
 		vk::Rect2D area{{0, 0}, target->extent()};
 		vk::RenderingAttachmentInfo renderingAttachmentInfo{target->imageView(), target->imageLayout()};
@@ -61,7 +61,7 @@ namespace ciallo::rendering
 		cb.endRendering();
 	}
 
-	void ArticulatedProgress::genVertexBuffer(VmaAllocator allocator)
+	void ArticulatedLine::genVertexBuffer(VmaAllocator allocator)
 	{
 		struct Vertex
 		{

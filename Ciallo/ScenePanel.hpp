@@ -5,7 +5,7 @@
 #include "Device.hpp"
 #include "Image.hpp"
 #include "CanvasRenderer.hpp"
-#include "ArticulatedProgress.hpp"
+#include "ArticulatedLine.hpp"
 
 namespace ciallo::gui
 {

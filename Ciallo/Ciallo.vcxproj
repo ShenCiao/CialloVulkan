@@ -95,7 +95,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="ArticulatedProgress.cpp" />
+    <ClCompile Include="ArticulatedLine.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="Device.cpp" />
@@ -114,7 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
-    <ClInclude Include="ArticulatedProgress.hpp" />
+    <ClInclude Include="ArticulatedLine.hpp" />
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="CanvasRenderer.hpp" />
     <ClInclude Include="Device.hpp" />
@@ -138,20 +138,6 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="shaders\articulatedProgress.frag.spv">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulatedProgress.geom.spv">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulatedProgress.vert.spv">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
-    </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
     <CopyFileToFolders Include="shaders\equidistantDot.comp.spv">
       <FileType>Document</FileType>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
@@ -165,6 +151,20 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
     </CopyFileToFolders>
     <CopyFileToFolders Include="shaders\equidistantDot.vert.spv">
+      <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="shaders\articulatedLine.frag.spv">
+      <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulatedLine.geom.spv">
+      <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulatedLine.vert.spv">
       <FileType>Document</FileType>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
     </CopyFileToFolders>

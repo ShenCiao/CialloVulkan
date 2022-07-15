@@ -6,7 +6,7 @@
 
 namespace ciallo::rendering
 {
-	class ArticulatedProgress
+	class ArticulatedLine
 	{
 		vk::Device m_device;
 		vulkan::ShaderModule m_vertShader;
@@ -18,7 +18,7 @@ namespace ciallo::rendering
 		vk::UniqueFramebuffer m_framebuffer;
 		vulkan::Buffer m_vertBuffer;
 	public:
-		ArticulatedProgress(vulkan::Device* device);
+		explicit ArticulatedLine(vulkan::Device* device);
 
 		void genPipelineLayout();
 

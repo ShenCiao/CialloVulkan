@@ -9,6 +9,7 @@ namespace ciallo::rendering
 	class EquidistantDot
 	{
 		vk::Device m_device;
+		vulkan::ShaderModule m_compShader;
 		vulkan::ShaderModule m_vertShader;
 		vulkan::ShaderModule m_fragShader;
 		vulkan::ShaderModule m_geomShader;
@@ -19,7 +20,6 @@ namespace ciallo::rendering
 		vulkan::Buffer m_dotBuffer;// buffer for rendered quad
 		vulkan::Buffer m_inputBuffer;// buffer for data points input
 
-		vulkan::ShaderModule m_compShader;
 		vk::UniquePipelineLayout m_compPipelineLayout;
 		vk::UniquePipeline m_compPipeline;
 		vk::UniqueDescriptorSetLayout m_compDescriptorSetLayout;

@@ -60,7 +60,7 @@
     <ClCompile Include="TriangleTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ArticulatedProgress.cpp">
+    <ClCompile Include="ArticulatedLine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EquidistantDot.cpp">
@@ -107,7 +107,7 @@
     <ClInclude Include="TriangleTest.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ArticulatedProgress.hpp">
+    <ClInclude Include="ArticulatedLine.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EquidistantDot.hpp">
@@ -116,15 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulatedProgress.frag.spv">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulatedProgress.geom.spv">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="shaders\articulatedProgress.vert.spv">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="shaders\equidistantDot.comp.spv">
@@ -137,6 +128,15 @@
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="shaders\equidistantDot.vert.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulatedLine.vert.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulatedLine.frag.spv">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\articulatedLine.geom.spv">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
   </ItemGroup>
