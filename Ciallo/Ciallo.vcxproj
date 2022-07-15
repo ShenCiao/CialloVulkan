@@ -95,7 +95,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="ArticulatedBrush.cpp" />
     <ClCompile Include="ArticulatedProgress.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
@@ -115,7 +114,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
-    <ClInclude Include="ArticulatedBrush.hpp" />
     <ClInclude Include="ArticulatedProgress.hpp" />
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="CanvasRenderer.hpp" />

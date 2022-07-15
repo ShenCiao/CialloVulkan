@@ -1,38 +1,49 @@
 # Ciallo: Next generation 2D dcc software
 
-> Ciallo～(∠・ω< )⌒★!  anime/cartoon computer graphics.
+> Ciallo～(∠・ω< )⌒★!  Anime/cartoon computer graphics.
 
 Ciallo aims for improving 2d artist's work efficiency and painting experience.
 
 Being different from traditional pixelmap or bezier curve based painting software, polylines/polygons are the first citizen in ciallo. They are rendered with GPU and edited based on some geometry algorithms. Quite a lot of features need to be researched and developed.
 
-Why using polyline? Polyline can approximate any kind of curve, can honestly record stylus/tablet data (bezier curve always try to overfits). And applying the geometry algorithms on polyline is relatively easy.
+Why using polyline? Polyline can approximate any kind of curve, can honestly record stylus/tablet data (bezier curve always try to overfits). And applying geometry algorithms on polyline is relatively easy.
 
-Ciallo is greatly inspired by [blender grease pencil](https://docs.blender.org/manual/en/latest/grease_pencil/introduction.html). I got a lot of help from @Clément Foucault  and @Falk David  when learning about code of grease pencil system. The grease pencil is based on polylines in 3D space and render them on GPU. Though Ciallo uses polylines in lower dimension space, we can utilize the powerful geometry tools only available in 2D space. 
+Ciallo is greatly inspired by [blender grease pencil](https://docs.blender.org/manual/en/latest/grease_pencil/introduction.html). I got a lot of help from @Clément Foucault  and @Falk David  when learning the code of grease pencil system. The grease pencil is based on polylines in 3D space and render them on GPU. Ciallo discard one space dimension, which make it possible to utilize some powerful geometry tools only available on curve in 2D space like 2D arrangements, 2D generalized winding number and 2D Envelopes.
 
-Here are some successful artworks drawn in grease pencil. [GPencil open project](https://cloud.blender.org/p/gallery/5b642e25bf419c1042056fc6) , [Hero](https://www.youtube.com/watch?v=pKmSdY56VtY&t=3s).
+Here are some successful artworks drawn with polyline method (in blender): [GPencil open project](https://cloud.blender.org/p/gallery/5b642e25bf419c1042056fc6) and several statistics on the number of vertices and strokes from those artworks.
 
-## Innovative features preview
+## Features preview
 
-- GPU powered brush engine
 - Real time "label to fill"
-- Line binding (parenting) for editing and animating
-
-### GPU powered brush engine
-
-In July 2022, two engines are made: _dot engine_, _articulated engine_. Dot engine evenly place texture quad along the polyline and articulated engine render the polyline as if an articulated arm. Their math/geometry behind the scene are pretty straight forward except for airbrush generated from articulated engine. It needs bachelor level of calculus to clarify the whole ideas. I've made a draft to explain the brush in Jan 2022 but it's definitely too messy to be read. I'll try to clean it up someday. If you are literally interested in how to render an airbrush stroke on a bezier curve (which takes [8 steps](https://www.techwalla.com/articles/how-to-airbrush-in-illustrator) in illustrator), have a try on the draft.
+- Brush engines powered by GPU
+- Line binding (parenting) for stroke editing and animating
 
 ### Real time "label to fill"
 
-Automated coloring process (wrapping up the [CGAL 2D Arrangement](https://doc.cgal.org/latest/Arrangement_on_surface_2/index.html) for users):
+Automate coloring process (wrapping up the [CGAL 2D Arrangement](https://doc.cgal.org/latest/Arrangement_on_surface_2/index.html) for users):
 
 
 
-In animation industry, artists use labeling lines to indicate how to fill colors. In the picture above, blue means shadow and red means highlight. Ciallo utilizes these labeling lines and generate polygon data for GPU to render instead of flood fill on pixelmap. It usually takes less than 1ms on an pre-arranged data sets. If you want to know some statistic on polyline/polygon based artwork's data size (number of lines and vertices), here is the [link].
+In animation industry, artists use labeling lines to indicate how to fill colors. In the picture above, blue strokes means shadow and red strokes means highlight. Ciallo will utilize these labeling strokes and query polygons enclose those labels (these polygons are called face). Then send the polygon data to GPU for rendering instead of flood fill on pixelmap. It usually takes less than 1ms on a pre-arranged data set. If you want to know more about statistic on polyline/polygon based artwork's data size (number of lines and vertices), here is the [link].
 
-Similar feature offered by Krita is called "[colorize mask](https://docs.krita.org/en/reference_manual/tools/colorize_mask.html)". But it seems not fast enough for production and hard to edit the content on canvas since it's pixelmap. Take a look at [this video](https://www.youtube.com/watch?v=HQdx6H9BIGs) if you are interested in the problem of colorize mask.
+Similar feature offered by Krita is called "[colorize mask](https://docs.krita.org/en/reference_manual/tools/colorize_mask.html)". But it seems not fast enough for production and hard to edit the content on canvas since it's based on pixelmap. Take a look at [this video](https://www.youtube.com/watch?v=HQdx6H9BIGs) if you are interested in the problem of colorize mask.
 
-In combination with line binding, users can animate the scene with color at great ease.
+In combination with line binding, users can animate their artworks at great ease. When modifying the label strokes and strokes enclose them, faces generated from strokes are updated automatically.
+
+### Brush engines powered by GPU 
+
+Though inspired by blender grease pencil, the rendering method in Ciallo is quite different from grease pencil. The new method fix some fatal drawbacks and will aim for flexibility instead of performance.
+
+In July 2022, two engines are made: _Equidistant Dot_ and _Articulated Line_. As the name imply, _equidistant dot_ evenly place texture quad along the polyline. _Articulated line_ render a polyline as if an articulated arm. Here are some comparisons between them:
+
+| Features                | Equidistant Dot                                              | Articulated Line                                             |
+| ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Great performance       | Yes, better than methods on CPU.                             | Yes, better than Equidistant Dot in theory.                  |
+| Customization by users  | Easy. Procedural texture is not mandatory.                   | Hard. Procedural texture is mandatory. Need experience in shader development or shader graph node system. |
+| Robustness to ill cases | One ill case would be pretty common (unevenly distributed vertices) and it could hit hard on rendering performance. Need help from editor to avoid it. | Better than Equidistant Dot. Pretty few ill cases I've found and they rarely happen in practice. |
+| Limitations on vertices | Total amount of vertices input are limited be *maximum local workgroup size* (1024) in compute shader. Total amount of dots generated are limited by buffer size set by developers. | No limits on regular usage.                                  |
+
+Their computes about geometry are pretty straight forward except for airbrush generated from articulated line. It needs calculus to clarify the whole idea about solving "the joint problem". I've made a draft to explain the brush in Jan. 2022 but it's definitely too messy to read. I'll try to clean it up someday. Unless you are ultra interested in rendering an airbrush stroke on a bezier curve (which takes [8 steps in illustrator](https://www.techwalla.com/articles/how-to-airbrush-in-illustrator)), I do not recommend to read it.
 
 ### Line binding for editing and animating
 
