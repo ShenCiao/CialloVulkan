@@ -6,29 +6,33 @@
 
 namespace ciallo::vulkan
 {
-	// Suppose to support 2d image only, may add multiple layers support
+	
+	/**
+	 * \brief 2D image. Copy constructor/assignment only allocate memory, do not copy content.
+	 */
 	class Image
 	{
 	private:
-		uint32_t m_width;
-		uint32_t m_height;
-		vk::Format m_format;
-		vk::ImageLayout m_layout;
-		VmaAllocator m_allocator;
-		VmaAllocation m_allocation;
-		vk::Image m_image;
+		uint32_t m_width = 0u;
+		uint32_t m_height = 0u;
+		vk::Format m_format = vk::Format::eUndefined;
+		vk::ImageLayout m_layout = vk::ImageLayout::eUndefined;
+		VmaAllocator m_allocator = nullptr;
+		VmaAllocation m_allocation = nullptr;
+		vk::Image m_image = VK_NULL_HANDLE;
 		std::unique_ptr<Buffer> m_stagingBuffer;
 		vk::UniqueImageView m_imageView;
+		vk::ImageUsageFlags m_usage;
 	public:
-		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, uint32_t width, uint32_t height, vk::ImageUsageFlags usage);
+		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height, vk::ImageUsageFlags usage);
 		~Image();
 
-		// TODO: better layout changing and turn it into a default creatable object like vulkan::buffer.
-		Image() = delete;
-		Image(const Image& other) = delete;
-		Image(Image&& other) = default;
-		Image& operator=(const Image& other) = delete;
-		Image& operator=(Image&& other) = default;
+		// TODO: better layout changing, customized image flags
+		Image() = default;
+		Image(const Image& other);
+		Image(Image&& other) noexcept;
+		Image& operator=(const Image& other);
+		Image& operator=(Image&& other) noexcept;
 		operator vk::Image() const {return m_image;}
 	public:
 		void changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout,
@@ -78,6 +82,6 @@ namespace ciallo::vulkan
 		vk::Extent2D extent() const
 		{
 			return {m_width, m_height};
-		};
+		}
 	};
 }

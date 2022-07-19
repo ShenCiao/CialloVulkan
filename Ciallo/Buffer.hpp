@@ -25,6 +25,7 @@ namespace ciallo::vulkan
 
 		operator vk::Buffer() const { return m_buffer; }
 
+		// TODO: make it copyable like image
 		Buffer() = default;
 		Buffer(const Buffer& other) = delete;
 		Buffer(Buffer&& other) noexcept;

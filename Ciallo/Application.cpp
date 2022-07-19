@@ -6,51 +6,54 @@
 #include "Device.hpp"
 #include "MainPassRenderer.hpp"
 #include "ScenePanel.hpp"
+#include "BrushPool.hpp"
 
 void ciallo::Application::run() const
 {
-	auto w = std::make_unique<vulkan::Window>(1000, 1000, "hi");
+	auto win = std::make_unique<vulkan::Window>(1000, 1000, "hi");
 	vulkan::Instance::addExtensions(vulkan::Window::getRequiredInstanceExtensions());
 	auto inst = std::make_shared<vulkan::Instance>();
 	int physicalDeviceIndex = vulkan::Device::pickPhysicalDevice(*inst);
-	auto d = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
+	auto device = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
+	auto brushPool = std::make_unique<BrushPool>();
+	brushPool->loadPresetBrushes(device.get());
 
+	win->setInstance(inst);
+	win->setDevice(device);
+	win->initResources();
 
-	w->setInstance(inst);
-	w->setDevice(d);
-	w->initResources();
-
-	vk::UniqueSemaphore presentImageAvailableSemaphore = d->device().createSemaphoreUnique({});
-	vulkan::MainPassRenderer mainPassRenderer(w.get());
-	w->show();
-	vk::CommandBuffer cb = d->createCommandBuffer();
+	vk::UniqueSemaphore presentImageAvailableSemaphore = device->device().createSemaphoreUnique({});
+	vulkan::MainPassRenderer mainPassRenderer(win.get());
+	win->show();
+	vk::CommandBuffer cb = device->createCommandBuffer();
 
 	gui::ScenePanel sp;
 
-	d->executeImmediately([&](vk::CommandBuffer tmpcb)
+	device->executeImmediately([&](vk::CommandBuffer tmpcb)
 	{
-		sp.genSampler(*d);
-		sp.genCanvas(d.get(), tmpcb);
+		sp.genSampler(*device);
+		sp.genCanvas(device.get(), tmpcb);
 	});
 
-	d->device().waitIdle();
+	device->device().waitIdle();
 
-	while (!w->shouldClose())
+	while (!win->shouldClose())
 	{
-		w->pollEvents();
+		win->pollEvents();
 		vk::Result _;
-		_ = d->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
-		                              std::numeric_limits<uint64_t>::max());
+		_ = device->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
+		                                   std::numeric_limits<uint64_t>::max());
 
 		uint32_t index;
 		try
 		{
-			index = d->device().acquireNextImageKHR(w->swapchain(), UINT64_MAX, *presentImageAvailableSemaphore,
-			                                        VK_NULL_HANDLE).value;
+			index = device->device().acquireNextImageKHR(win->swapchain(), UINT64_MAX,
+			                                             *presentImageAvailableSemaphore,
+			                                             VK_NULL_HANDLE).value;
 		}
 		catch (vk::OutOfDateKHRError&)
 		{
-			w->onWindowResize();
+			win->onWindowResize();
 			mainPassRenderer.genFramebuffers();
 			continue;
 		}
@@ -58,18 +61,17 @@ void ciallo::Application::run() const
 		{
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
-		d->device().resetFences(mainPassRenderer.renderingCompleteFence());
+		device->device().resetFences(mainPassRenderer.renderingCompleteFence());
 
 		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr};
 		cb.begin(cbbi);
 		ImGui_ImplVulkan_NewFrame();
-		w->imguiNewFrame();
+		win->imguiNewFrame();
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// -----------------------------------------------------------------------------
 		if (ImGui::BeginMainMenuBar())
 		{
-			
 			ImGui::EndMainMenuBar();
 		}
 
@@ -100,9 +102,9 @@ void ciallo::Application::run() const
 			cb,
 			submitSignalSemaphores
 		};
-		d->queue().submit(si, mainPassRenderer.renderingCompleteFence());
+		device->queue().submit(si, mainPassRenderer.renderingCompleteFence());
 
-		auto swapchain = w->swapchain();
+		auto swapchain = win->swapchain();
 		vk::PresentInfoKHR pi{
 			submitSignalSemaphores,
 			swapchain,
@@ -112,11 +114,11 @@ void ciallo::Application::run() const
 
 		try
 		{
-			_ = d->queue().presentKHR(pi);
+			_ = device->queue().presentKHR(pi);
 		}
 		catch (vk::OutOfDateKHRError&)
 		{
-			w->onWindowResize();
+			win->onWindowResize();
 			mainPassRenderer.genFramebuffers();
 			continue;
 		}
@@ -126,7 +128,7 @@ void ciallo::Application::run() const
 		}
 	}
 
-	d->device().waitIdle();
+	device->device().waitIdle();
 }
 
 void ciallo::Application::loadSettings()

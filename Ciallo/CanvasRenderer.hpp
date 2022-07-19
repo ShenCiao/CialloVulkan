@@ -3,6 +3,7 @@
 #include "Device.hpp"
 #include "EquidistantDot.hpp"
 #include "Image.hpp"
+#include <glm/glm.hpp>
 
 namespace ciallo::rendering
 {
@@ -13,7 +14,7 @@ namespace ciallo::rendering
 		std::unique_ptr<vulkan::Buffer> m_uniformFrag;
 		std::unique_ptr<rendering::ArticulatedLine> m_articulated;
 		std::unique_ptr<rendering::EquidistantDot> m_equidistantDot;
-		
+		vulkan::Buffer m_canvasViewProj;
 	public:
 		explicit CanvasRenderer(vulkan::Device* device)
 		{

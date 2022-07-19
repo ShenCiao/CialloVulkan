@@ -66,6 +66,15 @@
     <ClCompile Include="EquidistantDot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BrushCabinet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BrushPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BezierTransformer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
@@ -111,6 +120,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EquidistantDot.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushCabinet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushPool.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrincipleStrokeComponents.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BezierTransformer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bezier.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryPrimitives.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

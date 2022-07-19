@@ -5,8 +5,8 @@
 
 namespace ciallo::vulkan
 {
-	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, uint32_t width, uint32_t height,
-	             vk::ImageUsageFlags usage)
+	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height,
+	             vk::ImageUsageFlags usage): m_width(width), m_height(height), m_allocator(allocator), m_usage(usage)
 	{
 		vk::ImageCreateInfo info{};
 		info.imageType = vk::ImageType::e2D;
@@ -21,19 +21,58 @@ namespace ciallo::vulkan
 		info.sharingMode = vk::SharingMode::eExclusive;
 		info.initialLayout = vk::ImageLayout::eUndefined;
 
-		m_allocator = allocator;
-		m_width = info.extent.width;
-		m_height = info.extent.height;
 		m_layout = info.initialLayout;
 		m_format = info.format;
-		genImage(allocator, allocInfo, info);
+		genImage(allocator, allocCreateInfo, info);
 		genImageView();
 	}
 
 	Image::~Image()
 	{
-		if(m_allocator)
+		if (m_allocator && m_image && m_allocation)
 			vmaDestroyImage(m_allocator, m_image, m_allocation);
+	}
+
+	Image::Image(const Image& other)
+	{
+		*this = other;
+	}
+
+	Image::Image(Image&& other) noexcept
+	{
+		*this = std::move(other);
+	}
+
+	Image& Image::operator=(const Image& other)
+	{
+		if(!other.m_allocator) // other is default constructed, default construct on this
+		{
+			*this = Image();
+			return *this;
+		}
+		
+		VmaAllocationInfo allocInfo;
+		vmaGetAllocationInfo(other.m_allocator, other.m_allocation, &allocInfo);
+		VmaAllocationCreateInfo allocCreateInfo{};
+		allocCreateInfo.memoryTypeBits = 1u << allocInfo.memoryType;
+
+		// Call move assignment operator.After swapping, already exist object get destructed in temp object.
+		*this = Image(other.m_allocator, allocCreateInfo, other.m_width, other.m_height, other.m_usage);
+		return *this;
+	}
+
+	Image& Image::operator=(Image&& other) noexcept
+	{
+		std::swap(m_width, other.m_width);
+		std::swap(m_height, other.m_height);
+		std::swap(m_layout, other.m_layout);
+		std::swap(m_allocator, other.m_allocator);
+		std::swap(m_allocation, other.m_allocation);
+		std::swap(m_image, other.m_image);
+		std::swap(m_stagingBuffer, other.m_stagingBuffer);
+		std::swap(m_imageView, other.m_imageView);
+		std::swap(m_usage, other.m_usage);
+		return *this;
 	}
 
 	/**
