@@ -16,3 +16,5 @@ namespace views = ranges::views;
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
 #include <entt/entt.hpp>
+
+#include "GeometryPrimitives.hpp"

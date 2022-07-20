@@ -2,6 +2,8 @@
 
 > Ciallo～(∠・ω< )⌒★!  Anime/Cartoon/2D computer graphics.
 
+[TOC]
+
 ## Introduction
 
 Ciallo aims for improving 2D artist's work efficiency with modern GPU and computational geometry. 
@@ -12,30 +14,32 @@ Different from traditional pixelmap or bezier curve based painting software, pol
 
 Why using polyline? Polylines can approximate any kind of curve, can honestly record stylus/tablet data (bezier curve always try to underfit). And applying geometry algorithms on polyline is relatively easy. 
 
-Ciallo is greatly inspired by [Blender Grease Pencil](https://docs.blender.org/manual/en/latest/grease_pencil/introduction.html). It's a successful toolsets based on polyline inside Blender. Here are some successful artworks drawn with polyline method (in blender): [GPencil open project](https://cloud.blender.org/p/gallery/5b642e25bf419c1042056fc6).
+Ciallo is greatly inspired by [Blender Grease Pencil](https://docs.blender.org/manual/en/latest/grease_pencil/introduction.html). It's a wonderful toolsets based on polyline in 3D space inside Blender. Here are some successful artworks drawn with polyline method (in blender): [GPencil open project](https://cloud.blender.org/p/gallery/5b642e25bf419c1042056fc6).
 
-For now, Ciallo is more of a personal research project. But I literally wish it could shine as an free open-source software. Artists would love to paint/animate their artworks and researchers could easily develop and test their 2D algorithms in a real production environment. Help me out by staring on this project and follow up the evolution of 2D computer graphics.
+For now, Ciallo is more of a personal research project. But I literally wish it could shine as an free open-source software like Krita or Blender. Artists would love to paint/animate their artworks and researchers could easily develop and test their 2D geometry/rendering algorithm in a real production environment. Help me out by staring on this project and follow up the evolution of 2D computer graphics.
 
 ## Feature Previews
 
 - Real time "label to fill"
 - Brush engines powered by GPU
-- Curve binding (parenting) for stroke editing and animating
+- Curve binding for stroke editing and animating
 
 ### Real time "label to fill"
 
 <figure>
-    <figcaption align = "center"><b>Fig. - Screenshot from <i>SHIROBAKO</i>. It's an anime about anime making.</b></figcaption>
-     <p align="center">
-    <img src=".\articles\autoColoringFromShriobako.jpg" width="640"/>
+    <p align="center"> <img src="./articles/autoColoringFromShriobako.jpg" width = 640/></p>
+    <p align="center">
+    <figcaption>Fig. - Screenshot from <i>SHIROBAKO</i>. It's an anime about anime making.</figcaption>
     </p>
 </figure>
 
+
+
 In animation industry, artists use labeling strokes to indicate how to fill colors. For example, on the upper part of the picture, blue strokes inside the character indicate fill in shadows, red strokes indicate highlights, green or yellow indicate contours need to be filled in combination with other strokes. 
 
-Ciallo will utilize these labeling strokes. In computational geometry, [point-location problem](https://en.wikipedia.org/wiki/Point_location) is well researched and widely used in GIS and motion planning. Apparently, color filling in 2D artworks is exactly a point-location problem. 
+Ciallo will utilize these labeling strokes for automating color. In computational geometry, [point-location problem](https://en.wikipedia.org/wiki/Point_location) is well researched and widely used in GIS and motion planning. Apparently, color filling in 2D artworks is exactly a point-location problem. 
 
-Color filling is separated into three steps. First, artist paint on canvas and meanwhile arrange the polyline data in the backgrond. Second, query those labeling curves location and fetch face data (faces are polygons generated from artworks). Third, send face data to GPU for rendering a colored polygon. 
+Color filling is separated into three steps. First, artist paint on canvas and meanwhile arrange the polyline data in the background. Second, query those labeling curves location and fetch face data (faces are polygons generated from artworks). Third, send face data to GPU for rendering a colored polygon. 
 
 Comparing to flood fill on high resolution pixelmap, it can be 100~1000 times faster and the final images' resolution can be scaled up freely. You may intertest in statistics on some exiting artworks, number of polylines and points are critical to the performance of 2D arrangements. 
 
@@ -45,9 +49,11 @@ In combination with line binding, users can animate their artworks at great ease
 
 ### Brush engines powered by GPU
 
-Polyline/polygon in 2D space is the counterpart of mesh in 3D space. Real time rendering on polyline could potentially save GPU from fetching GBs of texture or video. It'll make large scale animation and real time lighting in 2D games possible. And help to make better Live2D models (learn more) **紧急TODO**.
+<img src="C:\dev\Ciallo\articles\naiive brush engine.jpg" alt="naiive brush engine" style="zoom:50%;" />
 
-Inside Ciallo, "label to fill" will eat up the whole resource of a CPU thread/core and line editing will operation on a lot of points simultaneously
+Polyline/polygon in 2D space is the counterpart of mesh in 3D space. Real time rendering on polyline could potentially save GPU from fetching GBs of texture or video. It'll make large scale animation and real time lighting in 2D games possible. And help to make better Live2D models (learn more).
+
+Inside Ciallo, "label to fill" will eat up the whole resource of a CPU thread/core. Line editing will operation on a lot of points simultaneously. They are both heavy systems on CPU. For better user experience, it is necessary to render strokes on GPU .
 
 Though inspired by blender grease pencil, the rendering method in Ciallo is quite different from grease pencil. The new method fix some fatal drawbacks and aim for flexibility instead of performance.
 
@@ -60,7 +66,7 @@ In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated 
 | Robustness to ill cases | One ill case would be pretty common (unevenly distributed vertices) and it would hit hard on rendering performance. Need help from editor to avoid it. | Better than Equidistant Dot. Pretty few ill cases I've found and they rarely happen in practice. |
 | Limitations on vertices | Total amount of vertices input are limited be *maximum local workgroup size* (1024) in compute shader. Total amount of dots generated are limited by buffer size set by developers. | No limits on regular usage.                                  |
 
-Their computes about geometry are pretty straight forward except for airbrush generated from articulated line. It needs calculus to clarify the whole idea about solving "the joint problem". I've made a draft to explain the brush in Jan. 2022 but it's definitely too messy to read. I'll try to clean it up someday. Unless you are ultra interested in rendering an airbrush stroke on a bezier curve (which takes [8 steps in illustrator](https://www.techwalla.com/articles/how-to-airbrush-in-illustrator)), I do not recommend to read it.
+Their computes about geometry are pretty straight forward except for airbrush generated from articulated line. It needs calculus to clarify the whole idea about solving "the joint problem". I've made [a draft to explain the brush](.\articles\ContinuousAirbrushStrokeRendering.pdf) in Jan. 2022 but it's definitely too messy to read. I'll try to clean it up someday. Unless you are ultra interested in rendering an airbrush stroke on a bezier curve (which takes [8 steps in illustrator](https://www.techwalla.com/articles/how-to-airbrush-in-illustrator)), I do not recommend to read it carefully.
 
 ### Line binding for editing and animating
 
@@ -68,12 +74,24 @@ Polylines are hard to edit. So Ciallo allows users to "bind" a polyline upon bez
 
 <figure>
     <p align="center"> <img src=".\articles\strokeManipulation.gif"/></p>
-    <figcaption align = "center"><b>Fig. - Screenshot from <i>StrokeStrip: Joint Parameterization and Fitting of Stroke Clusters</i>.</b></figcaption>
+    <p align="center"> 
+    <figcaption>Fig. - Screenshot from <i>StrokeStrip: Joint Parameterization and Fitting of Stroke Clusters</i>.</figcaption>
+    </p>
 </figure>
 
 The polyline keeps noise information, meanwhile bezier curve helps to edit polyline's overall shapes. When it comes to animating, bezier curve can make animation like bones in 3D after binding, which lets 2D artists reuse their data within stroke level.
 
-Not just bezier curve, a lot of geometry tools may potentially be able to apply on polyline editing. For example, by binding a group of polyline into an oval, artist can easily animate flush on face by modifying the oval. It's cool to turn your knowledge of computational geometry, classical differential geometry, shape analysis, topology, and any other geometry areas still trying to keep intuitions, into tools can be used by artists. (I'm not sure if wavelets were used for analyzing polyline shapes. Is it a hot spot 20 years ago? Tell me more if you know about those research.) 
+Not just bezier curve, a lot of geometry tools may potentially be able to apply on polyline editing. For example, by binding a group of polyline into an oval, artist can easily animate flush on face by modifying the oval.
+
+## Trinity
+
+Each individual feature above doesn't make too much sense for end users: 
+
+- Label to fill? Clicking around with paint bucket tool is convenient enough;
+- GPU brush engines? Why bothering with very few brushes? There are so many seasoned brushes in Photoshop, Clip Studio Paint, Affinity or Krita.
+- Curve binding? Just use a bezier curve vector software like Illustrator or Inkscape.
+
+Only the integration of these three can make a brand new experience for users. Star on Ciallo and see more on this amazing toolset in the future.
 
 ## Working Progress
 
@@ -88,15 +106,33 @@ Not just bezier curve, a lot of geometry tools may potentially be able to apply 
 
 ## How to Compile
 
+Ciallo is not ready for everybody to participate in yet.
+
 ### Windows
 
 - Download Vulkan SDK.
-- Download vcpkg and integrate.
+- Pull vcpkg and integrate.
 - Pull the codebase and run Ciallo.sln with visual studio.
+
+### External Dependencies
+
+- Rendering
+  - Vulkan
+  - Vulkan Memory Allocator
+  - Vookoo: It's a thin wrapper on Vulkan. Ciallo use it for fast prototyping vulkan pipeline.
+- GUI
+  - Dear ImGui
+  - ImPlot
+- Coding Patterns
+  - Entt: ECS and event system. Ciallo use ECS for writing data-operation-separated code rather than high performance. (Polylines are basically born cache friendly.)
+  - range-v3
+- Geometry and algebra
+  - CGAL
+  - GLM
 
 ## Other Potential Usage
 
-- Help AAA games suffering from texture loading.
+- Help AAA games suffering from tens of GBs of texture loading.
 - Offer diverse line and polygon rendering solution for UI frameworks.
 
 ## Inspired by Blender Grease Pencil

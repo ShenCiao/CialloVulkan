@@ -54,7 +54,7 @@ void main(){
     }
     // Prefix sum done! For now segmentLengths is the distance from the starting point of polyline
 
-    float dotDistance = 0.5;
+    float dotDistance = 0.02;
     
     // Only invocation id within [0, points.length()) supposed to be dealed with
     if (id != 0 && id < points.length()) {

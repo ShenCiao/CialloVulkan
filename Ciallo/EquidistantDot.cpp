@@ -123,13 +123,15 @@ namespace ciallo::rendering
 	void EquidistantDot::genInputBuffer(VmaAllocator allocator)
 	{
 		std::vector<Vertex> vertices{};
-		int n = 16;
+		int n = 32;
 		vertices.reserve(n);
-		for (float i : views::iota(0, n))
+		for (int i : views::iota(0, n))
 		{
-			float x = glm::mix(-1.0f, 0.5f, i / n);
-			float y = x;
-			vertices.push_back({{x, y}, 1.0f, {}});
+			auto t = static_cast<float>(i)/n;
+			float x = glm::mix(-0.9f, 0.9f, t);
+			float y = 0.3f * glm::sin(2*t*glm::pi<float>());
+			float p = t;
+			vertices.push_back({{x, y}, p, {}});
 		}
 
 
