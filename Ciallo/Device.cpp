@@ -45,11 +45,14 @@ namespace ciallo::vulkan
 		                      .setShaderClipDistance(VK_TRUE);
 		vk::PhysicalDeviceFeatures2 physicalDeviceFeatures2{physicalDeviceFeatures};
 
-		vk::PhysicalDeviceVulkan13Features physicalDeviceVulkan13Features{};
-		physicalDeviceVulkan13Features.setDynamicRendering(VK_TRUE)
-		                              .setSynchronization2(VK_TRUE);
+		vk::PhysicalDeviceVulkan12Features vulkan12Features{};
+		vulkan12Features.setUniformBufferStandardLayout(VK_TRUE);
 
-		vk::StructureChain c(deviceCreateInfo, physicalDeviceFeatures2, physicalDeviceVulkan13Features);
+		vk::PhysicalDeviceVulkan13Features vulkan13Features{};
+		vulkan13Features.setDynamicRendering(VK_TRUE)
+		                .setSynchronization2(VK_TRUE);
+
+		vk::StructureChain c(deviceCreateInfo, physicalDeviceFeatures2, vulkan13Features);
 		m_device = m_physicalDevice.createDeviceUnique(c.get<vk::DeviceCreateInfo>());
 	}
 

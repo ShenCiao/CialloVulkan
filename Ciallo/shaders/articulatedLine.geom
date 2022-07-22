@@ -12,7 +12,7 @@ layout(location = 3) out vec2 p;
 layout(location = 4) out float width;
 
 void main(){
-    float w = 0.05;
+    float w = 0.02;
     vec4 v01 = gl_in[1].gl_Position - gl_in[0].gl_Position;
     vec2 nv = normalize(v01.xy);
     vec2 n = vec2(-nv.y, nv.x);

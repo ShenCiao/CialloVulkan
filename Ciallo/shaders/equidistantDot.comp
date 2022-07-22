@@ -4,18 +4,19 @@
 layout(local_size_x = 1024) in;
 
 
-struct Point {
+struct Vertex {
     vec2 pos;
-    float pressure;
-    float _pad0;
+    vec2 _pad0;
+    vec3 color;
+    float _pad1;
 };
 
 layout(std430, binding = 0) buffer Input{
-    Point[] points;
+    Vertex[] inVertices;
 };
 
 layout(std430, binding = 1) buffer Output{
-    Point[] dots;
+    Vertex[] outVertices;
 };
 
 layout(std430, binding = 2) buffer DrawIndirectCommand{
@@ -30,8 +31,8 @@ shared uint n_totDots;
 
 void main(){
     uint id = gl_LocalInvocationID.x;
-    vec2 p0 = points[id].pos;
-    vec2 p1 = id == 0 ? p0:points[id - 1].pos;
+    vec2 p0 = inVertices[id].pos;
+    vec2 p1 = id == 0 ? p0:inVertices[id - 1].pos;
     // length of each segment
     float curLength = distance(p0, p1);
     segmentLengths[id] = curLength;
@@ -54,37 +55,44 @@ void main(){
     }
     // Prefix sum done! For now segmentLengths is the distance from the starting point of polyline
 
+    // if(id < inVertices.length()){
+    //     debugPrintfEXT("pos: %.2f %.2f", inVertices[id].pos[0], inVertices[id].pos[1]);
+    //     debugPrintfEXT("color: %.2f %.2f %.2f", inVertices[id].color[0], inVertices[id].color[1], inVertices[id].color[2]);
+    // }
+
     float dotDistance = 0.02;
     
-    // Only invocation id within [0, points.length()) supposed to be dealed with
-    if (id != 0 && id < points.length()) {
+    // Only invocation id within [0, inVertices.length()) supposed to be dealed with
+    if (id != 0 && id < inVertices.length()) {
         float tDistance = dotDistance - mod(segmentLengths[id - 1], dotDistance);
-        uint idDot = uint( segmentLengths[id - 1]/dotDistance );
+        uint idOut = uint( segmentLengths[id - 1]/dotDistance );
 
         while (tDistance + segmentLengths[id - 1] < segmentLengths[id]){
-            idDot += 1;
+            idOut += 1;
             float t = tDistance/curLength;
             // interpolate everything with t value
-            dots[idDot].pos = mix(points[id-1].pos, points[id].pos, t);
-            dots[idDot].pressure = mix(points[id-1].pressure, points[id].pressure, t);
+            outVertices[idOut].pos = mix(inVertices[id-1].pos, inVertices[id].pos, t);
+            outVertices[idOut].color = mix(inVertices[id-1].color, inVertices[id].color, t);
 
             tDistance += dotDistance;
         }
 
-        if (id == points.length() - 1) // endpoint of poyline
+        if (id == inVertices.length() - 1) // endpoint of poyline
         {
-            // pad one dot at the end of stroke for direction
-            draw.vertexCount = idDot+1; 
-            dots[idDot+1].pos = dots[idDot].pos + points[id].pos - points[id-1].pos;
+            // pad one dot at the end of stroke
+            
+            draw.vertexCount = idOut+2; 
+            debugPrintfEXT("idOut: %d", draw.vertexCount);
+            outVertices[idOut+1].pos = outVertices[idOut].pos + inVertices[id].pos - inVertices[id-1].pos;
+            outVertices[idOut+1].color = outVertices[idOut].color;
         }
     }
     else if(id == 0){
-        dots[0].pos = points[0].pos;
-        dots[0].pressure = points[0].pressure;
+        outVertices[0].pos = inVertices[0].pos;
+        outVertices[0].color = inVertices[0].color;
 
         draw.instanceCount = 1;
         draw.firstVertex = 0;
         draw.firstInstance = 0;
     }
-
 }

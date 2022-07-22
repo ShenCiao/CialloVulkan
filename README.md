@@ -2,8 +2,6 @@
 
 > Ciallo～(∠・ω< )⌒★!  Anime/Cartoon/2D computer graphics.
 
-[TOC]
-
 ## Introduction
 
 Ciallo aims for improving 2D artist's work efficiency with modern GPU and computational geometry. 
@@ -16,7 +14,7 @@ Why using polyline? Polylines can approximate any kind of curve, can honestly re
 
 Ciallo is greatly inspired by [Blender Grease Pencil](https://docs.blender.org/manual/en/latest/grease_pencil/introduction.html). It's a wonderful toolsets based on polyline in 3D space inside Blender. Here are some successful artworks drawn with polyline method (in blender): [GPencil open project](https://cloud.blender.org/p/gallery/5b642e25bf419c1042056fc6).
 
-For now, Ciallo is more of a personal research project. But I literally wish it could shine as an free open-source software like Krita or Blender. Artists would love to paint/animate their artworks and researchers could easily develop and test their 2D geometry/rendering algorithm in a real production environment. Help me out by staring on this project and follow up the evolution of 2D computer graphics.
+For now, Ciallo is more of a personal research project. But I literally wish it could shine as an free open-source software. Artists would love to paint/animate their artworks and researchers could easily develop and test their 2D geometry/rendering algorithm in a real production environment. Help me out by staring on this project and follow up the evolution of 2D computer graphics.
 
 ## Feature Previews
 
@@ -53,7 +51,7 @@ In combination with line binding, users can animate their artworks at great ease
 
 Polyline/polygon in 2D space is the counterpart of mesh in 3D space. Real time rendering on polyline could potentially save GPU from fetching GBs of texture or video. It'll make large scale animation and real time lighting in 2D games possible. And help to make better Live2D models (learn more).
 
-Inside Ciallo, "label to fill" will eat up the whole resource of a CPU thread/core. Line editing will operation on a lot of points simultaneously. They are both heavy systems on CPU. For better user experience, it is necessary to render strokes on GPU .
+Inside Ciallo, "label to fill" will eat up the whole resource of a CPU core. Line editing will operation on a lot of points simultaneously. They both need heavy computation on CPU. For better user experience, it is necessary to render strokes on GPU.
 
 Though inspired by blender grease pencil, the rendering method in Ciallo is quite different from grease pencil. The new method fix some fatal drawbacks and aim for flexibility instead of performance.
 
@@ -87,11 +85,11 @@ Not just bezier curve, a lot of geometry tools may potentially be able to apply 
 
 Each individual feature above doesn't make too much sense for end users: 
 
-- Label to fill? Clicking around with paint bucket tool is convenient enough;
-- GPU brush engines? Why bothering with very few brushes? There are so many seasoned brushes in Photoshop, Clip Studio Paint, Affinity or Krita.
-- Curve binding? Just use a bezier curve vector software like Illustrator or Inkscape.
+>- Label to fill? Clicking around with paint bucket tool is convenient enough;
+>- GPU brush engines? Why bothering with very few brushes? There are so many seasoned brushes in Photoshop, Clip Studio Paint, Affinity or Krita.
+>- Curve binding? Just use a bezier curve vector software like Illustrator or Inkscape.
 
-Only the integration of these three can make a brand new experience for users. Star on Ciallo and see more on this amazing toolset in the future.
+Only the integration of above three features can make a brand new experience for users. Star on Ciallo and see more on this amazing toolset in the future.
 
 ## Working Progress
 
@@ -106,7 +104,7 @@ Only the integration of these three can make a brand new experience for users. S
 
 ## How to Compile
 
-Ciallo is not ready for everybody to participate in yet.
+Take my great appreciation for your willingness to help on development. But Ciallo is not ready for everybody to participate in yet. Contact me if you have profound knowledge in one of these areas: DCC/paint software architecture, blender grease pencil, computational geometry, shader graph/node system.
 
 ### Windows
 
@@ -119,12 +117,12 @@ Ciallo is not ready for everybody to participate in yet.
 - Rendering
   - Vulkan
   - Vulkan Memory Allocator
-  - Vookoo: It's a thin wrapper on Vulkan. Ciallo use it for fast prototyping vulkan pipeline.
+  - Vookoo - It's a thin wrapper on Vulkan. Ciallo use it for fast prototyping vulkan pipeline.
 - GUI
   - Dear ImGui
   - ImPlot
 - Coding Patterns
-  - Entt: ECS and event system. Ciallo use ECS for writing data-operation-separated code rather than high performance. (Polylines are basically born cache friendly.)
+  - Entt - ECS and event system. Ciallo use ECS for writing data-operation-separated code rather than high performance. (Polylines are basically born cache friendly.)
   - range-v3
 - Geometry and algebra
   - CGAL

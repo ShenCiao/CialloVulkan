@@ -7,6 +7,14 @@
 
 namespace ciallo::rendering
 {
+	struct Vertex
+	{
+		glm::vec2 pos;
+		glm::vec2 _pad0;
+		glm::vec3 color;
+		float _pad1;
+	};
+
 	EquidistantDot::EquidistantDot(vulkan::Device* device): m_device(*device)
 	{
 		m_compShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eCompute,
@@ -39,9 +47,9 @@ namespace ciallo::rendering
 		     .shader(vk::ShaderStageFlagBits::eFragment, m_fragShader)
 		     .shader(vk::ShaderStageFlagBits::eGeometry, m_geomShader)
 		     .cullMode(vk::CullModeFlagBits::eNone)
-		     .vertexBinding(0, 4 * sizeof(float))
-		     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, 0)
-		     .vertexAttribute(1, 0, vk::Format::eR32Sfloat, vk::blockSize(vk::Format::eR32G32Sfloat));
+		     .vertexBinding(0, sizeof(Vertex))
+		     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, pos))
+		     .vertexAttribute(1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color));
 		m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 	}
 
@@ -113,27 +121,14 @@ namespace ciallo::rendering
 		cb.endRendering();
 	}
 
-	struct Vertex
-	{
-		glm::vec2 pos;
-		float pressure;
-		float _pad0;
-	};
-
 	void EquidistantDot::genInputBuffer(VmaAllocator allocator)
 	{
-		std::vector<Vertex> vertices{};
-		int n = 32;
-		vertices.reserve(n);
-		for (int i : views::iota(0, n))
-		{
-			auto t = static_cast<float>(i)/n;
-			float x = glm::mix(-0.9f, 0.9f, t);
-			float y = 0.3f * glm::sin(2*t*glm::pi<float>());
-			float p = t;
-			vertices.push_back({{x, y}, p, {}});
-		}
-
+		const std::vector<Vertex> vertices = {
+			{{0.0f, 0.5f}, {}, {1.0f, 0.0f, 0.0f}},
+			{{glm::sqrt(3.0f) * 0.25f, -0.25f}, {}, {0.0f, 1.0f, 0.0f}},
+			{{-glm::sqrt(3.0f) * 0.25f, -0.25f}, {}, {0.0f, 0.0f, 1.0f}},
+			{{0.0f, 0.5f}, {}, {1.0f, 0.0f, 0.0f}},
+		};
 
 		VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
 		auto size = vertices.size() * sizeof(Vertex);
