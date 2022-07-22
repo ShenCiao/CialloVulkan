@@ -33,7 +33,7 @@ For now, Ciallo is more of a personal research project. But I literally wish it 
 
 In animation industry, artists use labeling strokes to indicate how to fill colors. For example, on the upper part of the picture, blue strokes inside the character indicate fill in shadows, red strokes indicate highlights, green or yellow indicate contours need to be filled in combination with other strokes. 
 
-![AnimeMakingwholeProcess](./articles/AnimeMakingwholeProcess.gif)
+<img src=".\articles\AnimeMakingwholeProcess.gif" alt="AnimeMakingwholeProcess"  />
 
 Ciallo will utilize these labeling strokes for automating color. In computational geometry, [point-location problem](https://en.wikipedia.org/wiki/Point_location) is well researched and widely used in GIS and motion planning. Apparently, color filling in 2D artworks is exactly a point-location problem. 
 
@@ -49,7 +49,7 @@ In combination with line binding, users can animate their artworks at great ease
 
 <img src=".\articles\naiive brush engine.jpg" alt="naiive brush engine" style="zoom:100%;" />
 
-*Fig. - The  triangle directs upward is drawn by Articulated Line, another is by Equidistant Dot.*
+*Fig. - Triangle directs upward is drawn by Articulated Line, another is by Equidistant Dot.*
 
 Polyline/polygon in 2D space is the counterpart of mesh in 3D space. Real time rendering on polyline could potentially save GPU from fetching GBs of texture or video. It'll make large scale animation and real time lighting in 2D games possible. And help to make better VTuber avatars ([learn more](./articles/miscellaneous.md#vtuber's-avatar)).
 
