@@ -9,9 +9,12 @@ namespace ciallo::rendering
 {
 	ArticulatedLine::ArticulatedLine(vulkan::Device* device): m_device(*device)
 	{
-		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex, "./shaders/articulatedLine.vert.spv");
-		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment, "./shaders/articulatedLine.frag.spv");
-		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry, "./shaders/articulatedLine.geom.spv");
+		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex,
+		                                    "./shaders/articulatedLine.vert.spv");
+		m_fragShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eFragment,
+		                                    "./shaders/articulatedLine.frag.spv");
+		m_geomShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eGeometry,
+		                                    "./shaders/articulatedLine.geom.spv");
 		genPipelineLayout();
 		genPipelineDynamic();
 		genVertexBuffer(*device);
@@ -34,6 +37,7 @@ namespace ciallo::rendering
 		     .shader(vk::ShaderStageFlagBits::eVertex, m_vertShader)
 		     .shader(vk::ShaderStageFlagBits::eFragment, m_fragShader)
 		     .shader(vk::ShaderStageFlagBits::eGeometry, m_geomShader)
+		     .blendBegin(VK_TRUE)
 		     .cullMode(vk::CullModeFlagBits::eNone)
 		     .vertexBinding(0, 5 * sizeof(float))
 		     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, 0)

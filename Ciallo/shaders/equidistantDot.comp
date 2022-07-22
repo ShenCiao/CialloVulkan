@@ -55,11 +55,6 @@ void main(){
     }
     // Prefix sum done! For now segmentLengths is the distance from the starting point of polyline
 
-    // if(id < inVertices.length()){
-    //     debugPrintfEXT("pos: %.2f %.2f", inVertices[id].pos[0], inVertices[id].pos[1]);
-    //     debugPrintfEXT("color: %.2f %.2f %.2f", inVertices[id].color[0], inVertices[id].color[1], inVertices[id].color[2]);
-    // }
-
     float dotDistance = 0.02;
     
     // Only invocation id within [0, inVertices.length()) supposed to be dealed with
@@ -79,10 +74,8 @@ void main(){
 
         if (id == inVertices.length() - 1) // endpoint of poyline
         {
-            // pad one dot at the end of stroke
-            
-            draw.vertexCount = idOut+2; 
-            debugPrintfEXT("idOut: %d", draw.vertexCount);
+            // Pad one dot at the end of stroke and idOut start with zero
+            draw.vertexCount = idOut+2;
             outVertices[idOut+1].pos = outVertices[idOut].pos + inVertices[id].pos - inVertices[id-1].pos;
             outVertices[idOut+1].color = outVertices[idOut].color;
         }

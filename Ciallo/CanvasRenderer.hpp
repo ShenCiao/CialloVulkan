@@ -25,8 +25,8 @@ namespace ciallo::rendering
 
 		void render(vk::CommandBuffer cb, const vulkan::Image* target)
 		{
-			m_articulated->renderDynamic(cb, target);
 			m_equidistantDot->renderDynamic(cb, target);
+			m_articulated->renderDynamic(cb, target);
 		}
 	};
 }

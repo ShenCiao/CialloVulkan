@@ -8,6 +8,7 @@
 #include <limits>
 #include <algorithm>
 #include <array>
+#include <CGAL/Aff_transformation_2.h>
 
 
 namespace ciallo::geom
@@ -191,12 +192,28 @@ namespace ciallo::geom
 				subs++;
 			}
 
-			std::reverse(r.begin(), r.end()); //Warning: bad for performance
+			std::reverse(r.begin(), r.end());
 
 			Bezier<N> left{l.begin(), l.end()};
 			Bezier<N> right{r.begin(), r.end()};
 
 			return {left, right};
+		}
+
+		Bezier& operator+= (Vector v)
+		{
+			for (auto& p : mControlPoints)
+			{
+				p += v;
+			}
+			return *this;
+			
+		}
+
+		Bezier operator+ (Vector v)
+		{
+			Bezier curve = *this;
+			return curve += v;
 		}
 	};
 }
