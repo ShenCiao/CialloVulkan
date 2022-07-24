@@ -1,15 +1,12 @@
 ﻿#pragma once
-// -----------------------------------------------------------------------------
-// Being copied from https://github.com/oysteinmyrmo/bezier
-// Change geometry primitives and only keep functions currently in used.
-// -----------------------------------------------------------------------------
+
 #include <cassert>
 #include <cmath>
 #include <limits>
 #include <algorithm>
 #include <array>
-#include <CGAL/Aff_transformation_2.h>
-
+#include <CGAL/Polynomial.h>
+#include <boost/math/tools/roots.hpp>
 
 namespace ciallo::geom
 {
@@ -17,6 +14,8 @@ namespace ciallo::geom
 	// Should be the same signature as https://doc.cgal.org/latest/Arrangement_on_surface_2/classCGAL_1_1Arr__Bezier__curve__traits__2_1_1Curve__2.html
 	class Bezier
 	{
+		using Polynomial = CGAL::Polynomial<float>;
+
 		class BinomialCoefficients
 		{
 		public:
@@ -66,72 +65,52 @@ namespace ciallo::geom
 			size_t mCoefficients[size()]{0};
 		};
 
-		struct PolynomialPair
-		{
-			size_t t = 0;
-			size_t one_minus_t = 0;
-
-			float valueAt(float t) const
-			{
-				return static_cast<float>(pow(1.0f - t, one_minus_t) * pow(t, static_cast<float>(this->t)));
-			}
-		};
-
-		class PolynomialCoefficients
-		{
-		public:
-			PolynomialCoefficients()
-			{
-				for (size_t i = 0; i <= N; i++)
-				{
-					mPolynomialPairs[i].t = i;
-					mPolynomialPairs[i].one_minus_t = N - i;
-					assert(mPolynomialPairs[i].t + mPolynomialPairs[i].one_minus_t == N);
-				}
-			}
-
-			float valueAt(size_t pos, float t) const
-			{
-				assert(pos < size());
-				return mPolynomialPairs[pos].valueAt(t);
-			}
-
-			static constexpr size_t size()
-			{
-				return N + 1;
-			}
-
-			const PolynomialPair& operator [](size_t idx) const
-			{
-				assert(idx < size());
-				return mPolynomialPairs[idx];
-			}
-
-		private:
-			PolynomialPair mPolynomialPairs[size()];
-		};
-
 		const static inline BinomialCoefficients binomialCoefficients{};
-		const static inline PolynomialCoefficients polynomialCoefficients{};
-		std::array<Point, N + 1> mControlPoints = {};
 
-	public:
-		Bezier()
+		std::array<Polynomial, 2> m_bezierPoly; // Cache object for fast compute on t, not been lazy evaluated for now.
+		std::array<Point, N + 1> m_controlPoints = {};
+
+		void updatePolynomial()
 		{
-			for (size_t i = 0; i < N+1; i++)
+			Polynomial t{0.0f, 1.0f}; // Variable of the function
+
+			using CGAL::ipower;
+			Polynomial fx, fy;
+			for (size_t i = 0; i < N + 1; ++i)
 			{
-				mControlPoints[i] = Point{0.0f, 0.0f};
+				auto coefficient = static_cast<float>(binomialCoefficients[i]) *
+					ipower(t, static_cast<int>(i)) * ipower(1.0f - t, static_cast<int>(N - i));
+				fx += coefficient * m_controlPoints[i].x();
+				fy += coefficient * m_controlPoints[i].y();
 			}
+			m_bezierPoly[0] = fx;
+			m_bezierPoly[1] = fy;
 		}
 
-		Bezier(point_iter auto it, point_iter auto end)
+		void setControlPoints(point_iter auto it, point_iter auto end)
 		{
 			size_t s = end - it;
 			assert(s == N+1);
 			for (size_t i = 0; i < s; ++i)
 			{
-				mControlPoints[i] = it[i];
+				m_controlPoints[i] = it[i];
 			}
+		}
+
+	public:
+		Bezier()
+		{
+			for (size_t i = 0; i < N + 1; i++)
+			{
+				m_controlPoints[i] = Point{0.0f, 0.0f};
+			}
+			updatePolynomial();
+		}
+
+		Bezier(point_iter auto it, point_iter auto end)
+		{
+			setControlPoints(it, end);
+			updatePolynomial();
 		}
 
 		size_t order() const
@@ -142,12 +121,7 @@ namespace ciallo::geom
 		float operator()(float t, int axis) const
 		{
 			assert(axis < 2);
-			float sum = 0;
-			for (size_t n = 0; n < N + 1; n++)
-			{
-				sum += binomialCoefficients[n] * polynomialCoefficients[n].valueAt(t) * mControlPoints[n][axis];
-			}
-			return sum;
+			return m_bezierPoly[axis].evaluate(t);
 		}
 
 		Point operator()(float t) const
@@ -157,9 +131,9 @@ namespace ciallo::geom
 
 		friend std::ostream& operator<<(std::ostream& os, const Bezier<N>& curve)
 		{
-			for (size_t i = 0; i < N+1; ++i)
+			for (size_t i = 0; i < N + 1; ++i)
 			{
-				os << curve.mControlPoints[i] << "  ";
+				os << curve.m_controlPoints[i] << "  ";
 			}
 			return os;
 		}
@@ -168,10 +142,10 @@ namespace ciallo::geom
 		{
 			std::array<Point, N + 1> l;
 			std::array<Point, N + 1> r;
-			l[0] = mControlPoints[0];
-			r[0] = mControlPoints[N];
+			l[0] = m_controlPoints[0];
+			r[0] = m_controlPoints[N];
 
-			std::array<Point, N + 1> prev = mControlPoints;
+			std::array<Point, N + 1> prev = m_controlPoints;
 			std::array<Point, N + 1> curr;
 
 			size_t subs = 0;
@@ -200,20 +174,56 @@ namespace ciallo::geom
 			return {left, right};
 		}
 
-		Bezier& operator+= (Vector v)
-		{
-			for (auto& p : mControlPoints)
-			{
-				p += v;
-			}
-			return *this;
-			
-		}
 
-		Bezier operator+ (Vector v)
+		Bezier operator+(Vector v)
 		{
 			Bezier curve = *this;
 			return curve += v;
+		}
+
+		/**
+		 * \brief Find the t value at given value.
+		 * Only within range 0.0-1.0. Only find one value closer(?) to 0.0. May need change.
+		 * \param given The given value.
+		 * \param axis Axis to query.
+		 * \return T value.
+		 */
+		float findT(float given, int axis = 0)
+		{
+			using boost::math::tools::newton_raphson_iterate;
+
+			auto target = [given, axis, this](float var)
+			{
+				Polynomial diff = m_bezierPoly[axis] - given;
+				diff.diff();
+				return std::make_pair(m_bezierPoly[axis].evaluate(var) - given, diff.evaluate(var));
+			};
+
+			const int digits = std::numeric_limits<float>::digits;
+			boost::uintmax_t maxIt = 100;
+			float result = newton_raphson_iterate(target, 0.0f, 0.0f, 1.0f, digits, maxIt);
+
+			if (std::abs(target(result).first) >= 1e-2f)
+			{
+				throw std::range_error("Can not find the desired value!");
+			}
+			return result;
+		}
+
+		std::array<std::array<float, N + 1>, 2> polynomialCoefficients()
+		{
+			return {polynomialCoefficients(0), polynomialCoefficients(1)};
+		}
+
+		std::array<float, N + 1> polynomialCoefficients(int axis)
+		{
+			assert(axis < 2);
+			std::array<float, N + 1> co;
+			for (size_t i = 0; i < N + 1; ++i)
+			{
+				co[i] = CGAL::get_coefficient(m_bezierPoly[axis], i);
+			}
+			return co;
 		}
 	};
 }

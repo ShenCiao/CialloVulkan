@@ -6,7 +6,7 @@
 
 Ciallo aims for improving 2D artist's work efficiency with modern GPU and computational geometry. 
 
-Name "Ciallo" is the combination of Italian "Ciao" and English "Hello", comes from the video game *Sabbat of the Witch*.
+Name "Ciallo" is the combination of Italian "Ciao" and English "Hello", comes from the video game *Sabbat of the Witch* developed by Yuzusoft.
 
 Different from traditional pixelmap or bezier curve based painting software, polylines/polygons are the first citizen in Ciallo. They are rendered with GPU and edited based on computational geometry algorithms. 
 
