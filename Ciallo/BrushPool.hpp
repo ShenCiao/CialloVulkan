@@ -1,35 +1,12 @@
 #pragma once
+#include "ArticulatedLine.hpp"
 #include "Image.hpp"
 #include "Device.hpp"
 #include "imgui.h"
+#include "PrincipleBrushComponents.hpp"
 
-namespace ciallo
+namespace ciallo::brush
 {
-	namespace brush
-	{
-		enum class EngineFlags
-		{
-			None,
-			EquidistantDot,
-			ArticulatedLine
-		};
-
-		struct DemoComponent
-		{
-			vulkan::Image image;
-			ImTextureID id = nullptr;
-		};
-
-		struct EngineComponent
-		{
-			EngineFlags engineType;
-		};
-
-		struct ArticulatedLineSettings
-		{
-		};
-	}
-
 	class BrushPool
 	{
 		entt::registry m_registry;
@@ -37,26 +14,26 @@ namespace ciallo
 
 	public:
 		BrushPool() = default;
+		
 
-
-		void loadPresetBrushes(vulkan::Device* device)
+		void loadPresetBrushes(const vulkan::Device* device)
 		{
 			entt::entity brush = m_registry.create();
-			m_registry.emplace<brush::EngineFlags>(brush, brush::EngineFlags::ArticulatedLine);
-			m_registry.emplace<brush::ArticulatedLineSettings>(brush);
+			m_registry.emplace<brush::EngineTypeFlags>(brush, brush::EngineTypeFlags::ArticulatedLine);
+			m_registry.emplace<brush::ArticulatedLineSettingsCpo>(brush);
 
-			for (int i : views::iota(0, 1000))
+			for (int i : views::iota(0, 10))
 			{
 				m_brushes.push_back(m_registry.create());
 			}
 
 			VmaAllocationCreateInfo allocationCreateInfo{{}, VMA_MEMORY_USAGE_AUTO};
-			brush::DemoComponent demo{
+			brush::DemoCpo demo{
 				vulkan::Image(*device, allocationCreateInfo, 400, 100,
 				              vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eColorAttachment)
 			};
 
-			m_registry.insert<brush::DemoComponent>(m_brushes.begin(), m_brushes.end(), demo);
+			m_registry.insert<brush::DemoCpo>(m_brushes.begin(), m_brushes.end(), demo);
 		}
 	};
 }

@@ -133,7 +133,7 @@
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
-    <ClInclude Include="PrincipleStrokeComponents.hpp" />
+    <ClInclude Include="PrincipleBrushComponents.hpp" />
     <ClInclude Include="ScenePanel.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="TriangleTest.hpp" />

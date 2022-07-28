@@ -28,3 +28,11 @@ namespace ciallo::rendering
 		void genVertexBuffer(VmaAllocator allocator);
 	};
 }
+
+namespace ciallo::brush
+{
+	struct ArticulatedLineSettingsCpo
+	{
+		
+	};
+}

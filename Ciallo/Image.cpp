@@ -5,14 +5,21 @@
 
 namespace ciallo::vulkan
 {
+	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info):
+		m_allocator(allocator), m_format(info.format), m_width(info.extent.width), m_height(info.extent.height),
+		m_usage(info.usage), m_layout(info.initialLayout)
+	{
+		genImage(allocator, allocCreateInfo, info);
+		genImageView();
+	}
+
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height,
-	             vk::ImageUsageFlags usage): m_width(width), m_height(height), m_allocator(allocator), m_usage(usage)
+	             vk::ImageUsageFlags usage): m_allocator(allocator), m_width(width), m_height(height), m_usage(usage)
 	{
 		vk::ImageCreateInfo info{};
 		info.imageType = vk::ImageType::e2D;
 		info.format = vk::Format::eR8G8B8A8Unorm;
 		info.extent = vk::Extent3D{width, height, 1u};
-		info.extent.depth = 1;
 		info.mipLevels = 1;
 		info.arrayLayers = 1;
 		info.samples = vk::SampleCountFlagBits::e1;
@@ -45,18 +52,18 @@ namespace ciallo::vulkan
 
 	Image& Image::operator=(const Image& other)
 	{
-		if(!other.m_allocator) // other is default constructed, default construct on this
+		if (!other.m_allocator) // other is default constructed, default construct on this
 		{
 			*this = Image();
 			return *this;
 		}
-		
+
 		VmaAllocationInfo allocInfo;
 		vmaGetAllocationInfo(other.m_allocator, other.m_allocation, &allocInfo);
 		VmaAllocationCreateInfo allocCreateInfo{};
 		allocCreateInfo.memoryTypeBits = 1u << allocInfo.memoryType;
 
-		// Call move assignment operator.After swapping, already exist object get destructed in temp object.
+		// Call move assignment operator. After swapping, already exist object get destructed in temp object.
 		*this = Image(other.m_allocator, allocCreateInfo, other.m_width, other.m_height, other.m_usage);
 		return *this;
 	}
@@ -72,6 +79,7 @@ namespace ciallo::vulkan
 		std::swap(m_stagingBuffer, other.m_stagingBuffer);
 		std::swap(m_imageView, other.m_imageView);
 		std::swap(m_usage, other.m_usage);
+		std::swap(m_sampleCount, other.m_sampleCount);
 		return *this;
 	}
 
@@ -81,43 +89,28 @@ namespace ciallo::vulkan
 	void Image::changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectMask)
 	{
 		if (newLayout == m_layout) return;
+
+		vk::ImageMemoryBarrier2 barrier = createLayoutTransitionMemoryBarrier(newLayout, aspectMask);
+		cb.pipelineBarrier2({{}, {}, {}, barrier});
+
 		vk::ImageLayout oldLayout = m_layout;
 		m_layout = newLayout;
-
-		vk::ImageMemoryBarrier imageMemoryBarriers = {};
-		imageMemoryBarriers.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarriers.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarriers.oldLayout = oldLayout;
-		imageMemoryBarriers.newLayout = newLayout;
-		imageMemoryBarriers.image = m_image;
-		imageMemoryBarriers.subresourceRange = {aspectMask, 0, 1, 0, 1};
-
-		vk::PipelineStageFlags srcStageMask{vk::PipelineStageFlagBits::eTopOfPipe}; // wait for nothing
-		vk::PipelineStageFlags dstStageMask{vk::PipelineStageFlagBits::eBottomOfPipe}; // block nothing
-		vk::DependencyFlags dependencyFlags{};
-		vk::AccessFlags srcMask{};
-		vk::AccessFlags dstMask{};
-
-		imageMemoryBarriers.srcAccessMask = srcMask;
-		imageMemoryBarriers.dstAccessMask = dstMask;
-		auto memoryBarriers = nullptr;
-		auto bufferMemoryBarriers = nullptr;
-		cb.pipelineBarrier(srcStageMask, dstStageMask, dependencyFlags, memoryBarriers, bufferMemoryBarriers,
-		                   imageMemoryBarriers);
 	}
 
-	vk::ImageMemoryBarrier Image::createLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,
-	                                                                  vk::ImageAspectFlags aspectMask) const
+	vk::ImageMemoryBarrier2 Image::createLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,
+	                                                                   vk::ImageAspectFlags aspectMask) const
 	{
-		vk::ImageMemoryBarrier imageMemoryBarrier{};
-		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.oldLayout = m_layout;
-		imageMemoryBarrier.newLayout = newLayout;
-		imageMemoryBarrier.image = m_image;
-		imageMemoryBarrier.subresourceRange = {aspectMask, 0, 1, 0, 1};
-
-		return imageMemoryBarrier;
+		vk::ImageMemoryBarrier2 barrier{
+			vk::PipelineStageFlagBits2::eAllCommands,
+			vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+			vk::PipelineStageFlagBits2::eAllCommands,
+			vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+			m_layout, newLayout
+		};
+		barrier.image = m_image;
+		barrier.subresourceRange = {aspectMask, 0, 1, 0, 1};
+		
+		return barrier;
 	}
 
 	// Warning: mipmap and array layers unsupported

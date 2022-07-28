@@ -4,9 +4,10 @@
 // Renamed "Renderpass" to "RenderPass".
 // Create pipeline and compute pipeline with vk::ShaderModule instead of vku::ShaderModule
 // Add support for dynamic rendering.
-// Delete class Image and Buffer, we use our own.
+// Delete class Image, Buffer, ShaderModule, Device, Instance. We use our own.
 // Clean up unused #include and reformat whole code.
 // Add default offset and range to DescriptorUpdater::buffer.
+// Change pipeline blendEnable() same as blendBegin().
 // -----------------------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,26 +71,6 @@ namespace vku
 		return -1;
 	}
 
-	/// Execute commands immediately and wait for the device to finish.
-	inline void executeImmediately(vk::Device device, vk::CommandPool commandPool, vk::Queue queue,
-	                               const std::function<void (vk::CommandBuffer cb)>& func)
-	{
-		vk::CommandBufferAllocateInfo cbai{commandPool, vk::CommandBufferLevel::ePrimary, 1};
-
-		auto cbs = device.allocateCommandBuffers(cbai);
-		cbs[0].begin(vk::CommandBufferBeginInfo{});
-		func(cbs[0]);
-		cbs[0].end();
-
-		vk::SubmitInfo submit;
-		submit.commandBufferCount = (uint32_t)cbs.size();
-		submit.pCommandBuffers = cbs.data();
-		queue.submit(submit, vk::Fence{});
-		device.waitIdle();
-
-		device.freeCommandBuffers(commandPool, cbs);
-	}
-
 	/// Scale a value by mip level, but do not reduce to zero.
 	inline uint32_t mipScale(uint32_t value, uint32_t mipLevel)
 	{
@@ -112,7 +93,7 @@ namespace vku
 
 		return bytes;
 	}
-
+	
 	/// Description of blocks for compressed formats.
 	struct BlockParams
 	{
@@ -321,236 +302,6 @@ namespace vku
 		}
 		return BlockParams{0, 0, 0};
 	}
-
-	/// Factory for instances.
-	class InstanceMaker
-	{
-	public:
-		InstanceMaker()
-		{
-		}
-
-		/// Set the default layers and extensions.
-		InstanceMaker& defaultLayers()
-		{
-			layers_.push_back("VK_LAYER_KHRONOS_validation");
-			instance_extensions_.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-#ifdef VKU_SURFACE
-      instance_extensions_.push_back(VKU_SURFACE);
-#endif
-			instance_extensions_.push_back("VK_KHR_surface");
-#if defined( __APPLE__ ) && defined(VK_EXT_METAL_SURFACE_EXTENSION_NAME)
-    instance_extensions_.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);
-#endif //__APPLE__
-			return *this;
-		}
-
-		/// Add a layer. eg. "VK_LAYER_KHRONOS_validation"
-		InstanceMaker& layer(const char* layer)
-		{
-			layers_.push_back(layer);
-			return *this;
-		}
-
-		/// Add an extension. eg. VK_EXT_DEBUG_REPORT_EXTENSION_NAME
-		InstanceMaker& extension(const char* layer)
-		{
-			instance_extensions_.push_back(layer);
-			return *this;
-		}
-
-		/// Set the name of the application.
-		InstanceMaker& applicationName(const char* pApplicationName_)
-		{
-			app_info_.pApplicationName = pApplicationName_;
-			return *this;
-		}
-
-		/// Set the version of the application.
-		InstanceMaker& applicationVersion(uint32_t applicationVersion_)
-		{
-			app_info_.applicationVersion = applicationVersion_;
-			return *this;
-		}
-
-		/// Set the name of the engine.
-		InstanceMaker& engineName(const char* pEngineName_)
-		{
-			app_info_.pEngineName = pEngineName_;
-			return *this;
-		}
-
-		/// Set the version of the engine.
-		InstanceMaker& engineVersion(uint32_t engineVersion_)
-		{
-			app_info_.engineVersion = engineVersion_;
-			return *this;
-		}
-
-		/// Set the version of the api.
-		InstanceMaker& apiVersion(uint32_t apiVersion_)
-		{
-			app_info_.apiVersion = apiVersion_;
-			return *this;
-		}
-
-		/// Create a self-deleting (unique) instance.
-		vk::UniqueInstance createUnique()
-		{
-			return vk::createInstanceUnique(
-				vk::InstanceCreateInfo{
-					{}, &app_info_, (uint32_t)layers_.size(),
-					layers_.data(), (uint32_t)instance_extensions_.size(),
-					instance_extensions_.data()
-				}
-			);
-		}
-
-	private:
-		std::vector<const char*> layers_;
-		std::vector<const char*> instance_extensions_;
-		vk::ApplicationInfo app_info_;
-	};
-
-	/// Factory for devices.
-	class DeviceMaker
-	{
-	public:
-		/// Make queues and a logical device for a certain physical device.
-		DeviceMaker()
-		{
-		}
-
-		/// Set the default layers and extensions.
-		DeviceMaker& defaultLayers()
-		{
-			layers_.push_back("VK_LAYER_LUNARG_standard_validation");
-			device_extensions_.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-			// VK_KHR_MAINTENANCE1 is required for using negative viewport heights
-			// Note: This is core as of Vulkan 1.1. So if you target 1.1 you don't have to explicitly enable this
-			device_extensions_.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
-			return *this;
-		}
-
-		/// Add a layer. eg. "VK_LAYER_LUNARG_standard_validation"
-		DeviceMaker& layer(const char* layer)
-		{
-			layers_.push_back(layer);
-			return *this;
-		}
-
-		/// Add an extension. eg. VK_EXT_DEBUG_REPORT_EXTENSION_NAME
-		DeviceMaker& extension(const char* layer)
-		{
-			device_extensions_.push_back(layer);
-			return *this;
-		}
-
-		/// Add one or more queues to the device from a certain family.
-		DeviceMaker& queue(uint32_t familyIndex, float priority = 0.0f, uint32_t n = 1)
-		{
-			queue_priorities_.emplace_back(n, priority);
-
-			qci_.emplace_back(
-				vk::DeviceQueueCreateFlags{},
-				familyIndex, n,
-				queue_priorities_.back().data()
-			);
-
-			return *this;
-		}
-
-		/// Create a new logical device.
-		vk::UniqueDevice createUnique(vk::PhysicalDevice physical_device)
-		{
-			auto dci = vk::DeviceCreateInfo{
-				{},
-				(uint32_t)qci_.size(), qci_.data(),
-				(uint32_t)layers_.size(), layers_.data(),
-				(uint32_t)device_extensions_.size(), device_extensions_.data()
-			};
-
-			//
-			vk::PhysicalDeviceFeatures pdfs;
-			pdfs.setGeometryShader(true); // required to enable and use geometry shader
-			pdfs.setTessellationShader(true); // required to enable and use tesselation shaders
-			dci.setPEnabledFeatures(&pdfs);
-
-			// required to enable and use multiview
-			vk::PhysicalDeviceMultiviewFeatures physicalDeviceMultiviewFeatures;
-			physicalDeviceMultiviewFeatures.setMultiview(true);
-			dci.pNext = &physicalDeviceMultiviewFeatures;
-
-			return physical_device.createDeviceUnique(dci);
-		}
-
-	private:
-		std::vector<const char*> layers_;
-		std::vector<const char*> device_extensions_;
-		std::vector<std::vector<float>> queue_priorities_;
-		std::vector<vk::DeviceQueueCreateInfo> qci_;
-		vk::ApplicationInfo app_info_;
-	};
-
-	class DebugCallback
-	{
-	public:
-		DebugCallback()
-		{
-		}
-
-		DebugCallback(
-			vk::Instance instance,
-			vk::DebugReportFlagsEXT flags =
-				vk::DebugReportFlagBitsEXT::eWarning |
-				vk::DebugReportFlagBitsEXT::eError
-		) : instance_(instance)
-		{
-			auto ci = vk::DebugReportCallbackCreateInfoEXT{flags, &debugCallback};
-
-			auto vkCreateDebugReportCallbackEXT =
-				(PFN_vkCreateDebugReportCallbackEXT)instance_.getProcAddr(
-					"vkCreateDebugReportCallbackEXT");
-
-			VkDebugReportCallbackEXT cb;
-			vkCreateDebugReportCallbackEXT(
-				instance_, &(const VkDebugReportCallbackCreateInfoEXT&)ci,
-				nullptr, &cb
-			);
-			callback_ = cb;
-		}
-
-		~DebugCallback()
-		{
-			//reset();
-		}
-
-		void reset()
-		{
-			if (callback_)
-			{
-				auto vkDestroyDebugReportCallbackEXT =
-					(PFN_vkDestroyDebugReportCallbackEXT)instance_.getProcAddr(
-						"vkDestroyDebugReportCallbackEXT");
-				vkDestroyDebugReportCallbackEXT(instance_, callback_, nullptr);
-				callback_ = vk::DebugReportCallbackEXT{};
-			}
-		}
-
-	private:
-		// Report any errors or warnings.
-		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-			VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType,
-			uint64_t object, size_t location, int32_t messageCode,
-			const char* pLayerPrefix, const char* pMessage, void* pUserData)
-		{
-			printf("%08x debugCallback: %s\n", flags, pMessage);
-			return VK_FALSE;
-		}
-
-		vk::DebugReportCallbackEXT callback_;
-		vk::Instance instance_;
-	};
 
 	/// Factory for renderpasses.
 	/// example:
@@ -763,169 +514,6 @@ namespace vku
 		State s;
 	};
 
-	/// Class for building shader modules and extracting metadata from shaders.
-	class ShaderModule
-	{
-	public:
-		ShaderModule()
-		{
-		}
-
-		/// Construct a shader module from a file
-		ShaderModule(const vk::Device& device, const std::string& filename)
-		{
-			auto file = std::ifstream(filename, std::ios::binary);
-			if (!file.good())
-			{
-				return;
-			}
-
-			file.seekg(0, std::ios::end);
-			int length = (int)file.tellg();
-
-			s.opcodes_.resize((size_t)(length / 4));
-			file.seekg(0, std::ios::beg);
-			file.read((char*)s.opcodes_.data(), s.opcodes_.size() * 4);
-
-			vk::ShaderModuleCreateInfo ci;
-			ci.codeSize = s.opcodes_.size() * 4;
-			ci.pCode = s.opcodes_.data();
-			s.module_ = device.createShaderModuleUnique(ci);
-
-			s.ok_ = true;
-		}
-
-		/// Construct a shader module from a memory
-		template <class InIter>
-		ShaderModule(const vk::Device& device, InIter begin, InIter end)
-		{
-			s.opcodes_.assign(begin, end);
-			vk::ShaderModuleCreateInfo ci;
-			ci.codeSize = s.opcodes_.size() * 4;
-			ci.pCode = s.opcodes_.data();
-			s.module_ = device.createShaderModuleUnique(ci);
-
-			s.ok_ = true;
-		}
-
-#ifdef VOOKOO_SPIRV_SUPPORT
-  /// A variable in a shader.
-  struct Variable {
-    // The name of the variable from the GLSL/HLSL
-    std::string debugName;
-
-    // The internal name (integer) of the variable
-    int name;
-
-    // The location in the binding.
-    int location;
-
-    // The binding in the descriptor set or I/O channel.
-    int binding;
-
-    // The descriptor set (for uniforms)
-    int set;
-    int instruction;
-
-    // Storage class of the variable, eg. spv::StorageClass::Uniform
-    spv::StorageClass storageClass;
-  };
-
-  /// Get a list of variables from the shader.
-  ///
-  /// This exposes the Uniforms, inputs, outputs, push constants.
-  /// See spv::StorageClass for more details.
-  std::vector<Variable> getVariables() const {
-    auto bound = s.opcodes_[3];
-
-    std::unordered_map<int, int> bindings;
-    std::unordered_map<int, int> locations;
-    std::unordered_map<int, int> sets;
-    std::unordered_map<int, std::string> debugNames;
-
-    for (int i = 5; i != s.opcodes_.size(); i += s.opcodes_[i] >> 16) {
-      spv::Op op = spv::Op(s.opcodes_[i] & 0xffff);
-      if (op == spv::Op::OpDecorate) {
-        int name = s.opcodes_[i + 1];
-        auto decoration = spv::Decoration(s.opcodes_[i + 2]);
-        if (decoration == spv::Decoration::Binding) {
-          bindings[name] = s.opcodes_[i + 3];
-        } else if (decoration == spv::Decoration::Location) {
-          locations[name] = s.opcodes_[i + 3];
-        } else if (decoration == spv::Decoration::DescriptorSet) {
-          sets[name] = s.opcodes_[i + 3];
-        }
-      } else if (op == spv::Op::OpName) {
-        int name = s.opcodes_[i + 1];
-        debugNames[name] = (const char *)&s.opcodes_[i + 2];
-      }
-    }
-
-    std::vector<Variable> result;
-    for (int i = 5; i != s.opcodes_.size(); i += s.opcodes_[i] >> 16) {
-      spv::Op op = spv::Op(s.opcodes_[i] & 0xffff);
-      if (op == spv::Op::OpVariable) {
-        int name = s.opcodes_[i + 1];
-        auto sc = spv::StorageClass(s.opcodes_[i + 3]);
-        Variable b;
-        b.debugName = debugNames[name];
-        b.name = name;
-        b.location = locations[name];
-        b.set = sets[name];
-        b.instruction = i;
-        b.storageClass = sc;
-        result.push_back(b);
-      }
-    }
-    return result;
-  }
-#endif
-
-		bool ok() const { return s.ok_; }
-		VkShaderModule module() const { return *s.module_; }
-
-		/// Write a C++ consumable dump of the shader.
-		/// Todo: make this more idiomatic.
-		std::ostream& write(std::ostream& os)
-		{
-			os << "static const uint32_t shader[] = {\n";
-			char tmp[256];
-			auto p = s.opcodes_.begin();
-			snprintf(
-				tmp, sizeof(tmp), "  0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,\n", p[0], p[1], p[2], p[3], p[4]);
-			os << tmp;
-			for (int i = 5; i != s.opcodes_.size(); i += s.opcodes_[i] >> 16)
-			{
-				char *p = tmp + 2, *e = tmp + sizeof(tmp) - 2;
-				for (int j = i; j != i + (s.opcodes_[i] >> 16); ++j)
-				{
-					p += snprintf(p, e - p, "0x%08x,", s.opcodes_[j]);
-					if (p > e - 16)
-					{
-						*p++ = '\n';
-						*p = 0;
-						os << tmp;
-						p = tmp + 2;
-					}
-				}
-				*p++ = '\n';
-				*p = 0;
-				os << tmp;
-			}
-			os << "};\n\n";
-			return os;
-		}
-
-	private:
-		struct State
-		{
-			std::vector<uint32_t> opcodes_;
-			vk::UniqueShaderModule module_;
-			bool ok_ = false;
-		};
-
-		State s;
-	};
 
 	/// A class for building pipeline layouts.
 	/// Pipeline layouts describe the descriptor sets and push constants used by the shaders.
@@ -1220,8 +808,7 @@ namespace vku
 		/// Enable or disable blending (called after blendBegin())
 		PipelineMaker& blendEnable(vk::Bool32 value)
 		{
-			colorBlendAttachments_.back().blendEnable = value;
-			return *this;
+			return blendBegin(value);
 		}
 
 		/// Source colour blend factor (called after blendBegin())

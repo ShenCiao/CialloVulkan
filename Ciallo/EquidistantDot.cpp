@@ -100,6 +100,7 @@ namespace ciallo::rendering
 			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
 			vk::PipelineStageFlagBits2::eVertexInput, vk::AccessFlagBits2::eVertexAttributeRead
 		};
+		
 		std::vector barriers = {drawIndirectBarrier, vertexBarrier};
 		cb.pipelineBarrier2({{}, barriers, {}, {}});
 

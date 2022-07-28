@@ -6,7 +6,8 @@
 namespace ciallo::vulkan
 {
 	/**
-	 * \brief Class for logical device, physical device, command pool, descriptor pool and memory allocator, can be implicitly converted to the allocator since allocator is nothing more than the device.
+	 * \brief Class for logical device, physical device, command pool, descriptor pool and memory allocator.
+	 * Can be implicitly converted to the allocator since allocator is nothing more than the device.
 	 */
 	class Device
 	{
@@ -45,7 +46,9 @@ namespace ciallo::vulkan
 	private:
 		static inline std::vector<const char*> m_extensions{
 			"VK_KHR_swapchain",
-			// "VK_EXT_blend_operation_advanced" //ShenCiao's integrated Gpu(AMD) does not support this.
+			//ShenCiao's AMD Gpu(integrated) does not support these :(. I need them!!!
+			// "VK_EXT_blend_operation_advanced",
+			// "VK_EXT_vertex_input_dynamic_state",
 		};
 
 		void genDevice();

@@ -37,7 +37,7 @@ namespace ciallo::rendering
 		     .shader(vk::ShaderStageFlagBits::eVertex, m_vertShader)
 		     .shader(vk::ShaderStageFlagBits::eFragment, m_fragShader)
 		     .shader(vk::ShaderStageFlagBits::eGeometry, m_geomShader)
-		     .blendBegin(VK_TRUE)
+		     .blendEnable(VK_TRUE)
 		     .cullMode(vk::CullModeFlagBits::eNone)
 		     .vertexBinding(0, 5 * sizeof(float))
 		     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, 0)

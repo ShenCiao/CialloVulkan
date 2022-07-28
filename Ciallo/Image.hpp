@@ -8,26 +8,28 @@ namespace ciallo::vulkan
 {
 	
 	/**
-	 * \brief 2D image. Copy constructor/assignment only allocate memory, do not copy content.
+	 * \brief 2D image. Copy constructor/assignment only allocate memory and create object, do not copy content.
 	 */
 	class Image
 	{
-	private:
-		uint32_t m_width = 0u;
-		uint32_t m_height = 0u;
-		vk::Format m_format = vk::Format::eUndefined;
-		vk::ImageLayout m_layout = vk::ImageLayout::eUndefined;
 		VmaAllocator m_allocator = nullptr;
 		VmaAllocation m_allocation = nullptr;
+		vk::Format m_format = vk::Format::eUndefined;
+		uint32_t m_width = 0u;
+		uint32_t m_height = 0u;
+		vk::SampleCountFlags m_sampleCount = vk::SampleCountFlagBits::e1;
+		vk::ImageUsageFlags m_usage;
+		vk::ImageLayout m_layout = vk::ImageLayout::eUndefined;
+
 		vk::Image m_image = VK_NULL_HANDLE;
 		std::unique_ptr<Buffer> m_stagingBuffer;
 		vk::UniqueImageView m_imageView;
-		vk::ImageUsageFlags m_usage;
 	public:
+		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info);
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height, vk::ImageUsageFlags usage);
 		~Image();
 
-		// TODO: better layout changing, customized image flags
+		// TODO: customized image flags
 		Image() = default;
 		Image(const Image& other);
 		Image(Image&& other) noexcept;
@@ -37,7 +39,9 @@ namespace ciallo::vulkan
 	public:
 		void changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout,
 		                  vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor);
-		vk::ImageMemoryBarrier createLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor) const;
+		vk::ImageMemoryBarrier2 createLayoutTransitionMemoryBarrier(vk::ImageLayout newLayout,
+		                                                            vk::ImageAspectFlags aspectMask =
+			                                                            vk::ImageAspectFlagBits::eColor) const;
 
 		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size = 0u);
 		vk::DeviceSize size() const;

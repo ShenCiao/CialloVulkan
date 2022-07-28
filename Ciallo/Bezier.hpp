@@ -1,9 +1,7 @@
 ﻿#pragma once
 
 #include <cassert>
-#include <cmath>
 #include <limits>
-#include <algorithm>
 #include <array>
 #include <CGAL/Polynomial.h>
 #include <boost/math/tools/roots.hpp>

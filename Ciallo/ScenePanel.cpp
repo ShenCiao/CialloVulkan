@@ -29,16 +29,7 @@ namespace ciallo::gui
 		                                           vk::ImageUsageFlagBits::eTransferDst |
 		                                           vk::ImageUsageFlagBits::eColorAttachment);
 		
-		auto imageMemoryBarrier = m_canvas->createLayoutTransitionMemoryBarrier(vk::ImageLayout::eGeneral);
-		m_canvas->setImageLayout(vk::ImageLayout::eGeneral);
-		cb.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, 
-			{}, {}, {}, imageMemoryBarrier);
-
-
-		if (m_canvas->hostVisible())
-		{
-			spdlog::info("Canvas is host visible");
-		}
+		m_canvas->changeLayout(cb, vk::ImageLayout::eGeneral);
 
 		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),
 		                                                static_cast<VkImageLayout>(m_canvas->imageLayout()));
