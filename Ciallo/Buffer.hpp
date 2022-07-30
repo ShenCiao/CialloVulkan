@@ -4,11 +4,34 @@
 
 namespace ciallo::vulkan
 {
-	class Buffer
+	// Base class for objects need to allocate memory from device. Include Buffer, Image and Mapper.
+	class AllocationBase
 	{
-	private:
+	protected:
 		VmaAllocator m_allocator = nullptr;
 		VmaAllocation m_allocation = nullptr;
+
+
+	public:
+		AllocationBase() = default;
+		explicit AllocationBase(VmaAllocator allocator);
+		AllocationBase(const AllocationBase& other) = delete;
+		AllocationBase(AllocationBase&& other) noexcept;
+		AllocationBase& operator=(const AllocationBase& other) = delete;
+		AllocationBase& operator=(AllocationBase&& other) noexcept;
+		~AllocationBase() = default;
+
+		vk::MemoryPropertyFlags memoryProperty() const;
+		bool hostVisible() const;
+		bool hostCoherent() const;
+		uint32_t memoryTypeIndex() const;
+		vk::Device device() const;
+
+		void uploadLocal(const void* data, vk::DeviceSize size) const;
+	};
+
+	class Buffer : public AllocationBase
+	{
 		vk::Buffer m_buffer = VK_NULL_HANDLE;
 		vk::DeviceSize m_size{};
 		vk::BufferUsageFlags m_usage;
@@ -34,18 +57,10 @@ namespace ciallo::vulkan
 		~Buffer();
 
 	public:
-		vk::Buffer buffer() const
-		{
-			return m_buffer;
-		}
-
-		void uploadLocal(const void* data, vk::DeviceSize size) const;
-
+		vk::Buffer buffer() const;
 		// Upload with provided stagingBuffer
 		void uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size, vk::Buffer stagingBuffer) const;
-
 		void genStagingBuffer();
-
 		/**
 		 * \brief Upload data to buffer
 		 * \param cb Command buffer for recording copy command
@@ -53,13 +68,8 @@ namespace ciallo::vulkan
 		 * \param size Size of the data
 		 */
 		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size);
-
 		template <typename T>
 		void upload(vk::CommandBuffer cb, std::vector<T>& data);
-
-		bool hostVisible() const;
-
-		bool hostCoherent() const;
 
 		void destroyStagingBuffer();
 	};

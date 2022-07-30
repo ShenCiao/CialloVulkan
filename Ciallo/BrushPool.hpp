@@ -20,8 +20,7 @@ namespace ciallo::editor
 		{
 			entt::entity brush = m_registry.create();
 			m_registry.emplace<editor::EngineTypeFlags>(brush, editor::EngineTypeFlags::ArticulatedLine);
-			m_registry.emplace<editor::ArticulatedLineSettingsCpo>(brush);
-
+			
 			for (int i : views::iota(0, 10))
 			{
 				m_brushes.push_back(m_registry.create());

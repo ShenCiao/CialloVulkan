@@ -6,7 +6,7 @@
 namespace ciallo::vulkan
 {
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info):
-		m_allocator(allocator), m_format(info.format), m_width(info.extent.width), m_height(info.extent.height),
+		AllocationBase(allocator), m_format(info.format), m_width(info.extent.width), m_height(info.extent.height),
 		m_usage(info.usage), m_layout(info.initialLayout)
 	{
 		genImage(allocator, allocCreateInfo, info);
@@ -14,7 +14,7 @@ namespace ciallo::vulkan
 	}
 
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height,
-	             vk::ImageUsageFlags usage): m_allocator(allocator), m_width(width), m_height(height), m_usage(usage)
+	             vk::ImageUsageFlags usage): AllocationBase(allocator), m_width(width), m_height(height), m_usage(usage)
 	{
 		vk::ImageCreateInfo info{};
 		info.imageType = vk::ImageType::e2D;
@@ -58,10 +58,9 @@ namespace ciallo::vulkan
 			return *this;
 		}
 
-		VmaAllocationInfo allocInfo;
-		vmaGetAllocationInfo(other.m_allocator, other.m_allocation, &allocInfo);
 		VmaAllocationCreateInfo allocCreateInfo{};
-		allocCreateInfo.memoryTypeBits = 1u << allocInfo.memoryType;
+		uint32_t index = other.memoryTypeIndex();
+		allocCreateInfo.memoryTypeBits = 1u << index;
 
 		// Call move assignment operator. After swapping, already exist object get destructed in temp object.
 		*this = Image(other.m_allocator, allocCreateInfo, other.m_width, other.m_height, other.m_usage);
@@ -70,21 +69,21 @@ namespace ciallo::vulkan
 
 	Image& Image::operator=(Image&& other) noexcept
 	{
-		std::swap(m_width, other.m_width);
-		std::swap(m_height, other.m_height);
-		std::swap(m_layout, other.m_layout);
-		std::swap(m_allocator, other.m_allocator);
-		std::swap(m_allocation, other.m_allocation);
-		std::swap(m_image, other.m_image);
-		std::swap(m_stagingBuffer, other.m_stagingBuffer);
-		std::swap(m_imageView, other.m_imageView);
-		std::swap(m_usage, other.m_usage);
-		std::swap(m_sampleCount, other.m_sampleCount);
+		AllocationBase::operator=(std::move(other));
+		using std::swap;
+		swap(m_width, other.m_width);
+		swap(m_height, other.m_height);
+		swap(m_layout, other.m_layout);
+		swap(m_image, other.m_image);
+		swap(m_stagingBuffer, other.m_stagingBuffer);
+		swap(m_imageView, other.m_imageView);
+		swap(m_usage, other.m_usage);
+		swap(m_sampleCount, other.m_sampleCount);
 		return *this;
 	}
 
 	/**
-	 * \brief Change layout of the image. Barrier do not wait or block command.
+	 * \brief Change layout of the image. Barrier block all commands.
 	 */
 	void Image::changeLayout(vk::CommandBuffer cb, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectMask)
 	{
@@ -113,7 +112,6 @@ namespace ciallo::vulkan
 		return barrier;
 	}
 
-	// Warning: mipmap and array layers unsupported
 	void Image::upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size)
 	{
 		if (size == 0) size = this->size();
@@ -157,36 +155,6 @@ namespace ciallo::vulkan
 		m_imageView = device().createImageViewUnique(info);
 	}
 
-	vk::Device Image::device() const
-	{
-		VmaAllocatorInfo info;
-		vmaGetAllocatorInfo(m_allocator, &info);
-		return info.device;
-	}
-
-	bool Image::hostVisible() const
-	{
-		VkMemoryPropertyFlags flags;
-		vmaGetAllocationMemoryProperties(m_allocator, m_allocation, &flags);
-		return flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-	}
-
-	void Image::uploadLocal(const void* data, vk::DeviceSize size) const
-	{
-		if (!hostVisible())
-		{
-			throw std::runtime_error("Image is not visible to host");
-		}
-		void* mappedData;
-		vmaMapMemory(m_allocator, m_allocation, &mappedData);
-		memcpy(mappedData, data, size);
-		if (!hostCoherent())
-		{
-			vmaFlushAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
-		}
-		vmaUnmapMemory(m_allocator, m_allocation);
-	}
-
 	// Only color image for now.
 	void Image::uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size,
 	                          vk::Buffer stagingBuffer) const
@@ -205,12 +173,5 @@ namespace ciallo::vulkan
 		VkImage image;
 		vmaCreateImage(allocator, &i, &allocInfo, &image, &m_allocation, nullptr);
 		m_image = image;
-	}
-
-	bool Image::hostCoherent() const
-	{
-		VkMemoryPropertyFlags flags;
-		vmaGetAllocationMemoryProperties(m_allocator, m_allocation, &flags);
-		return flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 	}
 }

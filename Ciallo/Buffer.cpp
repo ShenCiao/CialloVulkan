@@ -4,24 +4,32 @@
 
 namespace ciallo::vulkan
 {
-	Buffer::Buffer(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::DeviceSize size,
-	               vk::BufferUsageFlags usage): m_allocator(allocator), m_size(size), m_usage(usage)
+	vk::MemoryPropertyFlags AllocationBase::memoryProperty() const
 	{
-		vk::BufferCreateInfo info{{}, size, usage};
-
-		auto i = static_cast<VkBufferCreateInfo>(info);
-		VkBuffer buffer;
-		vmaCreateBuffer(allocator, &i, &allocInfo, &buffer, &m_allocation, nullptr);
-
-		m_buffer = buffer;
+		VkMemoryPropertyFlags flags;
+		vmaGetAllocationMemoryProperties(m_allocator, m_allocation, &flags);
+		return static_cast<vk::MemoryPropertyFlags>(flags);
 	}
 
-	void Buffer::uploadLocal(const void* data, vk::DeviceSize size) const
+	bool AllocationBase::hostVisible() const
 	{
-		if (!hostVisible())
-		{
-			throw std::runtime_error("Buffer is not visible to host");
-		}
+		return static_cast<bool>(memoryProperty() & vk::MemoryPropertyFlagBits::eHostVisible);
+	}
+
+	bool AllocationBase::hostCoherent() const
+	{
+		return static_cast<bool>(memoryProperty() & vk::MemoryPropertyFlagBits::eHostCoherent);
+	}
+
+	uint32_t AllocationBase::memoryTypeIndex() const
+	{
+		VmaAllocationInfo allocInfo;
+		vmaGetAllocationInfo(m_allocator, m_allocation, &allocInfo);
+		return allocInfo.memoryType;
+	}
+
+	void AllocationBase::uploadLocal(const void* data, vk::DeviceSize size) const
+	{
 		void* mappedData;
 		vmaMapMemory(m_allocator, m_allocation, &mappedData);
 		memcpy(mappedData, data, size);
@@ -30,6 +38,42 @@ namespace ciallo::vulkan
 			vmaFlushAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
 		}
 		vmaUnmapMemory(m_allocator, m_allocation);
+	}
+
+	vk::Device AllocationBase::device() const
+	{
+		VmaAllocatorInfo info;
+		vmaGetAllocatorInfo(m_allocator, &info);
+		return info.device;
+	}
+
+	AllocationBase::AllocationBase(VmaAllocator allocator): m_allocator(allocator)
+	{
+	}
+
+	AllocationBase::AllocationBase(AllocationBase&& other) noexcept
+	{
+		*this = std::move(other);
+	}
+
+	AllocationBase& AllocationBase::operator=(AllocationBase&& other) noexcept
+	{
+		using std::swap;
+		swap(m_allocator, other.m_allocator);
+		swap(m_allocation, other.m_allocation);
+		return *this;
+	}
+
+	Buffer::Buffer(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::DeviceSize size,
+	               vk::BufferUsageFlags usage): AllocationBase(allocator), m_size(size), m_usage(usage)
+	{
+		vk::BufferCreateInfo info{{}, size, usage};
+
+		auto i = static_cast<VkBufferCreateInfo>(info);
+		VkBuffer buffer;
+		vmaCreateBuffer(allocator, &i, &allocInfo, &buffer, &m_allocation, nullptr);
+
+		m_buffer = buffer;
 	}
 
 	void Buffer::uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size,
@@ -71,20 +115,6 @@ namespace ciallo::vulkan
 		upload(cb, data.data(), data.size() * sizeof(T));
 	}
 
-	bool Buffer::hostVisible() const
-	{
-		VkMemoryPropertyFlags flags;
-		vmaGetAllocationMemoryProperties(m_allocator, m_allocation, &flags);
-		return flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-	}
-
-	bool Buffer::hostCoherent() const
-	{
-		VkMemoryPropertyFlags flags;
-		vmaGetAllocationMemoryProperties(m_allocator, m_allocation, &flags);
-		return flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-	}
-
 	void Buffer::destroyStagingBuffer()
 	{
 		m_stagingBuffer.reset();
@@ -108,10 +138,9 @@ namespace ciallo::vulkan
 			return *this;
 		}
 
-		VmaAllocationInfo allocInfo;
-		vmaGetAllocationInfo(other.m_allocator, other.m_allocation, &allocInfo);
+		uint32_t index = memoryTypeIndex();
 		VmaAllocationCreateInfo allocCreateInfo{};
-		allocCreateInfo.memoryTypeBits = 1u << allocInfo.memoryType;
+		allocCreateInfo.memoryTypeBits = 1u << index;
 
 		// Call move assignment operator.
 		*this = Buffer(other.m_allocator, allocCreateInfo, m_size, m_usage);
@@ -120,19 +149,24 @@ namespace ciallo::vulkan
 
 	Buffer& Buffer::operator=(Buffer&& other) noexcept
 	{
-		std::swap(m_allocator, other.m_allocator);
-		std::swap(m_buffer, other.m_buffer);
-		std::swap(m_allocation, other.m_allocation);
-		std::swap(m_size, other.m_size);
-		std::swap(m_stagingBuffer, other.m_stagingBuffer);
+		AllocationBase::operator=(std::move(other));
+		using std::swap;
+		swap(m_buffer, other.m_buffer);
+		swap(m_size, other.m_size);
+		swap(m_stagingBuffer, other.m_stagingBuffer);
 		return *this;
 	}
 
 	Buffer::~Buffer()
 	{
-		if (m_allocator)
+		if (m_allocator && m_buffer && m_allocation)
 		{
 			vmaDestroyBuffer(m_allocator, m_buffer, m_allocation);
 		}
+	}
+
+	vk::Buffer Buffer::buffer() const
+	{
+		return m_buffer;
 	}
 }

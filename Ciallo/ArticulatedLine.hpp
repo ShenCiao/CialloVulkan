@@ -41,11 +41,3 @@ namespace ciallo::rendering
 		void render(vk::CommandBuffer cb, entt::handle object) override;
 	};
 }
-
-namespace ciallo::editor
-{
-	struct ArticulatedLineSettingsCpo
-	{
-		
-	};
-}
