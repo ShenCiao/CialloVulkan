@@ -5,7 +5,7 @@
 #include "imgui.h"
 #include "PrincipleBrushComponents.hpp"
 
-namespace ciallo::brush
+namespace ciallo::editor
 {
 	class BrushPool
 	{
@@ -19,8 +19,8 @@ namespace ciallo::brush
 		void loadPresetBrushes(const vulkan::Device* device)
 		{
 			entt::entity brush = m_registry.create();
-			m_registry.emplace<brush::EngineTypeFlags>(brush, brush::EngineTypeFlags::ArticulatedLine);
-			m_registry.emplace<brush::ArticulatedLineSettingsCpo>(brush);
+			m_registry.emplace<editor::EngineTypeFlags>(brush, editor::EngineTypeFlags::ArticulatedLine);
+			m_registry.emplace<editor::ArticulatedLineSettingsCpo>(brush);
 
 			for (int i : views::iota(0, 10))
 			{
@@ -28,12 +28,12 @@ namespace ciallo::brush
 			}
 
 			VmaAllocationCreateInfo allocationCreateInfo{{}, VMA_MEMORY_USAGE_AUTO};
-			brush::DemoCpo demo{
+			editor::DemoCpo demo{
 				vulkan::Image(*device, allocationCreateInfo, 400, 100,
 				              vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eColorAttachment)
 			};
 
-			m_registry.insert<brush::DemoCpo>(m_brushes.begin(), m_brushes.end(), demo);
+			m_registry.insert<editor::DemoCpo>(m_brushes.begin(), m_brushes.end(), demo);
 		}
 	};
 }

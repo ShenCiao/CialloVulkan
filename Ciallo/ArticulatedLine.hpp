@@ -3,6 +3,7 @@
 #include "Device.hpp"
 #include "Image.hpp"
 #include "ShaderModule.hpp"
+#include "Renderer.hpp"
 
 namespace ciallo::rendering
 {
@@ -14,8 +15,6 @@ namespace ciallo::rendering
 		vulkan::ShaderModule m_geomShader;
 		vk::UniquePipeline m_pipeline;
 		vk::UniquePipelineLayout m_pipelineLayout;
-		vk::UniqueRenderPass m_renderPass;
-		vk::UniqueFramebuffer m_framebuffer;
 		vulkan::Buffer m_vertBuffer;
 	public:
 		explicit ArticulatedLine(vulkan::Device* device);
@@ -27,9 +26,23 @@ namespace ciallo::rendering
 		void renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target);
 		void genVertexBuffer(VmaAllocator allocator);
 	};
+
+	class ArticulatedLineRenderer : Renderer
+	{
+		vk::Pipeline m_pipeline;
+		vk::PipelineLayout m_pipelineLayout;
+	public:
+		ArticulatedLineRenderer(const ArticulatedLineRenderer& other) = default;
+		ArticulatedLineRenderer(ArticulatedLineRenderer&& other) = default;
+		ArticulatedLineRenderer& operator=(const ArticulatedLineRenderer& other) = default;
+		ArticulatedLineRenderer& operator=(ArticulatedLineRenderer&& other) = default;
+		~ArticulatedLineRenderer() override = default;
+
+		void render(vk::CommandBuffer cb, entt::handle object) override;
+	};
 }
 
-namespace ciallo::brush
+namespace ciallo::editor
 {
 	struct ArticulatedLineSettingsCpo
 	{

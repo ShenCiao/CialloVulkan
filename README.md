@@ -131,7 +131,7 @@ Take my great appreciation for your willingness to help on development. But Cial
   - Dear ImGui
   - ImPlot
 - Coding Patterns
-  - Entt - ECS and event system. Ciallo use ECS for writing data-operation-separated code rather than high performance. (Polylines are basically born cache friendly.)
+  - Entt - ECS and event system. Ciallo use ECS for writing data-operation-separated code rather than high performance.
   - range-v3
 - Geometry and algebra
   - CGAL

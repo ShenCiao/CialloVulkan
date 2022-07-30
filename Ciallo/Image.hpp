@@ -29,7 +29,7 @@ namespace ciallo::vulkan
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height, vk::ImageUsageFlags usage);
 		~Image();
 
-		// TODO: customized image flags
+		// TODO: customized image flags, add sample count support.
 		Image() = default;
 		Image(const Image& other);
 		Image(Image&& other) noexcept;

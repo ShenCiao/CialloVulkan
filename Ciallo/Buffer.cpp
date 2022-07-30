@@ -5,13 +5,14 @@
 namespace ciallo::vulkan
 {
 	Buffer::Buffer(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::DeviceSize size,
-	               vk::BufferUsageFlags usage): m_allocator(allocator), m_size(size)
+	               vk::BufferUsageFlags usage): m_allocator(allocator), m_size(size), m_usage(usage)
 	{
 		vk::BufferCreateInfo info{{}, size, usage};
-		auto i = static_cast<VkBufferCreateInfo>(info);
 
+		auto i = static_cast<VkBufferCreateInfo>(info);
 		VkBuffer buffer;
 		vmaCreateBuffer(allocator, &i, &allocInfo, &buffer, &m_allocation, nullptr);
+
 		m_buffer = buffer;
 	}
 
@@ -89,9 +90,32 @@ namespace ciallo::vulkan
 		m_stagingBuffer.reset();
 	}
 
+	Buffer::Buffer(const Buffer& other)
+	{
+		*this = other;
+	}
+
 	Buffer::Buffer(Buffer&& other) noexcept
 	{
 		*this = std::move(other);
+	}
+
+	Buffer& Buffer::operator=(const Buffer& other)
+	{
+		if (!other.m_allocator) // other is default constructed, default construct this
+		{
+			*this = Buffer();
+			return *this;
+		}
+
+		VmaAllocationInfo allocInfo;
+		vmaGetAllocationInfo(other.m_allocator, other.m_allocation, &allocInfo);
+		VmaAllocationCreateInfo allocCreateInfo{};
+		allocCreateInfo.memoryTypeBits = 1u << allocInfo.memoryType;
+
+		// Call move assignment operator.
+		*this = Buffer(other.m_allocator, allocCreateInfo, m_size, m_usage);
+		return *this;
 	}
 
 	Buffer& Buffer::operator=(Buffer&& other) noexcept

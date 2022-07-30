@@ -145,7 +145,7 @@ namespace ciallo::vulkan
 	void Device::genDescriptorPool()
 	{
 		vk::DescriptorPoolCreateInfo poolInfo(
-			{},
+			vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
 			MAX_SIZE * static_cast<uint32_t>(m_descriptorPoolSizes.size()),
 			m_descriptorPoolSizes
 		);

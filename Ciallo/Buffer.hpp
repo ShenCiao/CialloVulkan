@@ -11,6 +11,7 @@ namespace ciallo::vulkan
 		VmaAllocation m_allocation = nullptr;
 		vk::Buffer m_buffer = VK_NULL_HANDLE;
 		vk::DeviceSize m_size{};
+		vk::BufferUsageFlags m_usage;
 		std::unique_ptr<Buffer> m_stagingBuffer;
 	public:
 		/**
@@ -25,11 +26,10 @@ namespace ciallo::vulkan
 
 		operator vk::Buffer() const { return m_buffer; }
 
-		// TODO: make it copyable like image
 		Buffer() = default;
-		Buffer(const Buffer& other) = delete;
+		Buffer(const Buffer& other);
 		Buffer(Buffer&& other) noexcept;
-		Buffer& operator=(const Buffer& other) = delete;
+		Buffer& operator=(const Buffer& other);
 		Buffer& operator=(Buffer&& other) noexcept;
 		~Buffer();
 

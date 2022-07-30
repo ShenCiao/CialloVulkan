@@ -15,7 +15,7 @@ void ciallo::Application::run() const
 	auto inst = std::make_shared<vulkan::Instance>();
 	int physicalDeviceIndex = vulkan::Device::pickPhysicalDevice(*inst);
 	auto device = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
-	auto brushPool = std::make_unique<brush::BrushPool>();
+	auto brushPool = std::make_unique<editor::BrushPool>();
 	brushPool->loadPresetBrushes(device.get());
 
 	win->setInstance(inst);

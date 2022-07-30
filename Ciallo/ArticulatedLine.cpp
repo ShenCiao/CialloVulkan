@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "vku.hpp"
+#include "CommonSceneObjectComponents.hpp"
 
 namespace ciallo::rendering
 {
@@ -84,5 +85,11 @@ namespace ciallo::rendering
 		auto size = vertices.size() * sizeof(Vertex);
 		m_vertBuffer = vulkan::Buffer(allocator, info, size, vk::BufferUsageFlagBits::eVertexBuffer);
 		m_vertBuffer.uploadLocal(vertices.data(), size);
+	}
+
+	void ArticulatedLineRenderer::render(vk::CommandBuffer cb, entt::handle object)
+	{
+		auto& vert = object.get<scene::VertexBufferCpo>();
+		
 	}
 }

@@ -5,9 +5,9 @@ namespace ciallo::vulkan
 {
 	class ShaderModule
 	{
-		vk::Device m_device;
+		vk::Device m_device = VK_NULL_HANDLE;
 		vk::UniqueShaderModule m_shaderModule;
-		vk::ShaderStageFlagBits m_stage;
+		vk::ShaderStageFlagBits m_stage = vk::ShaderStageFlagBits::eAll;
 		std::optional<std::filesystem::path> m_filePath;
 	public:
 		ShaderModule(vk::Device device, vk::ShaderStageFlagBits stage, const std::filesystem::path& path);

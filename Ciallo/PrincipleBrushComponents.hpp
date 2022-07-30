@@ -7,7 +7,7 @@
  * All game engines support Ciallo's brush should at least support width per vertices and color of whole strokes.
  */
 
-namespace ciallo::brush
+namespace ciallo::editor
 {
 	// Value x should fetch from vertices abbreviated as xVCpo. 
 	struct WidthVCpo
@@ -29,7 +29,7 @@ namespace ciallo::brush
 	struct DemoCpo
 	{
 		vulkan::Image image;
-		ImTextureID id = nullptr;
+		ImTextureID guiId = nullptr;
 	};
 
 	struct EngineTagCpo
