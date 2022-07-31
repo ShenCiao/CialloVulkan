@@ -14,7 +14,7 @@ namespace ciallo::vulkan
 		vk::Format m_format = vk::Format::eUndefined;
 		uint32_t m_width = 0u;
 		uint32_t m_height = 0u;
-		vk::SampleCountFlags m_sampleCount = vk::SampleCountFlagBits::e1;
+		vk::SampleCountFlagBits m_sampleCount = {};
 		vk::ImageUsageFlags m_usage;
 		vk::ImageLayout m_layout = vk::ImageLayout::eUndefined;
 
@@ -23,11 +23,11 @@ namespace ciallo::vulkan
 		vk::UniqueImageView m_imageView;
 	public:
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info);
-		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height,
-		      vk::ImageUsageFlags usage);
+		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::Format format,
+		      uint32_t width, uint32_t height, vk::SampleCountFlagBits sampleCount, vk::ImageUsageFlags usage);
 		~Image();
 
-		// TODO: customized memory flags, add sample count support.
+		// TODO: customized memory flags.
 		Image() = default;
 		Image(const Image& other);
 		Image(Image&& other) noexcept;
@@ -41,7 +41,8 @@ namespace ciallo::vulkan
 			vk::ImageLayout newLayout,
 			vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eColor) const;
 
-		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size = 0u);
+		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size);
+		void uploadLocal(const void* data, vk::DeviceSize size) const;
 		vk::DeviceSize size() const;
 
 		// Upload with provided stagingBuffer

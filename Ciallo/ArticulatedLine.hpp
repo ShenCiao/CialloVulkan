@@ -7,7 +7,7 @@
 
 namespace ciallo::rendering
 {
-	class ArticulatedLine
+	class ArticulatedLineEngine
 	{
 		vk::Device m_device;
 		vulkan::ShaderModule m_vertShader;
@@ -16,8 +16,9 @@ namespace ciallo::rendering
 		vk::UniquePipeline m_pipeline;
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vulkan::Buffer m_vertBuffer;
+		
 	public:
-		explicit ArticulatedLine(vulkan::Device* device);
+		explicit ArticulatedLineEngine(vulkan::Device* device);
 
 		void genPipelineLayout();
 
@@ -27,11 +28,12 @@ namespace ciallo::rendering
 		void genVertexBuffer(VmaAllocator allocator);
 	};
 
-	class ArticulatedLineRenderer : Renderer
+	class ArticulatedLineRenderer : public Renderer
 	{
 		vk::Pipeline m_pipeline;
 		vk::PipelineLayout m_pipelineLayout;
 	public:
+		ArticulatedLineRenderer() = default;
 		ArticulatedLineRenderer(const ArticulatedLineRenderer& other) = default;
 		ArticulatedLineRenderer(ArticulatedLineRenderer&& other) = default;
 		ArticulatedLineRenderer& operator=(const ArticulatedLineRenderer& other) = default;

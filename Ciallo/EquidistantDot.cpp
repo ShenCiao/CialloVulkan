@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+
+#include "CommonSceneObjectComponents.hpp"
 #include "vku.hpp"
 
 namespace ciallo::rendering
@@ -15,7 +17,7 @@ namespace ciallo::rendering
 		float _pad1;
 	};
 
-	EquidistantDot::EquidistantDot(vulkan::Device* device): m_device(*device)
+	EquidistantDotEngine::EquidistantDotEngine(vulkan::Device* device): m_device(*device)
 	{
 		m_compShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eCompute,
 		                                    "./shaders/equidistantDot.comp.spv");
@@ -32,7 +34,7 @@ namespace ciallo::rendering
 		genPipelineDynamic();
 	}
 
-	void EquidistantDot::genPipelineDynamic()
+	void EquidistantDotEngine::genPipelineDynamic()
 	{
 		vku::PipelineLayoutMaker layoutMaker;
 		m_pipelineLayout = layoutMaker.createUnique(m_device);
@@ -53,7 +55,7 @@ namespace ciallo::rendering
 		m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 	}
 
-	void EquidistantDot::genCompDescriptorSet(vk::DescriptorPool pool)
+	void EquidistantDotEngine::genCompDescriptorSet(vk::DescriptorPool pool)
 	{
 		vku::DescriptorSetLayoutMaker layoutMaker;
 		layoutMaker.buffer(0, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eCompute, 1)
@@ -78,7 +80,7 @@ namespace ciallo::rendering
 	}
 
 	// gen compute layout and pipeline
-	void EquidistantDot::genCompPipeline()
+	void EquidistantDotEngine::genCompPipeline()
 	{
 		vku::PipelineLayoutMaker layoutMaker;
 		layoutMaker.descriptorSetLayout(*m_compDescriptorSetLayout);
@@ -89,7 +91,7 @@ namespace ciallo::rendering
 		m_compPipeline = maker.createUnique(m_device, nullptr, *m_compPipelineLayout);
 	}
 
-	void EquidistantDot::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
+	void EquidistantDotEngine::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
 	{
 		compute(cb);
 		vk::MemoryBarrier2 drawIndirectBarrier{
@@ -100,7 +102,7 @@ namespace ciallo::rendering
 			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
 			vk::PipelineStageFlagBits2::eVertexInput, vk::AccessFlagBits2::eVertexAttributeRead
 		};
-		
+
 		std::vector barriers = {drawIndirectBarrier, vertexBarrier};
 		cb.pipelineBarrier2({{}, barriers, {}, {}});
 
@@ -122,7 +124,7 @@ namespace ciallo::rendering
 		cb.endRendering();
 	}
 
-	void EquidistantDot::genInputBuffer(VmaAllocator allocator)
+	void EquidistantDotEngine::genInputBuffer(VmaAllocator allocator)
 	{
 		const std::vector<Vertex> vertices = {
 			{{0.0f, 0.5f}, {}, {1.0f, 0.0f, 0.0f}},
@@ -137,7 +139,7 @@ namespace ciallo::rendering
 		m_inputBuffer.uploadLocal(vertices.data(), size);
 	}
 
-	void EquidistantDot::genAuxiliaryBuffer(VmaAllocator allocator)
+	void EquidistantDotEngine::genAuxiliaryBuffer(VmaAllocator allocator)
 	{
 		VmaAllocationCreateInfo info{{}, VMA_MEMORY_USAGE_AUTO};
 		constexpr int MAX_DOT = 1024 * 8;
@@ -150,11 +152,39 @@ namespace ciallo::rendering
 		                                      vk::BufferUsageFlagBits::eIndirectBuffer);
 	}
 
-	void EquidistantDot::compute(vk::CommandBuffer cb)
+	void EquidistantDotEngine::compute(vk::CommandBuffer cb)
 	{
 		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, *m_compPipelineLayout, 0, m_compDescriptorSet,
 		                      nullptr);
 		cb.bindPipeline(vk::PipelineBindPoint::eCompute, *m_compPipeline);
 		cb.dispatch(1, 1, 1);
+	}
+
+	void EquidistantDotRenderer::render(vk::CommandBuffer cb, entt::handle object)
+	{
+		// Compute
+		auto& [vbDesS] = object.get<scene::VertexBufferDesSCpo>();
+
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, m_computePipelineLayout, 0, *vbDesS, nullptr);
+		cb.bindPipeline(vk::PipelineBindPoint::eCompute, m_computePipeline);
+		cb.dispatch(1, 1, 1);
+
+		// Sync
+		const vk::MemoryBarrier2 drawIndirectBarrier{
+			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
+			vk::PipelineStageFlagBits2::eDrawIndirect, vk::AccessFlagBits2::eIndirectCommandRead
+		};
+		const vk::MemoryBarrier2 vertexBarrier{
+			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
+			vk::PipelineStageFlagBits2::eVertexInput, vk::AccessFlagBits2::eVertexAttributeRead
+		};
+		const std::vector barriers = {drawIndirectBarrier, vertexBarrier};
+		cb.pipelineBarrier2({{}, barriers, {}, {}});
+
+		// Graphics
+		std::vector<vk::Buffer> vertexBuffers{m_dotBuffer};
+		cb.bindVertexBuffers(0, vertexBuffers, {0});
+		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+		cb.drawIndirect(m_indirectDrawBuffer, 0, 1, {});
 	}
 }

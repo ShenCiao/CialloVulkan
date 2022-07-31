@@ -24,11 +24,13 @@ namespace ciallo::gui
 		int width = 1024, height = 1024;
 		VmaAllocationCreateInfo info = {{}, VMA_MEMORY_USAGE_AUTO};
 
-		m_canvas = std::make_unique<vulkan::Image>(*d, info, width, height,
-		                                           vk::ImageUsageFlagBits::eSampled |
-		                                           vk::ImageUsageFlagBits::eTransferDst |
-		                                           vk::ImageUsageFlagBits::eColorAttachment);
-		
+		m_canvas = std::make_unique<vulkan::Image>(
+			*d, info, vk::Format::eR8G8B8A8Unorm,
+			width, height, vk::SampleCountFlagBits::e1,
+			vk::ImageUsageFlagBits::eSampled |
+			vk::ImageUsageFlagBits::eTransferDst |
+			vk::ImageUsageFlagBits::eColorAttachment);
+
 		m_canvas->changeLayout(cb, vk::ImageLayout::eGeneral);
 
 		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),

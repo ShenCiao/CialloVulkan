@@ -8,7 +8,7 @@
 
 namespace ciallo::rendering
 {
-	ArticulatedLine::ArticulatedLine(vulkan::Device* device): m_device(*device)
+	ArticulatedLineEngine::ArticulatedLineEngine(vulkan::Device* device): m_device(*device)
 	{
 		m_vertShader = vulkan::ShaderModule(*device, vk::ShaderStageFlagBits::eVertex,
 		                                    "./shaders/articulatedLine.vert.spv");
@@ -21,13 +21,13 @@ namespace ciallo::rendering
 		genVertexBuffer(*device);
 	}
 
-	void ArticulatedLine::genPipelineLayout()
+	void ArticulatedLineEngine::genPipelineLayout()
 	{
 		vku::PipelineLayoutMaker maker;
 		m_pipelineLayout = maker.createUnique(m_device);
 	}
 
-	void ArticulatedLine::genPipelineDynamic()
+	void ArticulatedLineEngine::genPipelineDynamic()
 	{
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
@@ -46,7 +46,7 @@ namespace ciallo::rendering
 		m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 	}
 
-	void ArticulatedLine::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
+	void ArticulatedLineEngine::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
 	{
 		vk::Rect2D area{{0, 0}, target->extent()};
 		vk::RenderingAttachmentInfo renderingAttachmentInfo{target->imageView(), target->imageLayout()};
@@ -66,7 +66,7 @@ namespace ciallo::rendering
 		cb.endRendering();
 	}
 
-	void ArticulatedLine::genVertexBuffer(VmaAllocator allocator)
+	void ArticulatedLineEngine::genVertexBuffer(VmaAllocator allocator)
 	{
 		struct Vertex
 		{
@@ -89,7 +89,18 @@ namespace ciallo::rendering
 
 	void ArticulatedLineRenderer::render(vk::CommandBuffer cb, entt::handle object)
 	{
-		auto& vert = object.get<scene::VertexBufferCpo>();
-		
+		auto& [buffers, vertexCount] = object.get<scene::VertexBufferCpo>();
+		auto& [piplineDesS] = object.get<scene::PipelineResourceCpo>();
+		vk::DescriptorSet desS = *piplineDesS;
+		auto getBufferObject = [](const vulkan::Buffer& b)
+		{
+			return b.buffer();
+		};
+		std::vector<vk::Buffer> vbs = buffers | views::transform(getBufferObject) | ranges::to_vector;
+
+		cb.bindVertexBuffers(0, vbs, {0});
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, desS, nullptr);
+		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+		cb.draw(vertexCount, 1, 0, 0);
 	}
 }

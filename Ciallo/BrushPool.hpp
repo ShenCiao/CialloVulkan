@@ -14,13 +14,13 @@ namespace ciallo::editor
 
 	public:
 		BrushPool() = default;
-		
+
 
 		void loadPresetBrushes(const vulkan::Device* device)
 		{
 			entt::entity brush = m_registry.create();
 			m_registry.emplace<editor::EngineTypeFlags>(brush, editor::EngineTypeFlags::ArticulatedLine);
-			
+
 			for (int i : views::iota(0, 10))
 			{
 				m_brushes.push_back(m_registry.create());
@@ -28,7 +28,8 @@ namespace ciallo::editor
 
 			VmaAllocationCreateInfo allocationCreateInfo{{}, VMA_MEMORY_USAGE_AUTO};
 			editor::DemoCpo demo{
-				vulkan::Image(*device, allocationCreateInfo, 400, 100,
+				vulkan::Image(*device, allocationCreateInfo, vk::Format::eR8G8B8A8Unorm, 400, 100,
+				              vk::SampleCountFlagBits::e1,
 				              vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eColorAttachment)
 			};
 

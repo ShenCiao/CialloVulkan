@@ -11,7 +11,6 @@ namespace ciallo::vulkan
 		VmaAllocator m_allocator = nullptr;
 		VmaAllocation m_allocation = nullptr;
 
-
 	public:
 		AllocationBase() = default;
 		explicit AllocationBase(VmaAllocator allocator);
@@ -70,7 +69,9 @@ namespace ciallo::vulkan
 		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size);
 		template <typename T>
 		void upload(vk::CommandBuffer cb, std::vector<T>& data);
+		void uploadLocal(const void* data, vk::DeviceSize size) const;
 
+		vk::DeviceSize size() const;
 		void destroyStagingBuffer();
 	};
 }

@@ -3,10 +3,11 @@
 #include "Device.hpp"
 #include "Image.hpp"
 #include "ShaderModule.hpp"
+#include "Renderer.hpp"
 
 namespace ciallo::rendering
 {
-	class EquidistantDot
+	class EquidistantDotEngine
 	{
 		vk::Device m_device;
 		vulkan::ShaderModule m_compShader;
@@ -25,7 +26,7 @@ namespace ciallo::rendering
 		vk::UniqueDescriptorSetLayout m_compDescriptorSetLayout;
 		vk::DescriptorSet m_compDescriptorSet;
 	public:
-		explicit EquidistantDot(vulkan::Device* device);
+		explicit EquidistantDotEngine(vulkan::Device* device);
 
 		void genPipelineDynamic();
 
@@ -35,32 +36,25 @@ namespace ciallo::rendering
 		void genInputBuffer(VmaAllocator allocator);
 		void genAuxiliaryBuffer(VmaAllocator allocator);
 		void compute(vk::CommandBuffer cb);
+	};
 
-		void render(vk::CommandBuffer cb, const std::vector<vk::DescriptorSet>& vertInputs,
-		            const std::vector<vk::DescriptorSet>& descriptors)
-		{
-			// Compute
-			cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, *m_compPipelineLayout, 0, vertInputs, nullptr);
-			cb.bindPipeline(vk::PipelineBindPoint::eCompute, *m_compPipeline);
-			cb.dispatch(1, 1, 1);
+	class EquidistantDotRenderer: public Renderer
+	{
+		vk::Pipeline m_pipeline;
+		vk::PipelineLayout m_pipelineLayout;
+		vk::Pipeline m_computePipeline;
+		vk::PipelineLayout m_computePipelineLayout;
 
-			// Sync
-			const vk::MemoryBarrier2 drawIndirectBarrier{
-				vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
-				vk::PipelineStageFlagBits2::eDrawIndirect, vk::AccessFlagBits2::eIndirectCommandRead
-			};
-			const vk::MemoryBarrier2 vertexBarrier{
-				vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
-				vk::PipelineStageFlagBits2::eVertexInput, vk::AccessFlagBits2::eVertexAttributeRead
-			};
-			const std::vector barriers = {drawIndirectBarrier, vertexBarrier};
-			cb.pipelineBarrier2({{}, barriers, {}, {}});
+		vulkan::Buffer m_indirectDrawBuffer;
+		vulkan::Buffer m_dotBuffer; // buffer for graphics pipeline input.
+	public:
+		EquidistantDotRenderer() = default;
+		EquidistantDotRenderer(const EquidistantDotRenderer& other) = default;
+		EquidistantDotRenderer(EquidistantDotRenderer&& other) noexcept = default;
+		EquidistantDotRenderer& operator=(const EquidistantDotRenderer& other) = default;
+		EquidistantDotRenderer& operator=(EquidistantDotRenderer&& other) noexcept = default;
+		~EquidistantDotRenderer() override = default;
 
-			// Graphics
-			std::vector<vk::Buffer> vertexBuffers{m_dotBuffer};
-			cb.bindVertexBuffers(0, vertexBuffers, {0});
-			cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
-			cb.drawIndirect(m_indirectDrawBuffer, 0, 1, {});
-		}
+		void render(vk::CommandBuffer cb, entt::handle object) override;
 	};
 }

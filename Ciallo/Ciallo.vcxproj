@@ -108,6 +108,7 @@
     <ClCompile Include="EquidistantDot.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainPassRenderer.cpp" />
+    <ClCompile Include="Mapper.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -133,6 +134,7 @@
     <ClInclude Include="Image.hpp" />
     <ClInclude Include="EquidistantDot.hpp" />
     <ClInclude Include="MainPassRenderer.hpp" />
+    <ClInclude Include="Mapper.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="PrincipleBrushComponents.hpp" />

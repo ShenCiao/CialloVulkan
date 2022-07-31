@@ -93,7 +93,7 @@ namespace ciallo::vulkan
 
 	void Buffer::upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size)
 	{
-		if (size == 0) return;
+		if (size == VK_WHOLE_SIZE) size = m_size;
 		if (hostVisible())
 		{
 			uploadLocal(data, size);
@@ -113,6 +113,17 @@ namespace ciallo::vulkan
 	void Buffer::upload(vk::CommandBuffer cb, std::vector<T>& data)
 	{
 		upload(cb, data.data(), data.size() * sizeof(T));
+	}
+
+	void Buffer::uploadLocal(const void* data, vk::DeviceSize size) const
+	{
+		if (size == VK_WHOLE_SIZE) size = this->size();
+		AllocationBase::uploadLocal(data, size);
+	}
+
+	vk::DeviceSize Buffer::size() const
+	{
+		return m_size;
 	}
 
 	void Buffer::destroyStagingBuffer()

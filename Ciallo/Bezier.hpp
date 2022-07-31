@@ -9,7 +9,6 @@
 namespace ciallo::geom
 {
 	template <size_t N>
-	// Should be the same signature as https://doc.cgal.org/latest/Arrangement_on_surface_2/classCGAL_1_1Arr__Bezier__curve__traits__2_1_1Curve__2.html
 	class Bezier
 	{
 		using Polynomial = CGAL::Polynomial<float>;

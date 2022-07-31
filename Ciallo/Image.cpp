@@ -7,29 +7,31 @@ namespace ciallo::vulkan
 {
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info):
 		AllocationBase(allocator), m_format(info.format), m_width(info.extent.width), m_height(info.extent.height),
-		m_usage(info.usage), m_layout(info.initialLayout)
+		m_sampleCount(info.samples), m_usage(info.usage), m_layout(info.initialLayout)
 	{
 		genImage(allocator, allocCreateInfo, info);
 		genImageView();
 	}
 
-	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, uint32_t width, uint32_t height,
-	             vk::ImageUsageFlags usage): AllocationBase(allocator), m_width(width), m_height(height), m_usage(usage)
+	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo,
+	             vk::Format format, uint32_t width, uint32_t height,
+	             vk::SampleCountFlagBits sampleCount, vk::ImageUsageFlags usage):
+		AllocationBase(allocator), m_format(format), m_width(width), m_height(height),
+		m_sampleCount(sampleCount), m_usage(usage)
 	{
 		vk::ImageCreateInfo info{};
 		info.imageType = vk::ImageType::e2D;
-		info.format = vk::Format::eR8G8B8A8Unorm;
+		info.format = format;
 		info.extent = vk::Extent3D{width, height, 1u};
 		info.mipLevels = 1;
 		info.arrayLayers = 1;
-		info.samples = vk::SampleCountFlagBits::e1;
+		info.samples = sampleCount;
 		info.tiling = vk::ImageTiling::eOptimal;
 		info.usage = usage;
 		info.sharingMode = vk::SharingMode::eExclusive;
 		info.initialLayout = vk::ImageLayout::eUndefined;
 
 		m_layout = info.initialLayout;
-		m_format = info.format;
 		genImage(allocator, allocCreateInfo, info);
 		genImageView();
 	}
@@ -63,7 +65,8 @@ namespace ciallo::vulkan
 		allocCreateInfo.memoryTypeBits = 1u << index;
 
 		// Call move assignment operator. After swapping, already exist object get destructed in temp object.
-		*this = Image(other.m_allocator, allocCreateInfo, other.m_width, other.m_height, other.m_usage);
+		*this = Image(other.m_allocator, allocCreateInfo, other.m_format,
+		              other.m_width, other.m_height, other.m_sampleCount, other.m_usage);
 		return *this;
 	}
 
@@ -71,14 +74,15 @@ namespace ciallo::vulkan
 	{
 		AllocationBase::operator=(std::move(other));
 		using std::swap;
+		swap(m_format, other.m_format);
 		swap(m_width, other.m_width);
 		swap(m_height, other.m_height);
+		swap(m_sampleCount, other.m_sampleCount);
+		swap(m_usage, other.m_usage);
 		swap(m_layout, other.m_layout);
 		swap(m_image, other.m_image);
 		swap(m_stagingBuffer, other.m_stagingBuffer);
 		swap(m_imageView, other.m_imageView);
-		swap(m_usage, other.m_usage);
-		swap(m_sampleCount, other.m_sampleCount);
 		return *this;
 	}
 
@@ -108,13 +112,13 @@ namespace ciallo::vulkan
 		};
 		barrier.image = m_image;
 		barrier.subresourceRange = {aspectMask, 0, 1, 0, 1};
-		
+
 		return barrier;
 	}
 
 	void Image::upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size)
 	{
-		if (size == 0) size = this->size();
+		if (size == VK_WHOLE_SIZE) size = this->size();
 		if (hostVisible())
 		{
 			uploadLocal(data, size);
@@ -130,6 +134,12 @@ namespace ciallo::vulkan
 			m_stagingBuffer->uploadLocal(data, size);
 			uploadStaging(cb, data, size, *m_stagingBuffer);
 		}
+	}
+
+	void Image::uploadLocal(const void* data, vk::DeviceSize size) const
+	{
+		if (size == VK_WHOLE_SIZE) size = this->size();
+		AllocationBase::uploadLocal(data, size);
 	}
 
 	vk::DeviceSize Image::size() const
