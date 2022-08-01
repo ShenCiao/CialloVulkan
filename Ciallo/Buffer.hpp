@@ -4,7 +4,7 @@
 
 namespace ciallo::vulkan
 {
-	// Base class for objects need to allocate memory from device. Include Buffer, Image and Mapper.
+	// Base class for objects need to allocate memory with vulkan memory allocator. Include Buffer, Image and Mapper.
 	class AllocationBase
 	{
 	protected:

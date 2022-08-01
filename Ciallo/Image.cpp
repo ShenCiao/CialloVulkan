@@ -6,17 +6,17 @@
 namespace ciallo::vulkan
 {
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info):
-		AllocationBase(allocator), m_format(info.format), m_width(info.extent.width), m_height(info.extent.height),
+		AllocationBase(allocator), m_format(info.format), m_extent(info.extent),
 		m_sampleCount(info.samples), m_usage(info.usage), m_layout(info.initialLayout)
 	{
-		genImage(allocator, allocCreateInfo, info);
-		genImageView();
+		m_image = createImage(allocator, allocCreateInfo, info);
+		m_imageView = createImageView();
 	}
 
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo,
 	             vk::Format format, uint32_t width, uint32_t height,
 	             vk::SampleCountFlagBits sampleCount, vk::ImageUsageFlags usage):
-		AllocationBase(allocator), m_format(format), m_width(width), m_height(height),
+		AllocationBase(allocator), m_format(format), m_extent({width, height, 1u}),
 		m_sampleCount(sampleCount), m_usage(usage)
 	{
 		vk::ImageCreateInfo info{};
@@ -32,8 +32,8 @@ namespace ciallo::vulkan
 		info.initialLayout = vk::ImageLayout::eUndefined;
 
 		m_layout = info.initialLayout;
-		genImage(allocator, allocCreateInfo, info);
-		genImageView();
+		m_image = createImage(allocator, allocCreateInfo, info);
+		m_imageView = createImageView();
 	}
 
 	Image::~Image()
@@ -66,7 +66,7 @@ namespace ciallo::vulkan
 
 		// Call move assignment operator. After swapping, already exist object get destructed in temp object.
 		*this = Image(other.m_allocator, allocCreateInfo, other.m_format,
-		              other.m_width, other.m_height, other.m_sampleCount, other.m_usage);
+		              other.m_extent.width, other.m_extent.height, other.m_sampleCount, other.m_usage);
 		return *this;
 	}
 
@@ -75,8 +75,7 @@ namespace ciallo::vulkan
 		AllocationBase::operator=(std::move(other));
 		using std::swap;
 		swap(m_format, other.m_format);
-		swap(m_width, other.m_width);
-		swap(m_height, other.m_height);
+		swap(m_extent, other.m_extent);
 		swap(m_sampleCount, other.m_sampleCount);
 		swap(m_usage, other.m_usage);
 		swap(m_layout, other.m_layout);
@@ -145,7 +144,7 @@ namespace ciallo::vulkan
 	vk::DeviceSize Image::size() const
 	{
 		vk::DeviceSize pixelSize = vk::blockSize(m_format);
-		return m_width * m_height * pixelSize;
+		return m_extent.width * m_extent.height * m_extent.depth * pixelSize;
 	}
 
 	void Image::genStagingBuffer()
@@ -154,7 +153,7 @@ namespace ciallo::vulkan
 		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, info, size(), vk::BufferUsageFlagBits::eTransferSrc);
 	}
 
-	void Image::genImageView()
+	vk::UniqueImageView Image::createImageView() const
 	{
 		vk::ImageViewCreateInfo info{};
 		info.setImage(m_image);
@@ -162,7 +161,7 @@ namespace ciallo::vulkan
 		info.setFormat(m_format);
 		info.setComponents({});
 		info.setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
-		m_imageView = device().createImageViewUnique(info);
+		return device().createImageViewUnique(info);
 	}
 
 	// Only color image for now.
@@ -172,16 +171,17 @@ namespace ciallo::vulkan
 		// Refer to vulkan spec struct VkImageSubresourceRange for aspectMask information
 		vk::BufferImageCopy copy{};
 		copy.setBufferOffset(0);
-		copy.setImageExtent({m_width, m_height, 1u});
+		copy.setImageExtent(m_extent);
 		copy.setImageSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1});
 		cb.copyBufferToImage(stagingBuffer, m_image, m_layout, copy);
 	}
 
-	void Image::genImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info)
+	vk::Image Image::createImage(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo,
+	                             vk::ImageCreateInfo info)
 	{
 		auto i = static_cast<VkImageCreateInfo>(info);
 		VkImage image;
-		vmaCreateImage(allocator, &i, &allocInfo, &image, &m_allocation, nullptr);
-		m_image = image;
+		vmaCreateImage(allocator, &i, &allocCreateInfo, &image, &m_allocation, nullptr);
+		return image;
 	}
 }

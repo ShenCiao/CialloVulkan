@@ -7,13 +7,13 @@
 namespace ciallo::vulkan
 {
 	/**
-	 * \brief 2D image. Copy constructor/assignment only allocate memory and create object, do not copy content.
+	 * \brief 2D image (color image only, changes on AspectMask needed). Copy constructor/assignment only allocate memory and create object, do not copy content.
 	 */
 	class Image : public AllocationBase
 	{
+	protected:
 		vk::Format m_format = vk::Format::eUndefined;
-		uint32_t m_width = 0u;
-		uint32_t m_height = 0u;
+		vk::Extent3D m_extent = {1u, 1u, 1u};
 		vk::SampleCountFlagBits m_sampleCount = {};
 		vk::ImageUsageFlags m_usage;
 		vk::ImageLayout m_layout = vk::ImageLayout::eUndefined;
@@ -21,6 +21,11 @@ namespace ciallo::vulkan
 		vk::Image m_image = VK_NULL_HANDLE;
 		std::unique_ptr<Buffer> m_stagingBuffer;
 		vk::UniqueImageView m_imageView;
+
+		vk::Image createImage(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo,
+		                      vk::ImageCreateInfo info);
+		vk::UniqueImageView createImageView() const;
+		void genStagingBuffer();
 	public:
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info);
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::Format format,
@@ -48,10 +53,6 @@ namespace ciallo::vulkan
 		// Upload with provided stagingBuffer
 		void uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size, vk::Buffer stagingBuffer) const;
 
-	private:
-		void genImage(VmaAllocator allocator, VmaAllocationCreateInfo allocInfo, vk::ImageCreateInfo info);
-		void genStagingBuffer();
-		void genImageView();
 	public:
 		void setImageLayout(vk::ImageLayout layout)
 		{
@@ -70,17 +71,17 @@ namespace ciallo::vulkan
 
 		uint32_t width() const
 		{
-			return m_width;
+			return m_extent.width;
 		}
 
 		uint32_t height() const
 		{
-			return m_height;
+			return m_extent.height;
 		}
 
 		vk::Extent2D extent() const
 		{
-			return {m_width, m_height};
+			return {width(), height()};
 		}
 	};
 }
