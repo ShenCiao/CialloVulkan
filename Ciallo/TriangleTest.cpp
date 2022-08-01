@@ -75,7 +75,7 @@ namespace ciallo::rendering
 
 	void TriangleTest::render(vk::CommandBuffer cb)
 	{
-		vk::RenderPassBeginInfo rpbi{*m_renderPass, *m_framebuffer, {{0, 0}, m_target->extent()}, {}};
+		vk::RenderPassBeginInfo rpbi{*m_renderPass, *m_framebuffer, {{0, 0}, m_target->extent2D()}, {}};
 		cb.beginRenderPass(rpbi, vk::SubpassContents::eInline);
 		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
 		cb.draw(3, 1, 0, 0);
@@ -84,7 +84,7 @@ namespace ciallo::rendering
 
 	void TriangleTest::renderDynamic(vk::CommandBuffer cb)
 	{
-		vk::Rect2D area{{0, 0}, m_target->extent()};
+		vk::Rect2D area{{0, 0}, m_target->extent2D()};
 		vk::RenderingAttachmentInfo renderingAttachmentInfo{m_target->imageView(), m_target->imageLayout()};
 		std::vector colorAttachments{renderingAttachmentInfo};
 		vk::RenderingInfo renderingInfo{{}, area, 1, 0, colorAttachments, {}, {}};
@@ -93,7 +93,7 @@ namespace ciallo::rendering
 			0, 0, static_cast<float>(m_target->width()), static_cast<float>(m_target->height()), 0.0f, 1.0f
 		};
 		cb.setViewport(0, allViewport);
-		vk::Rect2D allScissor{{0, 0}, m_target->extent()};
+		vk::Rect2D allScissor{{0, 0}, m_target->extent2D()};
 		cb.setScissor(0, allScissor);
 		std::vector<vk::Buffer> vertexBuffers{m_vertBuffer};
 		cb.bindVertexBuffers(0, vertexBuffers, {0});

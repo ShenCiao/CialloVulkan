@@ -5,15 +5,12 @@ namespace ciallo::vulkan
 {
 	/**
 	 * \brief Map variable inside shader
-	 * Internally, it use sampler and image with color format.
+	 * Internally, it use sampler and image with color format. Maybe it's a bad idea to inherent from Image...
 	 */
 	class Mapper : public Image
 	{
 		vk::ImageType imageType{};
 
-		vk::UniqueImageView createImageView();
-
-		vk::ImageViewType imageTypeToImageViewType(vk::ImageType imType);
 	public:
 		Mapper() = default;
 		Mapper(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info);

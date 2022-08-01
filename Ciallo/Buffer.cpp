@@ -97,16 +97,14 @@ namespace ciallo::vulkan
 		if (hostVisible())
 		{
 			uploadLocal(data, size);
+			return;
 		}
-		else if (m_stagingBuffer)
-		{
-			uploadStaging(cb, data, size, *m_stagingBuffer);
-		}
-		else
+		if (!m_stagingBuffer)
 		{
 			genStagingBuffer();
-			uploadStaging(cb, data, size, *m_stagingBuffer);
 		}
+		m_stagingBuffer->uploadLocal(data, size);
+		uploadStaging(cb, data, size, *m_stagingBuffer);
 	}
 
 	template <typename T>

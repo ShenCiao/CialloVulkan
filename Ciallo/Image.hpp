@@ -24,8 +24,9 @@ namespace ciallo::vulkan
 
 		vk::Image createImage(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo,
 		                      vk::ImageCreateInfo info);
-		vk::UniqueImageView createImageView() const;
+		vk::UniqueImageView createImageView(vk::Image image, vk::ImageViewType viewType, vk::Format format) const;
 		void genStagingBuffer();
+		vk::ImageViewType imageTypeToImageViewType(vk::ImageType imType);
 	public:
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info);
 		Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::Format format,
@@ -79,7 +80,7 @@ namespace ciallo::vulkan
 			return m_extent.height;
 		}
 
-		vk::Extent2D extent() const
+		vk::Extent2D extent2D() const
 		{
 			return {width(), height()};
 		}

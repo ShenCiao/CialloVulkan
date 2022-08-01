@@ -9,8 +9,9 @@ namespace ciallo::vulkan
 		AllocationBase(allocator), m_format(info.format), m_extent(info.extent),
 		m_sampleCount(info.samples), m_usage(info.usage), m_layout(info.initialLayout)
 	{
+		auto viewType = imageTypeToImageViewType(info.imageType);
 		m_image = createImage(allocator, allocCreateInfo, info);
-		m_imageView = createImageView();
+		m_imageView = createImageView(m_image, viewType, info.format);
 	}
 
 	Image::Image(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo,
@@ -31,9 +32,11 @@ namespace ciallo::vulkan
 		info.sharingMode = vk::SharingMode::eExclusive;
 		info.initialLayout = vk::ImageLayout::eUndefined;
 
+		auto viewType = imageTypeToImageViewType(info.imageType);
+
 		m_layout = info.initialLayout;
 		m_image = createImage(allocator, allocCreateInfo, info);
-		m_imageView = createImageView();
+		m_imageView = createImageView(m_image, viewType, format);
 	}
 
 	Image::~Image()
@@ -121,18 +124,14 @@ namespace ciallo::vulkan
 		if (hostVisible())
 		{
 			uploadLocal(data, size);
+			return;
 		}
-		else if (!m_stagingBuffer)
+		if (!m_stagingBuffer)
 		{
 			genStagingBuffer();
-			m_stagingBuffer->uploadLocal(data, size);
-			uploadStaging(cb, data, size, *m_stagingBuffer);
 		}
-		else
-		{
-			m_stagingBuffer->uploadLocal(data, size);
-			uploadStaging(cb, data, size, *m_stagingBuffer);
-		}
+		m_stagingBuffer->uploadLocal(data, size);
+		uploadStaging(cb, data, size, *m_stagingBuffer);
 	}
 
 	void Image::uploadLocal(const void* data, vk::DeviceSize size) const
@@ -153,12 +152,25 @@ namespace ciallo::vulkan
 		m_stagingBuffer = std::make_unique<Buffer>(m_allocator, info, size(), vk::BufferUsageFlagBits::eTransferSrc);
 	}
 
-	vk::UniqueImageView Image::createImageView() const
+	vk::ImageViewType Image::imageTypeToImageViewType(vk::ImageType imType)
+	{
+		using vk::ImageType;
+		using vk::ImageViewType;
+		switch (imType)
+		{
+		case ImageType::e1D: return ImageViewType::e1D;
+		case ImageType::e2D: return ImageViewType::e2D;
+		case ImageType::e3D: return ImageViewType::e3D;
+		}
+		return {};
+	}
+
+	vk::UniqueImageView Image::createImageView(vk::Image image, vk::ImageViewType viewType, vk::Format format) const
 	{
 		vk::ImageViewCreateInfo info{};
-		info.setImage(m_image);
-		info.setViewType(vk::ImageViewType::e2D);
-		info.setFormat(m_format);
+		info.setImage(image);
+		info.setViewType(viewType);
+		info.setFormat(format);
 		info.setComponents({});
 		info.setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 		return device().createImageViewUnique(info);

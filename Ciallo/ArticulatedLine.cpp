@@ -48,7 +48,7 @@ namespace ciallo::rendering
 
 	void ArticulatedLineEngine::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
 	{
-		vk::Rect2D area{{0, 0}, target->extent()};
+		vk::Rect2D area{{0, 0}, target->extent2D()};
 		vk::RenderingAttachmentInfo renderingAttachmentInfo{target->imageView(), target->imageLayout()};
 		std::vector colorAttachments{renderingAttachmentInfo};
 		vk::RenderingInfo renderingInfo{{}, area, 1, 0, colorAttachments, {}, {}};
@@ -57,7 +57,7 @@ namespace ciallo::rendering
 			0, 0, static_cast<float>(target->width()), static_cast<float>(target->height()), 0.0f, 1.0f
 		};
 		cb.setViewport(0, fullViewport);
-		vk::Rect2D zeroScissor{{0, 0}, target->extent()};
+		vk::Rect2D zeroScissor{{0, 0}, target->extent2D()};
 		cb.setScissor(0, zeroScissor);
 		std::vector<vk::Buffer> vertexBuffers{m_vertBuffer};
 		cb.bindVertexBuffers(0, vertexBuffers, {0});

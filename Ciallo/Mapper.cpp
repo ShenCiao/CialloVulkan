@@ -4,25 +4,16 @@
 namespace ciallo::vulkan
 {
 	Mapper::Mapper(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageCreateInfo info)
+		: Image(allocator, allocCreateInfo, info)
 	{
-		m_allocator = allocator;
-		m_format = info.format;
-		m_extent = info.extent;
-		m_sampleCount = info.samples;
-		m_usage = info.usage;
-		m_layout = info.initialLayout;
-
-		m_image = createImage(allocator, allocCreateInfo, info);
-		m_imageView = createImageView();
 	}
 
 	Mapper::Mapper(VmaAllocator allocator, VmaAllocationCreateInfo allocCreateInfo, vk::ImageType inType,
-	               vk::Format outType, vk::Extent3D extent, vk::ImageUsageFlags usage): imageType(inType)
+	               vk::Format outType, vk::Extent3D extent, vk::ImageUsageFlags usage):
+		Image(allocator, allocCreateInfo,
+		      {{}, inType, outType, extent, 1u, 1u, vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, usage}),
+		imageType(inType)
 	{
-		vk::ImageCreateInfo info{{}, inType, outType, extent, 1u, 1u};
-		info.setUsage(usage);
-		m_image = createImage(allocator, allocCreateInfo, info);
-		m_imageView = createImageView();
 	}
 
 	Mapper::~Mapper()
@@ -65,29 +56,5 @@ namespace ciallo::vulkan
 		using std::swap;
 		swap(imageType, other.imageType);
 		return *this;
-	}
-
-	vk::UniqueImageView Mapper::createImageView()
-	{
-		vk::ImageViewCreateInfo info{};
-		info.setImage(m_image)
-		    .setViewType(imageTypeToImageViewType(imageType))
-		    .setFormat(m_format)
-		    .setComponents({})
-		    .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
-		return device().createImageViewUnique(info);
-	}
-
-	vk::ImageViewType Mapper::imageTypeToImageViewType(vk::ImageType imType)
-	{
-		using vk::ImageType;
-		using vk::ImageViewType;
-		switch (imType)
-		{
-		case ImageType::e1D: return ImageViewType::e1D;
-		case ImageType::e2D: return ImageViewType::e2D;
-		case ImageType::e3D: return ImageViewType::e3D;
-		}
-		return {};
 	}
 }
