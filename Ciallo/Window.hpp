@@ -19,8 +19,9 @@ namespace ciallo::vulkan
 		friend class MainPassRenderer;
 
 		GLFWwindow* m_glfwWindow;
-		std::shared_ptr<Instance> m_instance;
-		std::shared_ptr<Device> m_device;
+		vk::Instance m_instance;
+		vk::Device m_device;
+		vk::PhysicalDevice m_physicalDevice;
 		vk::UniqueSurfaceKHR m_surface;
 		vk::UniqueSwapchainKHR m_swapchain;
 		std::vector<vk::Image> m_swapchainImages;
@@ -28,6 +29,7 @@ namespace ciallo::vulkan
 		vk::Extent2D m_swapchainExtent;
 		vk::Format m_swapchainImageFormat;
 		vk::ColorSpaceKHR m_swapchainImageColorSpace;
+
 	public:
 		Window(int height, int width, const std::string& title, bool visible = false);
 		~Window();
@@ -49,13 +51,14 @@ namespace ciallo::vulkan
 		void imguiInitWindow() const;
 		void imguiShutdownWindow();
 		void imguiNewFrame();
-		void initResources();
+		void initSwapchain();
 	public:
-		void setInstance(const std::shared_ptr<Instance>& instance);
-		void setDevice(const std::shared_ptr<Device>& device);
-	private:
-		void genSurface();
-		void pickSurfaceFormat();
+		void setInstance(vk::Instance instance);
+		void setDevice(vk::Device device);
+		void setPhysicalDevice(vk::PhysicalDevice physicalDevice);
+
+		vk::SurfaceKHR genSurface();
+		void genSwapchainFormat();
 		void genSwapchain();
 	public:
 		void onWindowResize();
@@ -67,6 +70,7 @@ namespace ciallo::vulkan
 		static std::vector<const char*> getRequiredInstanceExtensions();
 
 	public:
+		vk::SurfaceKHR surface() const;
 		vk::SwapchainKHR swapchain() const;
 		vk::Extent2D swapchainExtent() const;
 		int swapchainImageCount() const;

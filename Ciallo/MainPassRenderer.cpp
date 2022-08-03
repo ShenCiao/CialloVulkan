@@ -6,9 +6,8 @@
 
 namespace ciallo::vulkan
 {
-	MainPassRenderer::MainPassRenderer(Window* w): w(w)
+	MainPassRenderer::MainPassRenderer(Window* window, Device* device): w(window), d(device)
 	{
-		d = w->m_device.get();
 		ImGui::CreateContext();
 		ImPlot::CreateContext();
 		init();

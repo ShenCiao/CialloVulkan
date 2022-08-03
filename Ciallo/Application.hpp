@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "Window.hpp"
+#include "Instance.hpp"
+#include "Device.hpp"
 
 namespace ciallo
 {
@@ -10,18 +12,16 @@ public:
 	Application() = default;
 
 	Application(const Application& other) = delete;
-	Application(Application&& other) = default;
+	Application(Application&& other) = delete;
 	Application& operator=(const Application& other) = delete;
-	Application& operator=(Application&& other) = default;
+	Application& operator=(Application&& other) = delete;
 
-	void run() const;
+	void run();
 	
 	void loadSettings();
-
 private:
-	int m_mainWindowWidth;
-	int m_mainWindowHeight;
-	std::unique_ptr<vulkan::Window> m_mainWindow;
+	std::shared_ptr<vulkan::Instance> m_instance;
+	std::shared_ptr<vulkan::Device> m_device;
 };
 	
 }

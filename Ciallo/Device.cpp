@@ -4,16 +4,9 @@
 
 namespace ciallo::vulkan
 {
-	Device::Device(vk::Instance instance, int physicalDeviceIndex)
+	Device::Device(vk::Instance instance, vk::PhysicalDevice physicalDevice, uint32_t queueFamilyIndex):
+		m_physicalDevice(physicalDevice), m_queueFamilyIndex(queueFamilyIndex)
 	{
-		auto physicalDevice = instance.enumeratePhysicalDevices()[physicalDeviceIndex];
-		setPhysicalDevice(physicalDevice);
-		int index = findRequiredQueueFamily(physicalDevice);
-		if (index < 0)
-		{
-			throw std::runtime_error("No required index, check for physical device validity before using it!");
-		}
-		m_queueFamilyIndex = index;
 		genDevice();
 		genCommandPool();
 		genDescriptorPool();
@@ -56,41 +49,33 @@ namespace ciallo::vulkan
 		m_device = m_physicalDevice.createDeviceUnique(c.get<vk::DeviceCreateInfo>());
 	}
 
-	void Device::setPhysicalDevice(vk::PhysicalDevice device)
-	{
-		m_physicalDevice = device;
-	}
-
-	// need a queue family be able to graphics, compute, transfer and presents(unchecked)
-	int Device::findRequiredQueueFamily(vk::PhysicalDevice device)
+	// need a queue family be able to graphics, compute, transfer and presents
+	int Device::findRequiredQueueFamily(vk::PhysicalDevice device, vk::SurfaceKHR surface)
 	{
 		auto queueFamilies = device.getQueueFamilyProperties();
 
 		vk::QueueFlags req = vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
-		for (const auto [i, queueFamily] : views::enumerate(queueFamilies))
+		for (const auto [i, qF] : views::enumerate(queueFamilies))
 		{
-			if (queueFamily.queueCount > 0 && (queueFamily.queueFlags & req) == req)
+			if (qF.queueCount > 0 && (qF.queueFlags & req) == req)
 			{
-				return static_cast<int>(i);
+				bool support = device.getSurfaceSupportKHR(static_cast<uint32_t>(i), surface);
+				if (support)
+					return static_cast<int>(i);
 			}
 		}
 		return -1;
 	}
 
-	bool Device::isPhysicalDeviceValid(vk::PhysicalDevice device)
+	bool Device::isPhysicalDeviceValid(vk::PhysicalDevice device, vk::SurfaceKHR surface)
 	{
-		auto queueFamilies = device.getQueueFamilyProperties();
+		using vk::QueueFlags;
+		using vk::QueueFlagBits;
+		// find queue family
 		bool queueFamilyFound = false;
-		for (const auto [i, queueFamily] : views::enumerate(queueFamilies))
+		if (int i = findRequiredQueueFamily(device, surface); i != -1)
 		{
-			if (queueFamily.queueCount > 0 &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eGraphics &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eCompute &&
-				queueFamily.queueFlags & vk::QueueFlagBits::eTransfer)
-			{
-				queueFamilyFound = true;
-				break;
-			}
+			queueFamilyFound = true;
 		}
 
 		// device extension support
@@ -103,25 +88,39 @@ namespace ciallo::vulkan
 		}
 		bool extensionsFound = requiredExtensions.empty();
 
-
-		// may need check swapchain
+		// Do no need to check the swapchain
 		return queueFamilyFound && extensionsFound;
 	}
 
 	/**
 	 * \brief Choose from available physical device
 	 * \param instance Vulkan instance
+	 * \param surface Vulkan surface, use it for checking present capability of queue 
 	 * \return Physical device index
 	 */
-	int Device::pickPhysicalDevice(vk::Instance instance)
+	vk::PhysicalDevice Device::pickPhysicalDevice(vk::Instance instance, vk::SurfaceKHR surface)
 	{
-		//TODO: make it portable
-		return 1;
 		auto physicalDevices = instance.enumeratePhysicalDevices();
+		vk::PhysicalDevice nearest;
 		for (auto device : physicalDevices)
 		{
-			isPhysicalDeviceValid(device);
+			if (isPhysicalDeviceValid(device, surface))
+			{
+				nearest = device;
+				auto prop = device.getProperties2().properties;
+				if (prop.deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
+				{
+					return device;
+				}
+			}
 		}
+
+		if(nearest)
+		{
+			return nearest;
+		}
+
+		throw std::runtime_error("Fail to find appropriate physical Device!");
 	}
 
 	vk::CommandBuffer Device::createCommandBuffer(vk::CommandBufferLevel level)

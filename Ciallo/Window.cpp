@@ -37,44 +37,56 @@ namespace ciallo::vulkan
 		ImGui_ImplGlfw_NewFrame();
 	}
 
-	void Window::initResources()
+	void Window::initSwapchain()
 	{
-		genSurface();
-		pickSurfaceFormat();
+		genSwapchainFormat();
 		genSwapchain();
 	}
 
-	void Window::setInstance(const std::shared_ptr<Instance>& instance)
+	void Window::setInstance(vk::Instance instance)
 	{
 		m_instance = instance;
 	}
 
-	void Window::setDevice(const std::shared_ptr<Device>& device)
+	void Window::setDevice(vk::Device device)
 	{
 		m_device = device;
 	}
 
-	void Window::genSurface()
+	void Window::setPhysicalDevice(vk::PhysicalDevice physicalDevice)
+	{
+		m_physicalDevice = physicalDevice;
+	}
+
+	vk::SurfaceKHR Window::genSurface()
 	{
 		VkSurfaceKHR rawSurface;
-		if (glfwCreateWindowSurface(*m_instance->m_instance, m_glfwWindow, nullptr, &rawSurface) != VK_SUCCESS)
+		if (glfwCreateWindowSurface(m_instance, m_glfwWindow, nullptr, &rawSurface) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create window surface!");
 		}
-		m_surface = vk::UniqueSurfaceKHR(rawSurface, *m_instance->m_instance);
+		m_surface = vk::UniqueSurfaceKHR(rawSurface, m_instance);
+		return rawSurface;
 	}
 
-	void Window::pickSurfaceFormat()
+	void Window::genSwapchainFormat()
 	{
 		//TODO: make it portable, it's a dirty hack for ShenCiao's laptop only
-		auto surfaceFormats = m_device->physicalDevice().getSurfaceFormatsKHR(*m_surface);
+		auto surfaceFormats = m_physicalDevice.getSurfaceFormatsKHR(*m_surface);
+		const std::unordered_set<vk::Format> formats = {
+			vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8A8Unorm
+		};
+
 		for (auto surface : surfaceFormats)
 		{
-			std::cout << vk::to_string(surface.format) << std::endl;
-			std::cout << vk::to_string(surface.colorSpace) << std::endl;
+			if (formats.contains(surface.format))
+			{
+				m_swapchainImageFormat = surface.format;
+				m_swapchainImageColorSpace = surface.colorSpace;
+				return;
+			}
 		}
-		m_swapchainImageFormat = vk::Format::eB8G8R8A8Unorm;
-		m_swapchainImageColorSpace = vk::ColorSpaceKHR::eSrgbNonlinear;
+		throw std::runtime_error("Cannot find surface.");
 	}
 
 	/**
@@ -168,6 +180,11 @@ namespace ciallo::vulkan
 		return {extensions, extensions + extensionsCount};
 	}
 
+	vk::SurfaceKHR Window::surface() const
+	{
+		return *m_surface;
+	}
+
 	vk::SwapchainKHR Window::swapchain() const
 	{
 		return *m_swapchain;
@@ -180,7 +197,7 @@ namespace ciallo::vulkan
 
 	vk::Device Window::device() const
 	{
-		return *m_device;
+		return m_device;
 	}
 
 	int Window::swapchainImageCount() const
@@ -190,7 +207,7 @@ namespace ciallo::vulkan
 
 	vk::Instance Window::instance() const
 	{
-		return m_instance->instance();
+		return m_instance;
 	}
 
 	vk::Format Window::swapchainImageFormat() const

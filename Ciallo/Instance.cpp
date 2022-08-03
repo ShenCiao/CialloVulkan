@@ -6,24 +6,7 @@ namespace ciallo::vulkan
 {
 	Instance::Instance()
 	{
-		// auto availableLayerProperties = vk::enumerateInstanceLayerProperties();
-		// for (auto layer : availableLayerProperties)
-		// {
-		// 	spdlog::info("layer name: {}", layer.layerName);
-		// }
 		genInstance();
-
-		// //TODO: Delete this after ...
-		// auto devices = m_instance->enumeratePhysicalDevices();
-		// for (auto const& d : devices)
-		// {
-		// 	auto properties = d.getProperties2<vk::PhysicalDeviceProperties2, vk::PhysicalDeviceSubgroupProperties,
-		// 	                                   vk::PhysicalDeviceSubgroupSizeControlProperties>();
-		// 	auto physicalDeviceProperties = properties.get<vk::PhysicalDeviceProperties2>().properties;
-		// 	auto subgroupProperties = properties.get<vk::PhysicalDeviceSubgroupProperties>();
-		// 	auto& physicalDeviceSubgroupSizeControlProperties = properties.get<
-		// 		vk::PhysicalDeviceSubgroupSizeControlProperties>();
-		// }
 	}
 
 	Instance::~Instance()
@@ -31,7 +14,7 @@ namespace ciallo::vulkan
 		m_instance->destroyDebugUtilsMessengerEXT(m_debugMessenger, nullptr, m_dldi);
 	}
 
-	Instance::operator vk::Instance()
+	Instance::operator vk::Instance() const
 	{
 		return *m_instance;
 	}

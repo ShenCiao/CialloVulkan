@@ -8,52 +8,58 @@
 #include "ScenePanel.hpp"
 #include "BrushPool.hpp"
 
-void ciallo::Application::run() const
+void ciallo::Application::run()
 {
-	auto win = std::make_unique<vulkan::Window>(1000, 1000, "hi");
+	// --- Move these to somewhere else someday ---------------------------------
+	auto window = std::make_unique<vulkan::Window>(1000, 1000, "hi");
 	vulkan::Instance::addExtensions(vulkan::Window::getRequiredInstanceExtensions());
-	auto inst = std::make_shared<vulkan::Instance>();
-	int physicalDeviceIndex = vulkan::Device::pickPhysicalDevice(*inst);
-	auto device = std::make_shared<vulkan::Device>(*inst, physicalDeviceIndex);
+	m_instance = std::make_shared<vulkan::Instance>();
+	window->setInstance(*m_instance);
+	vk::SurfaceKHR surface = window->genSurface();
+	
+	vk::PhysicalDevice physicalDevice = vulkan::Device::pickPhysicalDevice(*m_instance, surface);
+	uint32_t queueIndex = vulkan::Device::findRequiredQueueFamily(physicalDevice, surface);
+	m_device = std::make_shared<vulkan::Device>(*m_instance, physicalDevice, queueIndex);
+	window->setDevice(*m_device);
+	window->setPhysicalDevice(m_device->physicalDevice());
+	window->initSwapchain();
+
 	auto brushPool = std::make_unique<editor::BrushPool>();
-	brushPool->loadPresetBrushes(device.get());
+	brushPool->loadPresetBrushes(m_device.get());
+	// -----------------------------------------------------------------------------
 
-	win->setInstance(inst);
-	win->setDevice(device);
-	win->initResources();
-
-	vk::UniqueSemaphore presentImageAvailableSemaphore = device->device().createSemaphoreUnique({});
-	vulkan::MainPassRenderer mainPassRenderer(win.get());
-	win->show();
-	vk::CommandBuffer cb = device->createCommandBuffer();
+	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
+	vulkan::MainPassRenderer mainPassRenderer(window.get(), m_device.get());
+	window->show();
+	vk::CommandBuffer cb = m_device->createCommandBuffer();
 
 	gui::ScenePanel sp;
 
-	device->executeImmediately([&](vk::CommandBuffer tmpcb)
+	m_device->executeImmediately([&](vk::CommandBuffer tmpcb)
 	{
-		sp.genSampler(*device);
-		sp.genCanvas(device.get(), tmpcb);
+		sp.genSampler(*m_device);
+		sp.genCanvas(m_device.get(), tmpcb);
 	});
 
-	device->device().waitIdle();
+	m_device->device().waitIdle();
 
-	while (!win->shouldClose())
+	while (!window->shouldClose())
 	{
-		win->pollEvents();
+		window->pollEvents();
 		vk::Result _;
-		_ = device->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
+		_ = m_device->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
 		                                   std::numeric_limits<uint64_t>::max());
 
 		uint32_t index;
 		try
 		{
-			index = device->device().acquireNextImageKHR(win->swapchain(), UINT64_MAX,
+			index = m_device->device().acquireNextImageKHR(window->swapchain(), UINT64_MAX,
 			                                             *presentImageAvailableSemaphore,
 			                                             VK_NULL_HANDLE).value;
 		}
 		catch (vk::OutOfDateKHRError&)
 		{
-			win->onWindowResize();
+			window->onWindowResize();
 			mainPassRenderer.genFramebuffers();
 			continue;
 		}
@@ -61,12 +67,12 @@ void ciallo::Application::run() const
 		{
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
-		device->device().resetFences(mainPassRenderer.renderingCompleteFence());
+		m_device->device().resetFences(mainPassRenderer.renderingCompleteFence());
 
 		vk::CommandBufferBeginInfo cbbi{vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr};
 		cb.begin(cbbi);
 		ImGui_ImplVulkan_NewFrame();
-		win->imguiNewFrame();
+		window->imguiNewFrame();
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// -----------------------------------------------------------------------------
@@ -102,9 +108,9 @@ void ciallo::Application::run() const
 			cb,
 			submitSignalSemaphores
 		};
-		device->queue().submit(si, mainPassRenderer.renderingCompleteFence());
+		m_device->queue().submit(si, mainPassRenderer.renderingCompleteFence());
 
-		auto swapchain = win->swapchain();
+		auto swapchain = window->swapchain();
 		vk::PresentInfoKHR pi{
 			submitSignalSemaphores,
 			swapchain,
@@ -114,11 +120,11 @@ void ciallo::Application::run() const
 
 		try
 		{
-			_ = device->queue().presentKHR(pi);
+			_ = m_device->queue().presentKHR(pi);
 		}
 		catch (vk::OutOfDateKHRError&)
 		{
-			win->onWindowResize();
+			window->onWindowResize();
 			mainPassRenderer.genFramebuffers();
 			continue;
 		}
@@ -128,11 +134,9 @@ void ciallo::Application::run() const
 		}
 	}
 
-	device->device().waitIdle();
+	m_device->device().waitIdle();
 }
 
 void ciallo::Application::loadSettings()
 {
-	m_mainWindowWidth = 400;
-	m_mainWindowHeight = 400;
 }

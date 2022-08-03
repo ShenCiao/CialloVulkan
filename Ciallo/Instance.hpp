@@ -26,7 +26,7 @@ namespace ciallo::vulkan
 		Instance& operator=(const Instance& other) = delete;
 		Instance& operator=(Instance&& other) = default;
 		~Instance();
-		operator vk::Instance();
+		operator vk::Instance() const;
 
 	private:
 		static VKAPI_ATTR VkBool32 VKAPI_CALL
@@ -47,7 +47,5 @@ namespace ciallo::vulkan
 		{
 			m_instanceExtensions.insert(m_instanceExtensions.end(), extensions.begin(), extensions.end());
 		}
-
-
 	};
 }

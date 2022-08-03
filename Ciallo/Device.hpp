@@ -34,7 +34,7 @@ namespace ciallo::vulkan
 		};
 
 	public:
-		explicit Device(vk::Instance instance, int physicalDeviceIndex);
+		explicit Device(vk::Instance instance, vk::PhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
 		Device(const Device& other) = delete;
 		Device(Device&& other) = default;
 		Device& operator=(const Device& other) = delete;
@@ -55,13 +55,10 @@ namespace ciallo::vulkan
 		void genCommandPool();
 		void genDescriptorPool();
 		void genAllocator(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device device);
-
-		void setPhysicalDevice(vk::PhysicalDevice device);
-
 	public:
-		static int findRequiredQueueFamily(vk::PhysicalDevice device);
-		static bool isPhysicalDeviceValid(vk::PhysicalDevice device);
-		static int pickPhysicalDevice(vk::Instance instance);
+		static int findRequiredQueueFamily(vk::PhysicalDevice device, vk::SurfaceKHR surface);
+		static bool isPhysicalDeviceValid(vk::PhysicalDevice device, vk::SurfaceKHR surface);
+		static vk::PhysicalDevice pickPhysicalDevice(vk::Instance instance, vk::SurfaceKHR surface);
 
 		void executeImmediately(const std::function<void(vk::CommandBuffer)>& func);
 		vk::CommandBuffer createCommandBuffer(vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
