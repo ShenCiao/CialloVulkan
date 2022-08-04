@@ -60,6 +60,7 @@ Though inspired by blender grease pencil, the rendering method in Ciallo is quit
 
 
 https://user-images.githubusercontent.com/24319509/182907394-b014c70b-33b3-4f8d-91f2-60aa095a5d49.mp4
+
 *Fig. -  Attributes are editable at per vertex level.*
 
 In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated Line_. As the name imply, _equidistant dot_ evenly place texture quad along the polyline. _Articulated line_ render a polyline as if an articulated arm. Here are some comparisons between them:
