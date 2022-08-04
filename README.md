@@ -57,7 +57,7 @@ Inside Ciallo, "label to fill" will eat up the whole resource of a CPU core. Lin
 
 Though inspired by blender grease pencil, the rendering method in Ciallo is quite different from grease pencil. The new method fix some fatal drawbacks and aim for flexibility instead of performance.
 
-<video src="./articles/six.mp4"></video>
+![six](./articles/six.mp4)
 
 *Fig. -  Attributes are editable at per vertex level.*
 
@@ -81,8 +81,7 @@ Polylines are hard to edit. So Ciallo allows users to "bind" a polyline upon bez
 <figure>
     <p align="center"> <img src=".\articles\strokeManipulation.gif"/></p>
 </figure>
-
-*Fig. - Screenshot from StrokeStrip: Joint Parameterization and Fitting of Stroke Clusters.*
+*Fig. - Screenshot from the paper StrokeStrip: Joint Parameterization and Fitting of Stroke Clusters.*
 
 The polyline keeps noise information, meanwhile bezier curve helps to edit polyline's overall shapes. When it comes to animating, bezier curve can make animation like bones in 3D after binding, which lets 2D artists reuse their data within stroke level.
 
