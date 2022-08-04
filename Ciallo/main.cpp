@@ -1,7 +1,5 @@
 #include "pch.hpp"
 #include "Application.hpp"
-#include "Bezier.hpp"
-#include <vulkan/vulkan_hash.hpp>
 
 int main()
 {

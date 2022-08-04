@@ -1,6 +1,6 @@
 #version 450
 
-layout(location = 0) in vec3 fragColor;
+layout(location = 0) in vec4 fragColor;
 layout(location = 1) in flat vec2 p0;
 layout(location = 2) in flat vec2 p1;
 layout(location = 3) in vec2 p;
@@ -37,11 +37,10 @@ void main() {
     if((pLH.x > p1LH.x && d1LH > 1.0)){
         discard;
     }
-
-    // Airbrush begin. 
+    float A = fragColor.a;
+    // Airbrush begin. Can be discard.
     // Sadly Shen Ciao already forget about some details in this implementation.
     // And He just copy and paste old implementation. May Muse bless the poor boy.
-    float A = 1.0;
     float reverse_falloff_stroke = reverse_falloff(pLH.y, A);
 
     float exceed1, exceed2;
@@ -57,8 +56,8 @@ void main() {
         sign(lenL - pLH.x) * 1.0/2.0 * (1.0-abs(lenL-pLH.x))) * 
         pow(reverse_falloff_stroke, step(0.0, pLH.x - lenL));
     }
-    float alpha = clamp(1 - reverse_falloff_stroke/exceed1/exceed2, 0.0, 1.0);
-    // Airbrush end. Can be discard if you want.
+    A = clamp(1 - reverse_falloff_stroke/exceed1/exceed2, 0.0, 1.0);
+    // Airbrush end. 
 
-    outColor = vec4(fragColor, alpha);
+    outColor = vec4(fragColor.rbg, A);
 }

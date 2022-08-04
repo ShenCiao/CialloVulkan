@@ -26,7 +26,7 @@ namespace ciallo::vulkan
 		uint32_t memoryTypeIndex() const;
 		vk::Device device() const;
 
-		void uploadLocal(const void* data, vk::DeviceSize size) const;
+		void uploadLocal(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const;
 	};
 
 	class Buffer : public AllocationBase

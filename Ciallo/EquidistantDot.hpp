@@ -3,12 +3,20 @@
 #include "Device.hpp"
 #include "Image.hpp"
 #include "ShaderModule.hpp"
-#include "Renderer.hpp"
+#include "ObjectRenderer.hpp"
 
 namespace ciallo::rendering
 {
 	class EquidistantDotEngine
 	{
+		struct Vertex
+		{
+			glm::vec2 pos;
+			float width;
+			float _pad0;
+			glm::vec4 color;
+		};
+
 		vk::Device m_device;
 		vulkan::ShaderModule m_compShader;
 		vulkan::ShaderModule m_vertShader;
@@ -18,14 +26,17 @@ namespace ciallo::rendering
 		vk::UniquePipeline m_pipeline;
 
 		vulkan::Buffer m_indirectDrawBuffer;
-		vulkan::Buffer m_dotBuffer; // buffer for rendered quad
+		vulkan::Buffer m_vertBuffer; // a large buffer for compute shader to output
 		vulkan::Buffer m_inputBuffer; // buffer for data points input
+		vulkan::Buffer m_tempBufferForSpacing;
 
 		vk::UniquePipelineLayout m_compPipelineLayout;
 		vk::UniquePipeline m_compPipeline;
 		vk::UniqueDescriptorSetLayout m_compDescriptorSetLayout;
 		vk::DescriptorSet m_compDescriptorSet;
 	public:
+		std::vector<Vertex> vertices; // delete it after...
+		float spacing = 0.02f;
 		explicit EquidistantDotEngine(vulkan::Device* device);
 
 		void genPipelineDynamic();
@@ -38,7 +49,7 @@ namespace ciallo::rendering
 		void compute(vk::CommandBuffer cb);
 	};
 
-	class EquidistantDotRenderer: public Renderer
+	class EquidistantDotRenderer : public ObjectRenderer
 	{
 		vk::Pipeline m_pipeline;
 		vk::PipelineLayout m_pipelineLayout;

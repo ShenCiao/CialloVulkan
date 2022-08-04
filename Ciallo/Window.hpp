@@ -31,7 +31,7 @@ namespace ciallo::vulkan
 		vk::ColorSpaceKHR m_swapchainImageColorSpace;
 
 	public:
-		Window(int height, int width, const std::string& title, bool visible = false);
+		explicit Window(const std::string& title, bool visible = false);
 		~Window();
 
 		Window(const Window& other) = delete;

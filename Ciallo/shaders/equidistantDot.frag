@@ -1,6 +1,6 @@
 #version 450
 
-layout(location = 0) in vec3 fragColor;
+layout(location = 0) in vec4 fragColor;
 layout(location = 1) in flat vec2 p0;
 layout(location = 3) in vec2 p;
 layout(location = 4) in float width;
@@ -14,5 +14,5 @@ void main() {
         discard;
     }
 
-    outColor = vec4(fragColor, 1.0);
+    outColor = vec4(fragColor);
 }

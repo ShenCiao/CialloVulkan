@@ -16,9 +16,8 @@ namespace ciallo::gui
 	public:
 		void genCanvas(vulkan::Device* d, vk::CommandBuffer cb);
 		void genSampler(vk::Device device);
-	private:
 		std::unique_ptr<vulkan::Image> m_canvas;
-		std::unique_ptr<rendering::CanvasRenderer> m_canvasRenderer;
+	private:
 		vk::UniqueSampler m_sampler;
 		ImTextureID m_canvasTextureId = nullptr;
 	};

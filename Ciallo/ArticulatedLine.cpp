@@ -1,8 +1,6 @@
 #include "pch.hpp"
 #include "ArticulatedLine.hpp"
 
-#include <glm/glm.hpp>
-
 #include "vku.hpp"
 #include "CommonSceneObjectComponents.hpp"
 
@@ -40,14 +38,16 @@ namespace ciallo::rendering
 		     .shader(vk::ShaderStageFlagBits::eGeometry, m_geomShader)
 		     .blendEnable(VK_TRUE)
 		     .cullMode(vk::CullModeFlagBits::eNone)
-		     .vertexBinding(0, 5 * sizeof(float))
+		     .vertexBinding(0, sizeof(Vertex))
 		     .vertexAttribute(0, 0, vk::Format::eR32G32Sfloat, 0)
-		     .vertexAttribute(1, 0, vk::Format::eR32G32B32Sfloat, vk::blockSize(vk::Format::eR32G32Sfloat));
+		     .vertexAttribute(1, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(Vertex, color))
+		     .vertexAttribute(2, 0, vk::Format::eR32Sfloat, offsetof(Vertex, width));
 		m_pipeline = maker.createUnique(m_device, nullptr, *m_pipelineLayout, renderingCreateInfo);
 	}
 
 	void ArticulatedLineEngine::renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target)
 	{
+		m_vertBuffer.uploadLocal(vertices.data(), VK_WHOLE_SIZE);
 		vk::Rect2D area{{0, 0}, target->extent2D()};
 		vk::RenderingAttachmentInfo renderingAttachmentInfo{target->imageView(), target->imageLayout()};
 		std::vector colorAttachments{renderingAttachmentInfo};
@@ -68,17 +68,11 @@ namespace ciallo::rendering
 
 	void ArticulatedLineEngine::genVertexBuffer(VmaAllocator allocator)
 	{
-		struct Vertex
-		{
-			glm::vec2 pos;
-			glm::vec3 color;
-		};
-
-		const std::vector<Vertex> vertices = {
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 1.0f, 0.0f}},
-			{{-glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 0.0f, 1.0f}},
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		vertices = {
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.02f},
+			{{glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 0.0f, 1.0f, 1.0f}, 0.02f},
+			{{-glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 1.0f, 0.0f, 1.0f}, 0.02f},
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.02f},
 		};
 		VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
 
@@ -90,8 +84,8 @@ namespace ciallo::rendering
 	void ArticulatedLineRenderer::render(vk::CommandBuffer cb, entt::handle object)
 	{
 		auto& [buffers, vertexCount] = object.get<scene::VertexBufferCpo>();
-		auto& [piplineDesS] = object.get<scene::PipelineResourceCpo>();
-		vk::DescriptorSet desS = *piplineDesS;
+		auto& [descriptorSet] = object.get<scene::PipelineResourceCpo>();
+		vk::DescriptorSet desS = *descriptorSet;
 		auto getBufferObject = [](const vulkan::Buffer& b)
 		{
 			return b.buffer();

@@ -11,12 +11,12 @@
 void ciallo::Application::run()
 {
 	// --- Move these to somewhere else someday ---------------------------------
-	auto window = std::make_unique<vulkan::Window>(1000, 1000, "hi");
+	auto window = std::make_unique<vulkan::Window>("hi");
 	vulkan::Instance::addExtensions(vulkan::Window::getRequiredInstanceExtensions());
 	m_instance = std::make_shared<vulkan::Instance>();
 	window->setInstance(*m_instance);
 	vk::SurfaceKHR surface = window->genSurface();
-	
+
 	vk::PhysicalDevice physicalDevice = vulkan::Device::pickPhysicalDevice(*m_instance, surface);
 	uint32_t queueIndex = vulkan::Device::findRequiredQueueFamily(physicalDevice, surface);
 	m_device = std::make_shared<vulkan::Device>(*m_instance, physicalDevice, queueIndex);
@@ -34,12 +34,13 @@ void ciallo::Application::run()
 	vk::CommandBuffer cb = m_device->createCommandBuffer();
 
 	gui::ScenePanel sp;
-
 	m_device->executeImmediately([&](vk::CommandBuffer tmpcb)
 	{
 		sp.genSampler(*m_device);
 		sp.genCanvas(m_device.get(), tmpcb);
 	});
+
+	auto canvasRenderer = std::make_unique<rendering::CanvasRenderer>(m_device.get());
 
 	m_device->device().waitIdle();
 
@@ -48,14 +49,14 @@ void ciallo::Application::run()
 		window->pollEvents();
 		vk::Result _;
 		_ = m_device->device().waitForFences(mainPassRenderer.renderingCompleteFence(), VK_TRUE,
-		                                   std::numeric_limits<uint64_t>::max());
+		                                     std::numeric_limits<uint64_t>::max());
 
 		uint32_t index;
 		try
 		{
 			index = m_device->device().acquireNextImageKHR(window->swapchain(), UINT64_MAX,
-			                                             *presentImageAvailableSemaphore,
-			                                             VK_NULL_HANDLE).value;
+			                                               *presentImageAvailableSemaphore,
+			                                               VK_NULL_HANDLE).value;
 		}
 		catch (vk::OutOfDateKHRError&)
 		{
@@ -75,7 +76,9 @@ void ciallo::Application::run()
 		window->imguiNewFrame();
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-		// -----------------------------------------------------------------------------
+		// --start imgui recording------------------------------------------------------
+		canvasRenderer->render(cb, sp.m_canvas.get());
+
 		if (ImGui::BeginMainMenuBar())
 		{
 			ImGui::EndMainMenuBar();
@@ -94,6 +97,36 @@ void ciallo::Application::run()
 
 		sp.draw();
 		// -----------------------------------------------------------------------------
+		ImGui::Begin("Hexagram Control", nullptr);
+		ImGui::Text("Upward Triangle drawn by Articulated Line Engine (NDC space)");
+		auto& al = canvasRenderer->m_articulated->vertices;
+		for (int i : views::iota(0, 3))
+		{
+			ImGui::Text("Vertex #%d", i);
+			ImGui::DragFloat2(fmt::format("Position##a{}", i).c_str(), reinterpret_cast<float*>(&al.at(i).pos), 0.01f,
+			                  -1.0f, 1.0f);
+			ImGui::ColorEdit4(fmt::format("Color##a{}", i).c_str(), reinterpret_cast<float*>(&al.at(i).color));
+			ImGui::DragFloat(fmt::format("Width##a{}", i).c_str(), &al.at(i).width, 0.001f, 0.0f, 0.1f);
+		}
+		al[3] = al[0];
+
+		ImGui::Separator();
+
+		ImGui::Text("Downward Triangle drawn by Equidistant Dot Engine (NDC space)");
+		ImGui::Text("Spacing control distance between dots");
+		ImGui::DragFloat("Spacing", &canvasRenderer->m_equidistantDot->spacing, 0.001f, 0.0001f, 1.0f);
+		auto& ed = canvasRenderer->m_equidistantDot->vertices;
+		for (int i : views::iota(0, 3))
+		{
+			ImGui::Text("Vertex #%d", i);
+			ImGui::DragFloat2(fmt::format("Position##b{}", i).c_str(), reinterpret_cast<float*>(&ed.at(i).pos), 0.01f,
+			                  -1.0f, 1.0f);
+			ImGui::ColorEdit4(fmt::format("Color##b{}", i).c_str(), reinterpret_cast<float*>(&ed.at(i).color));
+			ImGui::DragFloat(fmt::format("Width##b{}", i).c_str(), &ed.at(i).width, 0.001f, 0.0f, 0.1f);
+		}
+		ed[3] = ed[0];
+		ImGui::End();
+		// -----------------------------------------------------------------------------
 		ImGui::EndFrame();
 		ImGui::Render();
 		ImDrawData* main_draw_data = ImGui::GetDrawData();
@@ -101,18 +134,18 @@ void ciallo::Application::run()
 		cb.end();
 		std::vector<vk::PipelineStageFlags> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
-		std::vector<vk::Semaphore> submitSignalSemaphores = {mainPassRenderer.renderingCompleteSemaphore()};
+		std::vector<vk::Semaphore> signalAfterRenderingSemaphores = {mainPassRenderer.renderingCompleteSemaphore()};
 		vk::SubmitInfo si{
 			*presentImageAvailableSemaphore,
 			waitStages,
 			cb,
-			submitSignalSemaphores
+			signalAfterRenderingSemaphores
 		};
 		m_device->queue().submit(si, mainPassRenderer.renderingCompleteFence());
 
 		auto swapchain = window->swapchain();
 		vk::PresentInfoKHR pi{
-			submitSignalSemaphores,
+			signalAfterRenderingSemaphores,
 			swapchain,
 			index,
 			{}

@@ -18,7 +18,7 @@ For now, Ciallo is more of a personal research project. But I literally wish it 
 
 ## Feature Previews
 
-- Real time "label to fill"
+- Real time "label to fill" (Bucket fill with vector strokes)
 - Brush engines powered by GPU
 - Curve binding for stroke editing and animating
 
@@ -27,19 +27,19 @@ For now, Ciallo is more of a personal research project. But I literally wish it 
 <figure>
     <p align="center"> <img src="./articles/autoColoringFromShriobako.jpg" width = 640/></p>
 </figure>
-
 *Fig. - Screenshot from SHIROBAKO. It's an anime about anime making.*
 
+Artists cannot bucket fill in a vector graphics software like Adobe Illustrator or Inkscape. Ciallo will solve the problem.
 
 In animation industry, artists use labeling strokes to indicate how to fill colors. For example, on the upper part of the picture, blue strokes inside the character indicate fill in shadows, red strokes indicate highlights, green or yellow indicate contours need to be filled in combination with other strokes. 
 
 <img src=".\articles\AnimeMakingwholeProcess.gif" alt="AnimeMakingwholeProcess"  />
 
-Ciallo will utilize these labeling strokes for automating color. In computational geometry, [point-location problem](https://en.wikipedia.org/wiki/Point_location) is well researched and widely used in GIS and motion planning. Apparently, color filling in 2D artworks is exactly a point-location problem. 
+Ciallo will utilize these labeling strokes for coloring. In computational geometry, [point-location problem](https://en.wikipedia.org/wiki/Point_location) is well researched and widely used in GIS and motion planning. Apparently, color filling in 2D artworks is exactly a point-location problem. 
 
-Color filling is separated into three steps. First, artist paint on canvas and meanwhile arrange the polyline data in the background. Second, query those labeling curves location and fetch desired face data (faces are polygons generated from artworks). Third, send face data to GPU for rendering a colored polygon. 
+In Ciallo, color filling is separated into three steps. First, artist paint on canvas and meanwhile arrange the polyline data. Second, query those labeling curves location and fetch desired face data (faces are polygons generated from artworks). Third, send face data to GPU for rendering a colored polygon. 
 
-Comparing to flood fill on high resolution pixelmap, it can be 100~1000 times faster and can be scaled up freely. You may intertest in [statistics on some exiting artworks](./articles/miscellaneous.md#statistics-on-existing-artworks), number of polylines and points are critical to the performance of 2D arrangements. 
+Comparing to flood fill on high resolution pixelmap, it can be 100~1000 times faster and the final artwork can be freely modified. You may intertest in [statistics on some exiting artworks](./articles/miscellaneous.md#statistics-on-existing-artworks), number of polylines and points are critical to the performance of 2D arrangements.
 
 Similar feature offered by Krita is called "[colorize mask](https://docs.krita.org/en/reference_manual/tools/colorize_mask.html)". But it seems not fast enough for production and hard to edit the content on canvas since it's based on pixelmap. Take a look at [this video](https://www.youtube.com/watch?v=HQdx6H9BIGs) if you are interested in the problem of colorize mask.
 

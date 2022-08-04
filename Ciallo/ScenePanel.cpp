@@ -11,9 +11,9 @@ namespace ciallo::gui
 {
 	void ScenePanel::draw() const
 	{
-		ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_HorizontalScrollbar;
+		ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar;
 		ImGui::Begin("Scene", nullptr, flags);
-		// ImGui::Image()
+
 		ImVec2 sizeToShow{static_cast<float>(m_canvas->width()), static_cast<float>(m_canvas->height())};
 		ImGui::Image(m_canvasTextureId, sizeToShow);
 		ImGui::End();
@@ -35,9 +35,6 @@ namespace ciallo::gui
 
 		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),
 		                                                static_cast<VkImageLayout>(m_canvas->imageLayout()));
-
-		m_canvasRenderer = std::make_unique<rendering::CanvasRenderer>(d);
-		m_canvasRenderer->render(cb, m_canvas.get());
 	}
 
 	void ScenePanel::genSampler(vk::Device device)

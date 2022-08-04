@@ -5,7 +5,7 @@
 
 namespace ciallo::vulkan
 {
-	Window::Window(int height, int width, const std::string& title, bool visible)
+	Window::Window(const std::string& title, bool visible)
 	{
 		glfwSetErrorCallback(glfwErrorCallback);
 		glfwInit();
@@ -13,7 +13,7 @@ namespace ciallo::vulkan
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
-		m_glfwWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+		m_glfwWindow = glfwCreateWindow(1u, 1u, title.c_str(), nullptr, nullptr);
 	}
 
 	Window::~Window()
@@ -71,7 +71,6 @@ namespace ciallo::vulkan
 
 	void Window::genSwapchainFormat()
 	{
-		//TODO: make it portable, it's a dirty hack for ShenCiao's laptop only
 		auto surfaceFormats = m_physicalDevice.getSurfaceFormatsKHR(*m_surface);
 		const std::unordered_set<vk::Format> formats = {
 			vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8A8Unorm

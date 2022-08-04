@@ -2,11 +2,11 @@
 
 namespace ciallo::rendering
 {
-	class Renderer
+	class ObjectRenderer
 	{
 	public:
-		Renderer() = default;
-		virtual ~Renderer() = 0;
+		ObjectRenderer() = default;
+		virtual ~ObjectRenderer() = 0;
 		virtual void render(vk::CommandBuffer cb, entt::handle object) = 0;
 	};
 }

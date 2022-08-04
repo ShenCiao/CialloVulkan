@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Buffer.hpp"
-#include "Renderer.hpp"
+#include "ObjectRenderer.hpp"
 
 namespace ciallo::scene
 {
@@ -32,6 +32,6 @@ namespace ciallo::scene
 
 	struct RendererCpo
 	{
-		rendering::Renderer* renderer;
+		rendering::ObjectRenderer* renderer;
 	};
 }

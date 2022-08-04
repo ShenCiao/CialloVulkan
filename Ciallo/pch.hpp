@@ -12,8 +12,9 @@
 #include <range/v3/range/conversion.hpp>
 namespace views = ranges::views;
 
-#include <spdlog/spdlog.h>
 #include <vulkan/vulkan.hpp>
+#include <glm/glm.hpp>
+#include <spdlog/spdlog.h>
 #include <vk_mem_alloc.h>
 #include <entt/entt.hpp>
 

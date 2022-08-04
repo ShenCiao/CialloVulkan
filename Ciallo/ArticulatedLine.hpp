@@ -3,12 +3,20 @@
 #include "Device.hpp"
 #include "Image.hpp"
 #include "ShaderModule.hpp"
-#include "Renderer.hpp"
+#include "ObjectRenderer.hpp"
 
 namespace ciallo::rendering
 {
 	class ArticulatedLineEngine
 	{
+		struct Vertex
+		{
+			glm::vec2 pos;
+			glm::vec4 color;
+			float width;
+		};
+
+	public:
 		vk::Device m_device;
 		vulkan::ShaderModule m_vertShader;
 		vulkan::ShaderModule m_fragShader;
@@ -16,7 +24,7 @@ namespace ciallo::rendering
 		vk::UniquePipeline m_pipeline;
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vulkan::Buffer m_vertBuffer;
-		
+		std::vector<Vertex> vertices; // delete it after...
 	public:
 		explicit ArticulatedLineEngine(vulkan::Device* device);
 
@@ -25,10 +33,11 @@ namespace ciallo::rendering
 		void genPipelineDynamic();
 
 		void renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target);
+
 		void genVertexBuffer(VmaAllocator allocator);
 	};
 
-	class ArticulatedLineRenderer : public Renderer
+	class ArticulatedLineRenderer : public ObjectRenderer
 	{
 		vk::Pipeline m_pipeline;
 		vk::PipelineLayout m_pipelineLayout;

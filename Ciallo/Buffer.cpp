@@ -28,10 +28,14 @@ namespace ciallo::vulkan
 		return allocInfo.memoryType;
 	}
 
-	void AllocationBase::uploadLocal(const void* data, vk::DeviceSize size) const
+	void AllocationBase::uploadLocal(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const
 	{
 		void* mappedData;
 		vmaMapMemory(m_allocator, m_allocation, &mappedData);
+		auto mappedPos = static_cast<char*>(mappedData);
+		mappedPos += offset;
+		mappedData = static_cast<void*>(mappedPos);
+
 		memcpy(mappedData, data, size);
 		if (!hostCoherent())
 		{
@@ -116,7 +120,7 @@ namespace ciallo::vulkan
 	void Buffer::uploadLocal(const void* data, vk::DeviceSize size) const
 	{
 		if (size == VK_WHOLE_SIZE) size = this->size();
-		AllocationBase::uploadLocal(data, size);
+		AllocationBase::uploadLocal(data, 0, size);
 	}
 
 	vk::DeviceSize Buffer::size() const

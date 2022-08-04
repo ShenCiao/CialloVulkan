@@ -75,7 +75,7 @@
     <ClCompile Include="BezierTransformer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
+    <ClCompile Include="ObjectRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mapper.cpp">
@@ -146,7 +146,7 @@
     <ClInclude Include="GeometryPrimitives.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.hpp">
+    <ClInclude Include="ObjectRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CommonSceneObjectComponents.hpp">

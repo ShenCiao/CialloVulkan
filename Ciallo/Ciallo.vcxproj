@@ -113,7 +113,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Instance.cpp" />
-    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ObjectRenderer.cpp" />
     <ClCompile Include="ScenePanel.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TriangleTest.cpp" />
@@ -138,7 +138,7 @@
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="PrincipleBrushComponents.hpp" />
-    <ClInclude Include="Renderer.hpp" />
+    <ClInclude Include="ObjectRenderer.hpp" />
     <ClInclude Include="ScenePanel.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="TriangleTest.hpp" />
