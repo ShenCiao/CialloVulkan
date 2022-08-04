@@ -16,7 +16,6 @@ namespace ciallo::rendering
 			float width;
 		};
 
-	public:
 		vk::Device m_device;
 		vulkan::ShaderModule m_vertShader;
 		vulkan::ShaderModule m_fragShader;
@@ -24,8 +23,8 @@ namespace ciallo::rendering
 		vk::UniquePipeline m_pipeline;
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vulkan::Buffer m_vertBuffer;
-		std::vector<Vertex> vertices; // delete it after...
 	public:
+		std::vector<Vertex> vertices; // delete it after...
 		explicit ArticulatedLineEngine(vulkan::Device* device);
 
 		void genPipelineLayout();

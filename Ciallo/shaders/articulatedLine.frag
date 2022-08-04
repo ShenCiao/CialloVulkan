@@ -59,5 +59,5 @@ void main() {
     A = clamp(1 - reverse_falloff_stroke/exceed1/exceed2, 0.0, 1.0);
     // Airbrush end. 
 
-    outColor = vec4(fragColor.rbg, A);
+    outColor = vec4(fragColor.rgb, A);
 }

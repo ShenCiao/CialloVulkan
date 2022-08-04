@@ -47,15 +47,19 @@ In combination with line binding, users can animate their artworks at great ease
 
 ### Brush engines powered by GPU
 
-<img src=".\articles\naiive brush engine.jpg" alt="naiive brush engine" style="zoom:100%;" />
+<img src=".\articles\six.gif" alt="naiive brush engine" style="zoom:100%;" />
 
-*Fig. - Triangle directs upward is drawn by Articulated Line, another is by Equidistant Dot.*
+*Fig. - Triangle directs upward is drawn by Articulated Line, downward is by Equidistant Dot.*
 
 Polyline/polygon in 2D space is the counterpart of mesh in 3D space. Real time rendering on polyline could potentially save GPU from fetching GBs of texture or video. It'll make large scale animation and real time lighting in 2D games possible. And help to make better VTuber avatars ([learn more](./articles/miscellaneous.md#vtuber's-avatar)).
 
 Inside Ciallo, "label to fill" will eat up the whole resource of a CPU core. Line editing will operation on a lot of points simultaneously. They both need heavy computation on CPU. For better user experience, it is necessary to render strokes on GPU.
 
 Though inspired by blender grease pencil, the rendering method in Ciallo is quite different from grease pencil. The new method fix some fatal drawbacks and aim for flexibility instead of performance.
+
+<video src="./articles/six.mp4"></video>
+
+*Fig. -  Attributes are editable at per vertex level.*
 
 In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated Line_. As the name imply, _equidistant dot_ evenly place texture quad along the polyline. _Articulated line_ render a polyline as if an articulated arm. Here are some comparisons between them:
 
@@ -65,6 +69,8 @@ In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated 
 | Customization by users  | Easy. Procedural texture is not mandatory.                   | Hard. Procedural texture is mandatory. Need experience in shader development or shader graph node system. |
 | Robustness to ill cases | One ill case would be pretty common (unevenly distributed vertices) and it would hit hard on rendering performance. Need help from editor to avoid it. | Better than Equidistant Dot. Pretty few ill cases I've found and they rarely happen in practice. |
 | Limitations on vertices | Total amount of vertices input are limited be *maximum local workgroup size* (1024) in compute shader. Total amount of dots generated are limited by buffer size set by developers. | No limits on regular usage.                                  |
+
+
 
 Their computations in geometry are pretty straight forward except for airbrush generated from articulated line. It needs calculus to clarify the whole idea about solving "the joint problem". I've made [a draft to explain the brush](.\articles\ContinuousAirbrushStrokeRendering.pdf) in Jan. 2022 but it's definitely too messy to read. I'll try to clean it up someday. Unless you are ultra interested in rendering an airbrush stroke on a bezier curve which takes [8 steps in illustrator](https://www.techwalla.com/articles/how-to-airbrush-in-illustrator), I do not recommend to read it carefully.
 

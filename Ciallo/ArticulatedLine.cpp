@@ -70,8 +70,8 @@ namespace ciallo::rendering
 	{
 		vertices = {
 			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.02f},
-			{{glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 0.0f, 1.0f, 1.0f}, 0.02f},
-			{{-glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 1.0f, 0.0f, 1.0f}, 0.02f},
+			{{-glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 0.0f, 1.0f, 1.0f}, 0.02f},
+			{{glm::sqrt(3.0f) * 0.25f, 0.25f}, {0.0f, 1.0f, 0.0f, 1.0f}, 0.02f},
 			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.02f},
 		};
 		VmaAllocationCreateInfo info{VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, VMA_MEMORY_USAGE_AUTO};
