@@ -3,7 +3,7 @@
 #include "Image.hpp"
 #include "Device.hpp"
 #include "imgui.h"
-#include "PrincipleBrushComponents.hpp"
+#include "CommonBrushComponents.hpp"
 
 namespace ciallo::editor
 {
@@ -19,7 +19,7 @@ namespace ciallo::editor
 		void loadPresetBrushes(const vulkan::Device* device)
 		{
 			entt::entity brush = m_registry.create();
-			m_registry.emplace<editor::EngineTypeFlags>(brush, editor::EngineTypeFlags::ArticulatedLine);
+			m_registry.emplace<rendering::EngineTypeFlags>(brush, rendering::EngineTypeFlags::ArticulatedLine);
 
 			for (int i : views::iota(0, 10))
 			{

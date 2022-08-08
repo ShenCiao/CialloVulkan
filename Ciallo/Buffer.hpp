@@ -26,7 +26,9 @@ namespace ciallo::vulkan
 		uint32_t memoryTypeIndex() const;
 		vk::Device device() const;
 
-		void uploadLocal(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const;
+		void memoryCopy(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const;
+		template <class VecType> requires std::is_arithmetic_v<VecType>
+		void memorySet(VecType value, vk::DeviceSize offset, uint32_t count);
 	};
 
 	class Buffer : public AllocationBase

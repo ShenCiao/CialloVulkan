@@ -165,9 +165,10 @@ namespace ciallo::rendering
 	void EquidistantDotRenderer::render(vk::CommandBuffer cb, entt::handle object)
 	{
 		// Compute
-		auto& [vbDesS] = object.get<scene::VertexBufferDesSCpo>();
+		auto& vbCpo = object.get<scene::VertexBufferCpo>();
+		vk::DescriptorSet vbDesS = *vbCpo.descriptorSet;
 
-		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, m_computePipelineLayout, 0, *vbDesS, nullptr);
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, m_computePipelineLayout, 0, vbDesS, nullptr);
 		cb.bindPipeline(vk::PipelineBindPoint::eCompute, m_computePipeline);
 		cb.dispatch(1, 1, 1);
 

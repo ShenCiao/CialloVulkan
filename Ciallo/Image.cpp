@@ -137,7 +137,7 @@ namespace ciallo::vulkan
 	void Image::uploadLocal(const void* data, vk::DeviceSize size) const
 	{
 		if (size == VK_WHOLE_SIZE) size = this->size();
-		AllocationBase::uploadLocal(data, 0, size);
+		AllocationBase::memoryCopy(data, 0, size);
 	}
 
 	vk::DeviceSize Image::size() const

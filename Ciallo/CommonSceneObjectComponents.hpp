@@ -13,20 +13,16 @@ namespace ciallo::scene
 
 	struct VertexBufferCpo
 	{
+		// Each attributes has its own buffer.
 		std::vector<vulkan::Buffer> buffers;
 		uint32_t vertexCount = 0u;
-	};
-
-	struct VertexBufferDesSCpo
-	{
-		// A descriptorSet points to vertex buffer for compute (may not needed).
-		vk::UniqueDescriptorSet vertexBufferDesS; 
+		vk::UniqueDescriptorSet descriptorSet;
 	};
 
 	
-	struct PipelineResourceCpo
+	struct PipelineDescriptorSetCpo
 	{
-		// A descriptorSet of Images, Samplers, buffers that need to pop into graphics pipeline.
+		// A descriptorSet of Images, Samplers, buffers that need to pop into graphics pipeline at per object level.
 		vk::UniqueDescriptorSet pipelineDesS;
 	};
 

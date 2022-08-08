@@ -134,7 +134,7 @@
     <ClInclude Include="BrushPool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PrincipleBrushComponents.hpp">
+    <ClInclude Include="CommonBrushComponents.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BezierTransformer.hpp">
@@ -153,6 +153,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mapper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StrokeCompoinents.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

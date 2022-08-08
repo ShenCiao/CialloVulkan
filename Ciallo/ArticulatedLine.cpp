@@ -83,9 +83,12 @@ namespace ciallo::rendering
 
 	void ArticulatedLineRenderer::render(vk::CommandBuffer cb, entt::handle object)
 	{
-		auto& [buffers, vertexCount] = object.get<scene::VertexBufferCpo>();
-		auto& [descriptorSet] = object.get<scene::PipelineResourceCpo>();
-		vk::DescriptorSet desS = *descriptorSet;
+		auto& vbCpo = object.get<scene::VertexBufferCpo>();
+		auto& buffers = vbCpo.buffers;
+		uint32_t vertexCount = vbCpo.vertexCount;
+
+		auto& pdsCpo = object.get<scene::PipelineDescriptorSetCpo>();
+		vk::DescriptorSet desS = *pdsCpo.pipelineDesS;
 		auto getBufferObject = [](const vulkan::Buffer& b)
 		{
 			return b.buffer();

@@ -28,15 +28,16 @@ namespace ciallo::vulkan
 		return allocInfo.memoryType;
 	}
 
-	void AllocationBase::uploadLocal(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const
+	void AllocationBase::memoryCopy(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const
 	{
-		void* mappedData;
-		vmaMapMemory(m_allocator, m_allocation, &mappedData);
-		auto mappedPos = static_cast<char*>(mappedData);
-		mappedPos += offset;
-		mappedData = static_cast<void*>(mappedPos);
+		char* dst;
+		vmaMapMemory(m_allocator, m_allocation, reinterpret_cast<void**>(&dst));
 
-		memcpy(mappedData, data, size);
+		if (!hostCoherent())
+		{
+			vmaInvalidateAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
+		}
+		memcpy(dst, data, size);
 		if (!hostCoherent())
 		{
 			vmaFlushAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
@@ -111,6 +112,31 @@ namespace ciallo::vulkan
 		uploadStaging(cb, data, size, *m_stagingBuffer);
 	}
 
+	template <class ArithmeticType> requires std::is_arithmetic_v<ArithmeticType>
+	void AllocationBase::memorySet(ArithmeticType value, vk::DeviceSize offset, uint32_t count)
+	{
+		char* dst;
+		vmaMapMemory(m_allocator, m_allocation, reinterpret_cast<void**>(&dst));
+
+		if (!hostCoherent())
+		{
+			vmaInvalidateAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
+		}
+
+		for (int i : views::iota(0u, count))
+		{
+			constexpr vk::DeviceSize stride = sizeof(ArithmeticType);
+			memcpy(dst, &value, stride);
+			dst += stride;
+		}
+
+		if (!hostCoherent())
+		{
+			vmaFlushAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
+		}
+		vmaUnmapMemory(m_allocator, m_allocation);
+	}
+
 	template <typename T>
 	void Buffer::upload(vk::CommandBuffer cb, std::vector<T>& data)
 	{
@@ -120,7 +146,7 @@ namespace ciallo::vulkan
 	void Buffer::uploadLocal(const void* data, vk::DeviceSize size) const
 	{
 		if (size == VK_WHOLE_SIZE) size = this->size();
-		AllocationBase::uploadLocal(data, 0, size);
+		AllocationBase::memoryCopy(data, 0, size);
 	}
 
 	vk::DeviceSize Buffer::size() const

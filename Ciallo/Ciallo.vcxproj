@@ -137,10 +137,11 @@
     <ClInclude Include="Mapper.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
-    <ClInclude Include="PrincipleBrushComponents.hpp" />
+    <ClInclude Include="CommonBrushComponents.hpp" />
     <ClInclude Include="ObjectRenderer.hpp" />
     <ClInclude Include="ScenePanel.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
+    <ClInclude Include="StrokeCompoinents.hpp" />
     <ClInclude Include="TriangleTest.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />
