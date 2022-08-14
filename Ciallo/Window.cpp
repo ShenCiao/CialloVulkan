@@ -5,7 +5,7 @@
 
 namespace ciallo::vulkan
 {
-	Window::Window(const std::string& title, bool visible)
+	Window::Window(uint32_t width, uint32_t height, const std::string& title, bool visible)
 	{
 		glfwSetErrorCallback(glfwErrorCallback);
 		glfwInit();
@@ -13,7 +13,7 @@ namespace ciallo::vulkan
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
-		m_glfwWindow = glfwCreateWindow(1u, 1u, title.c_str(), nullptr, nullptr);
+		m_glfwWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 	}
 
 	Window::~Window()
@@ -199,9 +199,9 @@ namespace ciallo::vulkan
 		return m_device;
 	}
 
-	int Window::swapchainImageCount() const
+	uint32_t Window::swapchainImageCount() const
 	{
-		return static_cast<int>(m_swapchainImages.size());
+		return static_cast<uint32_t>(m_swapchainImages.size());
 	}
 
 	vk::Instance Window::instance() const

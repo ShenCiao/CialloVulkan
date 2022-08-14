@@ -31,7 +31,7 @@ namespace ciallo::vulkan
 		vk::ColorSpaceKHR m_swapchainImageColorSpace;
 
 	public:
-		explicit Window(const std::string& title, bool visible = false);
+		explicit Window(uint32_t width, uint32_t height, const std::string& title, bool visible = false);
 		~Window();
 
 		Window(const Window& other) = delete;
@@ -73,7 +73,7 @@ namespace ciallo::vulkan
 		vk::SurfaceKHR surface() const;
 		vk::SwapchainKHR swapchain() const;
 		vk::Extent2D swapchainExtent() const;
-		int swapchainImageCount() const;
+		uint32_t swapchainImageCount() const;
 		vk::Instance instance() const;
 		vk::Format swapchainImageFormat() const;
 	};

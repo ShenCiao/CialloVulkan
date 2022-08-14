@@ -3,7 +3,8 @@
 
 namespace ciallo::scene
 {
-	/* Stroke is the core object of Ciallo. It's constructed by a polyline and information of how to render the polyline. 
+	/*
+	 * Stroke is the core object of Ciallo. It's constructed by a polyline and information of how to render the polyline. 
 	 */
 	struct PolylineCpo
 	{

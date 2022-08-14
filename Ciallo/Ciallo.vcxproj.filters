@@ -158,6 +158,9 @@
     <ClInclude Include="StrokeCompoinents.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ciallo_imgui_config.h">
+      <Filter>Third Party</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">

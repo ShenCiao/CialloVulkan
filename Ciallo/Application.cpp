@@ -11,7 +11,7 @@
 void ciallo::Application::run()
 {
 	// --- Move these to somewhere else someday ---------------------------------
-	auto window = std::make_unique<vulkan::Window>("hi");
+	auto window = std::make_unique<vulkan::Window>(1024u, 1024u, "hi");
 	vulkan::Instance::addExtensions(vulkan::Window::getRequiredInstanceExtensions());
 	m_instance = std::make_shared<vulkan::Instance>();
 	window->setInstance(*m_instance);
@@ -108,24 +108,24 @@ void ciallo::Application::run()
 		glm::vec4 red = {1.0f, 0.0f, 0.0f, 1.0f};
 		glm::vec4 green = {0.0f, 1.0f, 0.0f, 1.0f};
 		glm::vec4 blue = {0.0f, 0.0f, 1.0f, 1.0f};
-		if (t < 1.0f)
-		{
-			al[0].color = glm::mix(red, green, a);
-			al[1].color = glm::mix(blue, red, a);
-			al[2].color = glm::mix(green, blue, a);
-		}
-		else if(t >= 1.0f && t < 2.0f)
-		{
-			al[0].color = glm::mix(green, blue, a);
-			al[1].color = glm::mix(red, green, a);
-			al[2].color = glm::mix(blue, red, a);
-		}
-		else
-		{
-			al[0].color = glm::mix(blue, red, a);
-			al[1].color = glm::mix(green, blue, a);
-			al[2].color = glm::mix(red, green, a);
-		}
+		// if (t < 1.0f)
+		// {
+		// 	al[0].color = glm::mix(red, green, a);
+		// 	al[1].color = glm::mix(blue, red, a);
+		// 	al[2].color = glm::mix(green, blue, a);
+		// }
+		// else if(t >= 1.0f && t < 2.0f)
+		// {
+		// 	al[0].color = glm::mix(green, blue, a);
+		// 	al[1].color = glm::mix(red, green, a);
+		// 	al[2].color = glm::mix(blue, red, a);
+		// }
+		// else
+		// {
+		// 	al[0].color = glm::mix(blue, red, a);
+		// 	al[1].color = glm::mix(green, blue, a);
+		// 	al[2].color = glm::mix(red, green, a);
+		// }
 		for (int i : views::iota(0, 3))
 		{
 			ImGui::Text("Vertex #%d", i);
@@ -142,24 +142,24 @@ void ciallo::Application::run()
 		ImGui::Text("Spacing control distance between dots");
 		ImGui::DragFloat("Spacing", &canvasRenderer->m_equidistantDot->spacing, 0.001f, 0.0001f, 1.0f);
 		auto& ed = canvasRenderer->m_equidistantDot->vertices;
-		if (t < 1.0f)
-		{
-			ed[0].color = glm::mix(red, green, a);
-			ed[1].color = glm::mix(blue, red, a);
-			ed[2].color = glm::mix(green, blue, a);
-		}
-		else if(t >= 1.0f && t < 2.0f)
-		{
-			ed[0].color = glm::mix(green, blue, a);
-			ed[1].color = glm::mix(red, green, a);
-			ed[2].color = glm::mix(blue, red, a);
-		}
-		else if(t >= 2.0f)
-		{
-			ed[0].color = glm::mix(blue, red, a);
-			ed[1].color = glm::mix(green, blue, a);
-			ed[2].color = glm::mix(red, green, a);
-		}
+		// if (t < 1.0f)
+		// {
+		// 	ed[0].color = glm::mix(red, green, a);
+		// 	ed[1].color = glm::mix(blue, red, a);
+		// 	ed[2].color = glm::mix(green, blue, a);
+		// }
+		// else if(t >= 1.0f && t < 2.0f)
+		// {
+		// 	ed[0].color = glm::mix(green, blue, a);
+		// 	ed[1].color = glm::mix(red, green, a);
+		// 	ed[2].color = glm::mix(blue, red, a);
+		// }
+		// else if(t >= 2.0f)
+		// {
+		// 	ed[0].color = glm::mix(blue, red, a);
+		// 	ed[1].color = glm::mix(green, blue, a);
+		// 	ed[2].color = glm::mix(red, green, a);
+		// }
 		for (int i : views::iota(0, 3))
 		{
 			ImGui::Text("Vertex #%d", i);

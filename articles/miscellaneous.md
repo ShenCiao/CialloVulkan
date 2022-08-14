@@ -8,15 +8,15 @@ Ciallo will persuade our users to use a powerful GPU (usually a discrete one man
 
 - Statistics underneath do not include polygon vertices generated from outlines.
 
-![HeAndSheStat](.\HeAndSheStat.png)
+![HeAndSheStat](./HeAndSheStat.png)
 
-![girlstat](.\girlstat.png)
+![girlstat](./girlstat.png)
 
 ## VTuber's Avatar
 
 Live2D is the software widely used for making avatars of VTuber. The animation it makes is based on deformation of pixelmaps:
 
-![Live2D](.\Live2D.gif)
+![Live2D](./Live2D.gif)
 
 You may notice that highlight on character's hair is "baked" within, and those noise of strokes are deformed unnaturally. As far as Shen Ciao's concern, it's a clumsy mimic of traditional frame by frame drawn animation. And the performance when using the model is definitely bad. It would be much better if it using GPU brush engine and redraw strokes and faces on every frames,  for both visual effects and performance.
 
