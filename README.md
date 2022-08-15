@@ -25,8 +25,9 @@ For now, Ciallo is more of a personal research project. But I literally wish it 
 ### Real time "label to fill"
 
 <figure>
-    <p align="center"> <img src="./articles/autoColoringFromShriobako.jpg" width = 640/></p>
+    <p> <img src="./articles/autoColoringFromShriobako.jpg" width = 640/></p>
 </figure>
+
 *Fig. - Screenshot from SHIROBAKO. It's an anime about anime making.*
 
 Artists cannot bucket fill in a vector graphics software like Adobe Illustrator or Inkscape. Ciallo will solve the problem.
@@ -81,8 +82,9 @@ Their computations in geometry are pretty straight forward except for airbrush g
 Polylines are hard to edit. So Ciallo allows users to "bind" a polyline upon bezier curve. It'll act like this:
 
 <figure>
-    <p align="center"> <img src=".\articles\strokeManipulation.gif"/></p>
+    <p> <img src=".\articles\strokeManipulation.gif"/></p>
 </figure>
+
 *Fig. - Screenshot from the paper StrokeStrip: Joint Parameterization and Fitting of Stroke Clusters.*
 
 The polyline keeps noise information, meanwhile bezier curve helps to edit polyline's overall shapes. When it comes to animating, bezier curve can make animation like bones in 3D after binding, which lets 2D artists reuse their data within stroke level.
