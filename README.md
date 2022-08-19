@@ -75,7 +75,7 @@ In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated 
 
 
 
-Their computations in geometry are pretty straight forward except for airbrush generated from articulated line. It needs calculus to clarify the whole idea about solving "the joint problem". I've made [a draft to explain the brush](.\articles\ContinuousAirbrushStrokeRendering.pdf) in Jan. 2022 but it's definitely too messy to read. I'll try to clean it up someday. Unless you are ultra interested in rendering an airbrush stroke on a bezier curve which takes [8 steps in illustrator](https://www.techwalla.com/articles/how-to-airbrush-in-illustrator), I do not recommend to read it carefully.
+Their computations in geometry are pretty straight forward except for airbrush generated from articulated line. It needs calculus to clarify the whole idea about solving "the joint problem". I've made [a draft to explain the brush](./articles/ContinuousAirbrushStrokeRendering.pdf) in Jan. 2022 but it's definitely too messy to read. I'll try to clean it up someday. Unless you are ultra interested in rendering an airbrush stroke on a bezier curve which takes [8 steps in illustrator](https://www.techwalla.com/articles/how-to-airbrush-in-illustrator), I do not recommend to read it carefully.
 
 ### Line binding for editing and animating
 
