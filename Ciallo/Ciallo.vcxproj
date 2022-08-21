@@ -100,7 +100,6 @@
     <ClCompile Include="ArticulatedLine.cpp" />
     <ClCompile Include="BezierTransformer.cpp" />
     <ClCompile Include="BrushCabinet.cpp" />
-    <ClCompile Include="BrushPool.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="Device.cpp" />
@@ -125,7 +124,6 @@
     <ClInclude Include="Bezier.hpp" />
     <ClInclude Include="BezierTransformer.hpp" />
     <ClInclude Include="BrushCabinet.hpp" />
-    <ClInclude Include="BrushPool.hpp" />
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="CanvasRenderer.hpp" />
     <ClInclude Include="ciallo_imgui_config.h" />

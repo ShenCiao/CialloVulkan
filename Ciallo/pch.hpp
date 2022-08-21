@@ -16,6 +16,7 @@ namespace views = ranges::views;
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 #include <vk_mem_alloc.h>
+#define ENTT_USE_ATOMIC
 #include <entt/entt.hpp>
 
 #include "GeometryPrimitives.hpp"

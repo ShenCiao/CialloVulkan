@@ -133,7 +133,7 @@ Take my great appreciation for your willingness to help on development. But Cial
 ### External Dependencies
 
 - Rendering
-  - Vulkan - For using some features OpenGL cannot offer.
+  - Vulkan - Using some features OpenGL cannot offer.
   - Vulkan Memory Allocator
   - Vookoo - It's a thin wrapper on Vulkan. Ciallo use it for fast prototyping vulkan pipeline.
 - GUI
