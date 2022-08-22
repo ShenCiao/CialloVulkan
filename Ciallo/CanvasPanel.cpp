@@ -1,5 +1,5 @@
 ﻿#include "pch.hpp"
-#include "ScenePanel.hpp"
+#include "CanvasPanel.hpp"
 
 #include <filesystem>
 #include <imgui_impl_vulkan.h>
@@ -9,7 +9,7 @@
 
 namespace ciallo::gui
 {
-	void ScenePanel::draw() const
+	void CanvasPanel::draw() const
 	{
 		ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar;
 		ImGui::Begin("Scene", nullptr, flags);
@@ -19,7 +19,7 @@ namespace ciallo::gui
 		ImGui::End();
 	}
 
-	void ScenePanel::genCanvas(vulkan::Device* d, vk::CommandBuffer cb)
+	void CanvasPanel::genCanvas(vulkan::Device* d, vk::CommandBuffer cb)
 	{
 		int width = 1024, height = 1024;
 		VmaAllocationCreateInfo info = {{}, VMA_MEMORY_USAGE_AUTO};
@@ -37,7 +37,7 @@ namespace ciallo::gui
 		                                                static_cast<VkImageLayout>(m_canvas->imageLayout()));
 	}
 
-	void ScenePanel::genSampler(vk::Device device)
+	void CanvasPanel::genSampler(vk::Device device)
 	{
 		vk::SamplerCreateInfo info{};
 		info.magFilter = vk::Filter::eNearest;

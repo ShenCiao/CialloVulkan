@@ -9,7 +9,7 @@
 
 namespace ciallo::gui
 {
-	class ScenePanel
+	class CanvasPanel
 	{
 	public:
 		void draw() const;

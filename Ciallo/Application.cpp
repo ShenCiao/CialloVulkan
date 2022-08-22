@@ -5,13 +5,13 @@
 
 #include "Device.hpp"
 #include "MainPassRenderer.hpp"
-#include "ScenePanel.hpp"
-#include "BrushPool.hpp"
+#include "CanvasPanel.hpp"
+#include "Project.hpp"
 
 void ciallo::Application::run()
 {
 	// --- Move these to somewhere else someday ---------------------------------
-	auto window = std::make_unique<vulkan::Window>(1024u, 1024u, "hi");
+	auto window = std::make_unique<vulkan::Window>(1024u, 1024u, "Ciallo  - Laboratory Version");
 	vulkan::Instance::addExtensions(vulkan::Window::getRequiredInstanceExtensions());
 	m_instance = std::make_shared<vulkan::Instance>();
 	window->setInstance(*m_instance);
@@ -23,6 +23,9 @@ void ciallo::Application::run()
 	window->setDevice(*m_device);
 	window->setPhysicalDevice(m_device->physicalDevice());
 	window->initSwapchain();
+
+	Project project;
+	entt::registry& registry = project.registry();
 	// -----------------------------------------------------------------------------
 
 	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
@@ -30,7 +33,7 @@ void ciallo::Application::run()
 	window->show();
 	vk::CommandBuffer cb = m_device->createCommandBuffer();
 
-	gui::ScenePanel sp;
+	gui::CanvasPanel sp;
 	m_device->executeImmediately([&](vk::CommandBuffer tmpcb)
 	{
 		sp.genSampler(*m_device);

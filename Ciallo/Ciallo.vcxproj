@@ -113,7 +113,8 @@
     </ClCompile>
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="ObjectRenderer.cpp" />
-    <ClCompile Include="ScenePanel.cpp" />
+    <ClCompile Include="CanvasPanel.cpp" />
+    <ClCompile Include="Project.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="TriangleTest.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -138,7 +139,8 @@
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="CommonBrushComponents.hpp" />
     <ClInclude Include="ObjectRenderer.hpp" />
-    <ClInclude Include="ScenePanel.hpp" />
+    <ClInclude Include="CanvasPanel.hpp" />
+    <ClInclude Include="Project.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="StrokeCompoinents.hpp" />
     <ClInclude Include="TriangleTest.hpp" />

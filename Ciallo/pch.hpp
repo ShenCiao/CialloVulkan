@@ -18,5 +18,6 @@ namespace views = ranges::views;
 #include <vk_mem_alloc.h>
 #define ENTT_USE_ATOMIC
 #include <entt/entt.hpp>
+using namespace entt::literals;
 
 #include "GeometryPrimitives.hpp"

@@ -62,7 +62,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScenePanel.cpp">
+    <ClCompile Include="CanvasPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderModule.cpp">
@@ -72,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Project.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -139,7 +142,7 @@
     <ClInclude Include="pch.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScenePanel.hpp">
+    <ClInclude Include="CanvasPanel.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="ShaderModule.hpp">
@@ -151,6 +154,7 @@
     <ClInclude Include="TriangleTest.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Project.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">

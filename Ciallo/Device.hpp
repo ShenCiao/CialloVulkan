@@ -7,7 +7,7 @@ namespace ciallo::vulkan
 {
 	/**
 	 * \brief Class for logical device, physical device, command pool, descriptor pool and memory allocator.
-	 * Can be implicitly converted to the allocator since allocator is nothing more than the device.
+	 * Can be implicitly converted to the allocator since allocator is nothing more than the device and instance.
 	 */
 	class Device
 	{
