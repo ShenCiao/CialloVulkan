@@ -1,25 +1,23 @@
 ﻿#pragma once
 
-#include <imgui.h>
-
 #include "Device.hpp"
 #include "Image.hpp"
 #include "CanvasRenderer.hpp"
 #include "ArticulatedLine.hpp"
 
-namespace ciallo::gui
+namespace ciallo
 {
-	class CanvasPanel
+	struct CanvasPanelCpo
 	{
-	public:
-		void draw() const;
-	public:
-		void genCanvas(vulkan::Device* d, vk::CommandBuffer cb);
-		void genSampler(vk::Device device);
-		std::unique_ptr<vulkan::Image> m_canvas;
-	private:
-		vk::UniqueSampler m_sampler;
-		ImTextureID m_canvasTextureId = nullptr;
+		entt::entity drawing{entt::null};
+		float drawingRotation = 0.0f;
+		float sizeRatio = 1.0f;
+		std::vector<entt::entity> onionSkinDrawings = {};
+		std::vector<float> onionSkinDrawingRotations = {};
 	};
-	
+
+	struct CanvasPanelDrawer
+	{
+		static void update(entt::registry& registry);
+	};
 }

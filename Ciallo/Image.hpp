@@ -86,3 +86,13 @@ namespace ciallo::vulkan
 		}
 	};
 }
+
+namespace ciallo
+{
+	struct VulkanImageCpo
+	{
+		vulkan::Image image;
+		vk::Sampler sampler;
+		ImTextureID id;
+	};
+}

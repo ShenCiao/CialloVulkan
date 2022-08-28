@@ -12,7 +12,6 @@ namespace ciallo::vulkan
 	 */
 	class MainPassRenderer
 	{
-	private:
 		Window* w;
 		Device* d;
 		bool m_imguiInitialized = false;
@@ -41,7 +40,6 @@ namespace ciallo::vulkan
 	public:
 		void genFramebuffers();
 
-	public:
 		vk::Fence renderingCompleteFence() const
 		{
 			return *m_renderingCompleteFence;

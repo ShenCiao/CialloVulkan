@@ -59,7 +59,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;IMGUI_USER_CONFIG="ciallo_imgui_config.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -83,7 +83,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
@@ -107,7 +107,6 @@
     <ClCompile Include="EquidistantDot.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainPassRenderer.cpp" />
-    <ClCompile Include="Mapper.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -116,7 +115,6 @@
     <ClCompile Include="CanvasPanel.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
-    <ClCompile Include="TriangleTest.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -134,7 +132,6 @@
     <ClInclude Include="Image.hpp" />
     <ClInclude Include="EquidistantDot.hpp" />
     <ClInclude Include="MainPassRenderer.hpp" />
-    <ClInclude Include="Mapper.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="CommonBrushComponents.hpp" />
@@ -143,7 +140,6 @@
     <ClInclude Include="Project.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="StrokeCompoinents.hpp" />
-    <ClInclude Include="TriangleTest.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

@@ -62,7 +62,6 @@ namespace ciallo::vulkan
 		io.FontGlobalScale = 1.5f;
 		w->imguiInitWindow();
 
-		// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 		ImGui_ImplVulkan_InitInfo init_info{};
 		init_info.Instance = w->instance();
 		init_info.PhysicalDevice = d->physicalDevice();

@@ -2,54 +2,50 @@
 #include "CanvasPanel.hpp"
 
 #include <filesystem>
-#include <imgui_impl_vulkan.h>
 #include <stb_image.h>
 
 #include "Device.hpp"
 
-namespace ciallo::gui
+namespace ciallo
 {
-	void CanvasPanel::draw() const
+	void CanvasPanelDrawer::update(entt::registry& registry)
 	{
-		ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar;
-		ImGui::Begin("Scene", nullptr, flags);
+		auto v = registry.view<CanvasPanelCpo>();
+		v.each([&registry](entt::entity canvasPanelEntity, CanvasPanelCpo& canvasPanelCpo)
+		{
+			const ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_HorizontalScrollbar;
+			bool notCloseWindow = true;
+			
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {.0f, .0f});
+			ImGui::Begin(std::format("Canvas###{}", canvasPanelEntity).c_str(), &notCloseWindow, flags);
+			if (!notCloseWindow)
+			{
+				ImGui::End();
+				ImGui::PopStyleVar(1);
+				registry.destroy(canvasPanelEntity);
+				return;
+			}
 
-		ImVec2 sizeToShow{static_cast<float>(m_canvas->width()), static_cast<float>(m_canvas->height())};
-		ImGui::Image(m_canvasTextureId, sizeToShow);
-		ImGui::End();
-	}
+			entt::entity drawingEntity = canvasPanelCpo.drawing;
+			if(!registry.valid(drawingEntity) || !registry.all_of<VulkanImageCpo>(drawingEntity))
+			{
+				ImGui::Text("Image is not valid.");
+				ImGui::End();
+				ImGui::PopStyleVar(1);
+				return;
+			}
 
-	void CanvasPanel::genCanvas(vulkan::Device* d, vk::CommandBuffer cb)
-	{
-		int width = 1024, height = 1024;
-		VmaAllocationCreateInfo info = {{}, VMA_MEMORY_USAGE_AUTO};
+			auto& vulkanImageCpo = registry.get<VulkanImageCpo>(drawingEntity);
+			vk::Extent2D s = vulkanImageCpo.image.extent2D();
+			float sizeRatio = canvasPanelCpo.sizeRatio;
+			glm::vec2 imageSize = {static_cast<float>(s.width)*sizeRatio, static_cast<float>(s.height)*sizeRatio};
+			ImVec2 innerWindowSize = imageSize * 3.0f; // Padding a whole image size around middle, so it's 3 times.
+			ImGui::Dummy(innerWindowSize); // Use a dummy object to fill the desired area.
 
-		m_canvas = std::make_unique<vulkan::Image>(
-			*d, info, vk::Format::eR8G8B8A8Unorm,
-			width, height, vk::SampleCountFlagBits::e1,
-			vk::ImageUsageFlagBits::eSampled |
-			vk::ImageUsageFlagBits::eTransferDst |
-			vk::ImageUsageFlagBits::eColorAttachment);
-
-		m_canvas->changeLayout(cb, vk::ImageLayout::eGeneral);
-
-		m_canvasTextureId = ImGui_ImplVulkan_AddTexture(*m_sampler, m_canvas->imageView(),
-		                                                static_cast<VkImageLayout>(m_canvas->imageLayout()));
-	}
-
-	void CanvasPanel::genSampler(vk::Device device)
-	{
-		vk::SamplerCreateInfo info{};
-		info.magFilter = vk::Filter::eNearest;
-		info.minFilter = vk::Filter::eNearest;
-		info.addressModeU = vk::SamplerAddressMode::eClampToBorder;
-		info.addressModeV = vk::SamplerAddressMode::eClampToBorder;
-		info.addressModeW = vk::SamplerAddressMode::eClampToBorder;
-		info.anisotropyEnable = VK_FALSE;
-		info.borderColor = vk::BorderColor::eIntOpaqueBlack;
-		info.unnormalizedCoordinates = VK_FALSE;
-		info.compareEnable = VK_FALSE;
-		info.compareOp = vk::CompareOp::eAlways;
-		m_sampler = device.createSamplerUnique(info);
+			ImGui::SetCursorPos(imageSize);
+			ImGui::Image(vulkanImageCpo.id, imageSize);
+			ImGui::End();
+			ImGui::PopStyleVar();
+		});
 	}
 }

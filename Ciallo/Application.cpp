@@ -26,19 +26,40 @@ void ciallo::Application::run()
 
 	Project project;
 	entt::registry& registry = project.registry();
+	vulkan::MainPassRenderer mainPassRenderer(window.get(), m_device.get());
+	// -----------------------------------------------------------------------------
+	entt::entity canvasPanel = registry.create();
+	entt::entity drawing = registry.create();
+	auto& canvasPanelCpo = registry.emplace<CanvasPanelCpo>(canvasPanel);
+	canvasPanelCpo.drawing = drawing;
+	auto& vulkanImageCpo = registry.emplace<VulkanImageCpo>(drawing);
+	vk::SamplerCreateInfo samplerCreateInfo{};
+	vk::UniqueSampler sampler = m_device->device().createSamplerUnique(samplerCreateInfo);
+	vulkanImageCpo.sampler = *sampler;
+
+	VmaAllocationCreateInfo allocCreateInfo = {};
+	allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+	vulkanImageCpo.image = vulkan::Image(*m_device, allocCreateInfo, vk::Format::eR8G8B8A8Unorm, 400u, 400u,
+	                                     vk::SampleCountFlagBits::e1,
+	                                     vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst |
+	                                     vk::ImageUsageFlagBits::eColorAttachment |
+	                                     vk::ImageUsageFlagBits::eTransferSrc);
+	m_device->executeImmediately([&vulkanImageCpo](vk::CommandBuffer cb)
+	{
+		vk::ImageMemoryBarrier2 barrier = vulkanImageCpo.image.createLayoutTransitionMemoryBarrier(
+			vk::ImageLayout::eGeneral);
+		vk::DependencyInfo info{};
+		info.setImageMemoryBarriers(barrier);
+		cb.pipelineBarrier2(info);
+		vulkanImageCpo.image.setImageLayout(vk::ImageLayout::eGeneral);
+	});
+	vk::ImageView imageView = vulkanImageCpo.image.imageView();
+	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
 	// -----------------------------------------------------------------------------
 
 	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
-	vulkan::MainPassRenderer mainPassRenderer(window.get(), m_device.get());
 	window->show();
 	vk::CommandBuffer cb = m_device->createCommandBuffer();
-
-	gui::CanvasPanel sp;
-	m_device->executeImmediately([&](vk::CommandBuffer tmpcb)
-	{
-		sp.genSampler(*m_device);
-		sp.genCanvas(m_device.get(), tmpcb);
-	});
 
 	auto canvasRenderer = std::make_unique<rendering::CanvasRenderer>(m_device.get());
 
@@ -77,8 +98,8 @@ void ciallo::Application::run()
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// --start imgui recording------------------------------------------------------
-		canvasRenderer->render(cb, sp.m_canvas.get());
-
+		canvasRenderer->render(cb, &vulkanImageCpo.image);
+		CanvasPanelDrawer::update(registry);
 		if (ImGui::BeginMainMenuBar())
 		{
 			ImGui::EndMainMenuBar();
@@ -94,8 +115,6 @@ void ciallo::Application::run()
 		{
 			ImPlot::ShowDemoWindow(&show_demo_plot);
 		}
-
-		sp.draw();
 		// -----------------------------------------------------------------------------
 		static float t = 0.0f;
 		t += 0.004f;

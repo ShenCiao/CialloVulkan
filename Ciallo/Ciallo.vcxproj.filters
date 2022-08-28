@@ -53,9 +53,6 @@
     <ClCompile Include="MainPassRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ObjectRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -66,9 +63,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriangleTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp">
@@ -133,9 +127,6 @@
     <ClInclude Include="MainPassRenderer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mapper.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="ObjectRenderer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -149,9 +140,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="StrokeCompoinents.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriangleTest.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Project.hpp" />
