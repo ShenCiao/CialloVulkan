@@ -4,6 +4,8 @@
 
 namespace ciallo::vulkan
 {
+	constexpr VmaAllocationCreateInfo MemoryHostVisible{VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT, VMA_MEMORY_USAGE_AUTO};
+	constexpr VmaAllocationCreateInfo MemoryAuto{{}, VMA_MEMORY_USAGE_AUTO}; // Host invisible at usual case
 	// Base class for objects need to allocate memory with vulkan memory allocator. Include Buffer, Image and Mapper.
 	class AllocationBase
 	{

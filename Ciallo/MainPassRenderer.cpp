@@ -59,6 +59,7 @@ namespace ciallo::vulkan
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigWindowsMoveFromTitleBarOnly = true;
 		io.FontGlobalScale = 1.5f;
 		w->imguiInitWindow();
 

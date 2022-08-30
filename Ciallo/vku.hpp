@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------
 // Modified version by Ciallo:
 //
-// Renamed "Renderpass" to "RenderPass".
-// Create pipeline and compute pipeline with vk::ShaderModule instead of vku::ShaderModule
-// Add support for dynamic rendering.
-// Delete class Image, Buffer, ShaderModule, Device, Instance. We use our own.
-// Clean up unused #include and reformat whole code.
-// Add default offset and range to DescriptorUpdater::buffer.
-// Change pipeline blendEnable() same as blendBegin().
+// - Renamed "Renderpass" to "RenderPass".
+// - Create pipeline and compute pipeline with vk::ShaderModule instead of vku::ShaderModule
+// - Add support for dynamic rendering.
+// - Delete class Image, Buffer, ShaderModule, Device, Instance. We use our own.
+// - Clean up unused #include and reformat whole code.
+// - Add default offset and range to DescriptorUpdater::buffer.
+// - Change pipeline blendEnable() same as blendBegin().
 // -----------------------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -37,9 +37,7 @@ void ciallo::Application::run()
 	vk::UniqueSampler sampler = m_device->device().createSamplerUnique(samplerCreateInfo);
 	vulkanImageCpo.sampler = *sampler;
 
-	VmaAllocationCreateInfo allocCreateInfo = {};
-	allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-	vulkanImageCpo.image = vulkan::Image(*m_device, allocCreateInfo, vk::Format::eR8G8B8A8Unorm, 400u, 400u,
+	vulkanImageCpo.image = vulkan::Image(*m_device, vulkan::MemoryAuto, vk::Format::eR8G8B8A8Unorm, 400u, 400u,
 	                                     vk::SampleCountFlagBits::e1,
 	                                     vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst |
 	                                     vk::ImageUsageFlagBits::eColorAttachment |

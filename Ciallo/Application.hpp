@@ -15,6 +15,7 @@ public:
 	Application(Application&& other) = delete;
 	Application& operator=(const Application& other) = delete;
 	Application& operator=(Application&& other) = delete;
+	~Application() = default;
 
 	void run();
 	

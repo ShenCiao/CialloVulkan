@@ -13,10 +13,12 @@
 namespace views = ranges::views;
 
 #include <vulkan/vulkan.hpp>
+#include <vk_mem_alloc.h>
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
-#include <vk_mem_alloc.h>
+#define IMGUI_DEFINE_MATH_OPERATORS 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_impl_vulkan.h>
 // -----------------------------------------------------------------------------
 #define ENTT_USE_ATOMIC
