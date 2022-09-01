@@ -122,7 +122,7 @@ Only the integration of three features above can make a brand new experience for
 
 ## How to Compile
 
-Take my great appreciation for your willingness to help on development. But Ciallo is not ready for everybody to participate in yet. Contact me if you have profound knowledge in one of these areas: DCC/paint software architecture, blender grease pencil, computational geometry, shader graph/node system.
+Take my great appreciation for your willingness to help on development. But Ciallo is not ready for everybody to participate in yet. Contact me if you have profound knowledge in one of these areas: DCC/paint software development, blender grease pencil, computational geometry, shader graph/node system.
 
 ### Windows
 
