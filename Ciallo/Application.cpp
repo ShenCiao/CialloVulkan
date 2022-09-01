@@ -6,6 +6,8 @@
 #include "Device.hpp"
 #include "MainPassRenderer.hpp"
 #include "CanvasPanel.hpp"
+#include "CanvasRenderer.hpp"
+#include "Image.hpp"
 #include "Project.hpp"
 
 void ciallo::Application::run()

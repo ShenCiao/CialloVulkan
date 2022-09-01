@@ -1,10 +1,7 @@
 ﻿#include "pch.hpp"
 #include "CanvasPanel.hpp"
 
-#include <filesystem>
-#include <stb_image.h>
-
-#include "Device.hpp"
+#include "Image.hpp"
 
 namespace ciallo
 {
@@ -13,10 +10,19 @@ namespace ciallo
 		auto v = registry.view<CanvasPanelCpo>();
 		v.each([&registry](entt::entity canvasPanelEntity, CanvasPanelCpo& canvasPanelCpo)
 		{
+			entt::entity drawingEntity = canvasPanelCpo.drawing;
+			auto& vulkanImageCpo = registry.get<const VulkanImageCpo>(drawingEntity);
+			vk::Extent2D s = vulkanImageCpo.image.extent2D();
+			glm::vec2 imageSize = {
+				static_cast<float>(s.width) * canvasPanelCpo.zoom,
+				static_cast<float>(s.height) * canvasPanelCpo.zoom
+			};
+
 			const ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_HorizontalScrollbar |
 				ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_AlwaysVerticalScrollbar;
 			bool notCloseWindow = true;
-
+			// Padding a whole image size around middle, so it's 3 times.
+			ImGui::SetNextWindowContentSize(imageSize*3.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {.0f, .0f});
 			ImGui::Begin(std::format("Canvas###{}", canvasPanelEntity).c_str(), &notCloseWindow, flags);
 			if (!notCloseWindow)
@@ -27,7 +33,6 @@ namespace ciallo
 				return;
 			}
 
-			entt::entity drawingEntity = canvasPanelCpo.drawing;
 			if (!registry.valid(drawingEntity) || !registry.all_of<VulkanImageCpo>(drawingEntity))
 			{
 				ImGui::Text("Image is not valid.");
@@ -35,62 +40,53 @@ namespace ciallo
 				ImGui::PopStyleVar(1);
 				return;
 			}
-			auto& vulkanImageCpo = registry.get<const VulkanImageCpo>(drawingEntity);
-			vk::Extent2D s = vulkanImageCpo.image.extent2D();
-			glm::vec2 imageSize = {
-				static_cast<float>(s.width) * canvasPanelCpo.zoom,
-				static_cast<float>(s.height) * canvasPanelCpo.zoom
-			};
-			// coordinate in world space, viewRect's origin at window left up corner, not include title bar and scroll bar
-			// window origin != work rect origin
-			glm::vec2 viewRectSize = ImGui::GetContentRegionAvail();
-			glm::vec2 viewRectOriginWindow = glm::vec2{0.f, ImGui::GetFrameHeight()}; // add menu if need
-			glm::vec2 viewRectOrigin = viewRectOriginWindow + glm::vec2(ImGui::GetWindowPos());
 
-			{
-				ImVec2 vMin = viewRectOrigin;
-				ImVec2 vMax = viewRectOrigin + viewRectSize;
-
-				ImGui::GetForegroundDrawList()->AddRect(vMin, vMax, IM_COL32(255, 255, 0, 255));
-			}
+			auto panel = ImGui::GetCurrentWindow();
+			glm::vec2 innerRectSize = panel->InnerRect.GetSize();
+			glm::vec2 innerRectOrigin = panel->InnerRect.Min;
+			glm::vec2 innerRectOriginWindow = panel->InnerRect.Min - ImGui::GetWindowPos();
 
 			ImGuiIO io = ImGui::GetIO();
 
 			// -----------------------------------------------------------------------------
 			// Mouse interaction
-			if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(viewRectOrigin, viewRectOrigin + viewRectSize))
+			ImGui::SetCursorScreenPos(innerRectOrigin);
+			
+			ImGui::InvisibleButton(std::format("CanvasInteraction##{}", canvasPanelEntity).c_str(), innerRectSize,
+			                       ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight |
+			                       ImGuiButtonFlags_MouseButtonMiddle);
+			if (ImGui::IsItemHovered() || ImGui::IsItemActive())
 			{
-				if (glm::abs(io.MouseWheel) >= 0.1f)
+				if (glm::abs(io.MouseWheel) >= 1.0f)
 				{
-					spdlog::info("MouseWheel: {}", io.MouseWheel);
-					const float wheelZoomFactor = 0.05f;
+					const float wheelZoomFactor = 0.1f;
 					float zoom_prev = canvasPanelCpo.zoom;
 					canvasPanelCpo.zoom += wheelZoomFactor * io.MouseWheel;
-
-					glm::vec2 mousePos = io.MousePos;
-					glm::vec2 mouseViewRectRatio = (mousePos - viewRectOrigin) / viewRectSize;
-					glm::vec2 mouseContentPos = glm::vec2{ImGui::GetScrollX(), ImGui::GetScrollY()} + (mousePos -
-						viewRectOrigin);
-					ImGui::SetScrollX(ImGui::GetScrollX() / zoom_prev * canvasPanelCpo.zoom);
-					ImGui::SetScrollY(ImGui::GetScrollY() / zoom_prev * canvasPanelCpo.zoom);
+					glm::vec2 mouseInnerRect = io.MousePos-innerRectOrigin;
+					canvasPanelCpo.scroll = (canvasPanelCpo.scroll+mouseInnerRect)/zoom_prev * canvasPanelCpo.zoom - mouseInnerRect;
 				}
 			}
+
+			if (io.MouseDown[2] && ImGui::IsItemActive())
+			{
+				canvasPanelCpo.scroll = canvasPanelCpo.scroll - glm::vec2(io.MouseDelta);
+			}
+
+			canvasPanelCpo.zoom = glm::clamp(canvasPanelCpo.zoom, 0.0f, 1000.0f);
+			canvasPanelCpo.scroll = glm::clamp(canvasPanelCpo.scroll, {0.0f, 0.0f}, {ImGui::GetScrollMaxX(), ImGui::GetScrollMaxY()});
+			ImGui::SetScrollX(canvasPanelCpo.scroll.x);
+			ImGui::SetScrollY(canvasPanelCpo.scroll.y);
 			// -----------------------------------------------------------------------------
-
-
-			// Padding a whole image size around middle, so it's 3 times.
-			ImGui::Dummy(imageSize * 3.0f); // Use a dummy object to fill the desired area.
-
 			glm::vec2 imageStartPosition = {
-				imageSize.x * 3.0f >= viewRectSize.x ? imageSize.x : viewRectSize.x / 2.0f - imageSize.x / 2.0f,
-				imageSize.y * 3.0f >= viewRectSize.y
-					? imageSize.y + viewRectOriginWindow.y
-					: viewRectSize.y / 2.0f - imageSize.y / 2.0f + viewRectOriginWindow.y
+				imageSize.x * 3.0f >= innerRectSize.x ? imageSize.x : innerRectSize.x / 2.0f - imageSize.x / 2.0f,
+				imageSize.y * 3.0f >= innerRectSize.y
+					? imageSize.y + innerRectOriginWindow.y
+					: innerRectSize.y / 2.0f - imageSize.y / 2.0f + innerRectOriginWindow.y
 			};
 			ImGui::SetCursorPosX(imageStartPosition.x);
 			ImGui::SetCursorPosY(imageStartPosition.y);
-
 			ImGui::Image(vulkanImageCpo.id, imageSize);
+
 			ImGui::End();
 			ImGui::PopStyleVar();
 		});

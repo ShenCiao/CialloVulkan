@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Window.hpp"
 #include "Instance.hpp"
 #include "Device.hpp"
 
