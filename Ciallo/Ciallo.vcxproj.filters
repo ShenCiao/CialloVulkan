@@ -74,6 +74,9 @@
     <ClCompile Include="CanvasInteraction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Drawing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vku.hpp">
@@ -149,6 +152,7 @@
     <ClInclude Include="CanvasInteraction.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Drawing.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">

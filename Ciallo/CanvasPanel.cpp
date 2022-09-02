@@ -43,14 +43,14 @@ namespace ciallo
 			
 			auto panel = ImGui::GetCurrentWindow();
 			glm::vec2 innerRectSize = panel->InnerRect.GetSize();
-			glm::vec2 innerRectOrigin = panel->InnerRect.Min;
-			glm::vec2 innerRectOriginWindow = panel->InnerRect.Min - ImGui::GetWindowPos();
+			glm::vec2 innerRectMin = panel->InnerRect.Min;
+			glm::vec2 innerRectMinWindow = panel->InnerRect.Min - ImGui::GetWindowPos();
 
 			ImGuiIO io = ImGui::GetIO();
 
 			// -----------------------------------------------------------------------------
 			// Mouse interaction
-			ImGui::SetCursorScreenPos(innerRectOrigin);
+			ImGui::SetCursorScreenPos(innerRectMin);
 			
 			ImGui::InvisibleButton(std::format("CanvasInteraction##{}", canvasPanelEntity).c_str(), innerRectSize,
 			                       ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight |
@@ -62,7 +62,7 @@ namespace ciallo
 					const float wheelZoomFactor = 0.1f;
 					float zoom_prev = canvasPanelCpo.zoom;
 					canvasPanelCpo.zoom += wheelZoomFactor * io.MouseWheel;
-					glm::vec2 mouseInnerRect = io.MousePos-innerRectOrigin;
+					glm::vec2 mouseInnerRect = io.MousePos-innerRectMin;
 					canvasPanelCpo.scroll = (canvasPanelCpo.scroll+mouseInnerRect)/zoom_prev * canvasPanelCpo.zoom - mouseInnerRect;
 				}
 			}
@@ -86,8 +86,8 @@ namespace ciallo
 			glm::vec2 imageStartPosition = {
 				imageSize.x * 3.0f >= innerRectSize.x ? imageSize.x : innerRectSize.x / 2.0f - imageSize.x / 2.0f,
 				imageSize.y * 3.0f >= innerRectSize.y
-					? imageSize.y + innerRectOriginWindow.y
-					: innerRectSize.y / 2.0f - imageSize.y / 2.0f + innerRectOriginWindow.y
+					? imageSize.y + innerRectMinWindow.y
+					: innerRectSize.y / 2.0f - imageSize.y / 2.0f + innerRectMinWindow.y
 			};
 			ImGui::SetCursorPosX(imageStartPosition.x);
 			ImGui::SetCursorPosY(imageStartPosition.y);

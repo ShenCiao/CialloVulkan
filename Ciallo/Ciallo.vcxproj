@@ -104,6 +104,7 @@
     <ClCompile Include="CanvasInteraction.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="EquidistantDot.cpp" />
     <ClCompile Include="main.cpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="ciallo_imgui_config.h" />
     <ClInclude Include="CommonSceneObjectComponents.hpp" />
     <ClInclude Include="Device.hpp" />
+    <ClInclude Include="Drawing.hpp" />
     <ClInclude Include="GeometryPrimitives.hpp" />
     <ClInclude Include="Image.hpp" />
     <ClInclude Include="EquidistantDot.hpp" />

@@ -7,6 +7,7 @@
 #include "MainPassRenderer.hpp"
 #include "CanvasPanel.hpp"
 #include "CanvasRenderer.hpp"
+#include "Drawing.hpp"
 #include "Image.hpp"
 #include "Project.hpp"
 
@@ -179,6 +180,7 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 {
 	Project project;
 	entt::registry& registry = project.registry();
+	// Canvas panel and drawing
 	entt::entity canvasPanel = registry.create();
 	entt::entity drawing = registry.create();
 	auto& canvasPanelCpo = registry.emplace<CanvasPanelCpo>(canvasPanel);
@@ -204,5 +206,12 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	});
 	vk::ImageView imageView = vulkanImageCpo.image.imageView();
 	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
+	auto& drawingCpo = registry.emplace<DrawingCpo>(drawing, A4Paper);
+	// Drawing and layer
+	entt::entity layer = registry.create();
+	drawingCpo.layers.push_back(layer);
+
+
+
 	return project;
 }
