@@ -26,35 +26,10 @@ void ciallo::Application::run()
 	window->setPhysicalDevice(m_device->physicalDevice());
 	window->initSwapchain();
 
-	Project project;
-	entt::registry& registry = project.registry();
 	vulkan::MainPassRenderer mainPassRenderer(window.get(), m_device.get());
 	// -----------------------------------------------------------------------------
-	entt::entity canvasPanel = registry.create();
-	entt::entity drawing = registry.create();
-	auto& canvasPanelCpo = registry.emplace<CanvasPanelCpo>(canvasPanel);
-	canvasPanelCpo.drawing = drawing;
-	auto& vulkanImageCpo = registry.emplace<VulkanImageCpo>(drawing);
-	vk::SamplerCreateInfo samplerCreateInfo{};
-	vk::UniqueSampler sampler = m_device->device().createSamplerUnique(samplerCreateInfo);
-	vulkanImageCpo.sampler = *sampler;
-
-	vulkanImageCpo.image = vulkan::Image(*m_device, vulkan::MemoryAuto, vk::Format::eR8G8B8A8Unorm, 400u, 400u,
-	                                     vk::SampleCountFlagBits::e1,
-	                                     vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst |
-	                                     vk::ImageUsageFlagBits::eColorAttachment |
-	                                     vk::ImageUsageFlagBits::eTransferSrc);
-	m_device->executeImmediately([&vulkanImageCpo](vk::CommandBuffer cb)
-	{
-		vk::ImageMemoryBarrier2 barrier = vulkanImageCpo.image.createLayoutTransitionMemoryBarrier(
-			vk::ImageLayout::eGeneral);
-		vk::DependencyInfo info{};
-		info.setImageMemoryBarriers(barrier);
-		cb.pipelineBarrier2(info);
-		vulkanImageCpo.image.setImageLayout(vk::ImageLayout::eGeneral);
-	});
-	vk::ImageView imageView = vulkanImageCpo.image.imageView();
-	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
+	Project project = createDefaultProject();
+	entt::registry& registry = project.registry();
 	// -----------------------------------------------------------------------------
 
 	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
@@ -98,7 +73,8 @@ void ciallo::Application::run()
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// --start imgui recording------------------------------------------------------
-		canvasRenderer->render(cb, &vulkanImageCpo.image);
+		entt::entity tempe = registry.view<CanvasPanelCpo>()[0];
+		canvasRenderer->render(cb, &registry.get<VulkanImageCpo>(registry.get<CanvasPanelCpo>(tempe).drawing).image);
 		CanvasPanelDrawer::update(registry);
 		if (ImGui::BeginMainMenuBar())
 		{
@@ -199,6 +175,34 @@ void ciallo::Application::run()
 	m_device->device().waitIdle();
 }
 
-void ciallo::Application::loadSettings()
+ciallo::Project ciallo::Application::createDefaultProject() const
 {
+	Project project;
+	entt::registry& registry = project.registry();
+	entt::entity canvasPanel = registry.create();
+	entt::entity drawing = registry.create();
+	auto& canvasPanelCpo = registry.emplace<CanvasPanelCpo>(canvasPanel);
+	canvasPanelCpo.drawing = drawing;
+	auto& vulkanImageCpo = registry.emplace<VulkanImageCpo>(drawing);
+	vk::SamplerCreateInfo samplerCreateInfo{};
+	vk::UniqueSampler sampler = m_device->device().createSamplerUnique(samplerCreateInfo);
+	vulkanImageCpo.sampler = *sampler;
+
+	vulkanImageCpo.image = vulkan::Image(*m_device, vulkan::MemoryAuto, vk::Format::eR8G8B8A8Unorm, 400u, 400u,
+	                                     vk::SampleCountFlagBits::e1,
+	                                     vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst |
+	                                     vk::ImageUsageFlagBits::eColorAttachment |
+	                                     vk::ImageUsageFlagBits::eTransferSrc);
+	m_device->executeImmediately([&vulkanImageCpo](vk::CommandBuffer cb)
+	{
+		vk::ImageMemoryBarrier2 barrier = vulkanImageCpo.image.createLayoutTransitionMemoryBarrier(
+			vk::ImageLayout::eGeneral);
+		vk::DependencyInfo info{};
+		info.setImageMemoryBarriers(barrier);
+		cb.pipelineBarrier2(info);
+		vulkanImageCpo.image.setImageLayout(vk::ImageLayout::eGeneral);
+	});
+	vk::ImageView imageView = vulkanImageCpo.image.imageView();
+	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
+	return project;
 }

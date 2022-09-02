@@ -71,6 +71,9 @@
     <ClCompile Include="Project.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CanvasInteraction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vku.hpp">
@@ -143,6 +146,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Project.hpp" />
+    <ClInclude Include="CanvasInteraction.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">

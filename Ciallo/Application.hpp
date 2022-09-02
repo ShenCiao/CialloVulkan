@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Instance.hpp"
 #include "Device.hpp"
+#include "Project.hpp"
 
 namespace ciallo
 {
@@ -17,8 +18,8 @@ public:
 	~Application() = default;
 
 	void run();
-	
-	void loadSettings();
+
+	Project createDefaultProject() const;
 private:
 	std::shared_ptr<vulkan::Instance> m_instance;
 	std::shared_ptr<vulkan::Device> m_device;

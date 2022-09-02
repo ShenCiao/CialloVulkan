@@ -40,7 +40,7 @@ namespace ciallo
 				ImGui::PopStyleVar(1);
 				return;
 			}
-
+			
 			auto panel = ImGui::GetCurrentWindow();
 			glm::vec2 innerRectSize = panel->InnerRect.GetSize();
 			glm::vec2 innerRectOrigin = panel->InnerRect.Min;
@@ -67,8 +67,14 @@ namespace ciallo
 				}
 			}
 
+			if (ImGui::IsItemHovered())
+			{
+				
+			}
+
 			if (io.MouseDown[2] && ImGui::IsItemActive())
 			{
+				ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 				canvasPanelCpo.scroll = canvasPanelCpo.scroll - glm::vec2(io.MouseDelta);
 			}
 
