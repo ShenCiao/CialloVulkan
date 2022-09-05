@@ -77,6 +77,9 @@
     <ClCompile Include="Drawing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vku.hpp">
@@ -145,14 +148,20 @@
     <ClInclude Include="ShaderModule.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="StrokeCompoinents.hpp">
+    <ClInclude Include="Stroke.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Project.hpp" />
     <ClInclude Include="CanvasInteraction.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Drawing.hpp" />
+    <ClInclude Include="Drawing.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer.hpp" />
+    <ClInclude Include="EntityContainer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="images\takagi3.png">

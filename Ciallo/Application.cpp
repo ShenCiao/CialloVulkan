@@ -10,6 +10,9 @@
 #include "Drawing.hpp"
 #include "Image.hpp"
 #include "Project.hpp"
+#include "Layer.hpp"
+#include "EntityContainer.hpp"
+#include "Stroke.hpp"
 
 void ciallo::Application::run()
 {
@@ -207,11 +210,30 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	vk::ImageView imageView = vulkanImageCpo.image.imageView();
 	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
 	auto& drawingCpo = registry.emplace<DrawingCpo>(drawing, A4Paper);
-	// Drawing and layer
+	auto& layerContainer = registry.emplace<EntityContainer>(drawing);
+	// layer
 	entt::entity layer = registry.create();
-	drawingCpo.layers.push_back(layer);
+	layerContainer.push_back(layer);
+	auto& layerCpo = registry.emplace<LayerCpo>(layer);
+	auto& objectContainer = registry.emplace<EntityContainer>(layer);
+	// stroke
+	entt::entity stroke = registry.create();
+	objectContainer.push_back(stroke);
+	registry.emplace<StrokeCpo>(stroke);
 
-
+	const int n = 1024;
+	std::vector<geom::Point> line;
+	for (int i : views::iota(0, n))
+	{
+		float ratio = static_cast<float>(i)/static_cast<float>(n);
+		const float pi = 3.141592653f;
+		geom::Point p = {A4Paper.max.x * ratio, A4Paper.max.y/2.0f * glm::sin(ratio*2.0f*pi) + A4Paper.max.y/2.0f};
+		line.push_back(p);
+	}
+	registry.emplace<PolylineCpo>(stroke, line);
+	std::vector<float> width(n, 0.01f);
+	registry.emplace<WidthVCpo>(stroke, width);
+	registry.emplace<ColorCpo>(stroke);
 
 	return project;
 }

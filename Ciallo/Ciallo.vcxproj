@@ -107,6 +107,7 @@
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="EquidistantDot.cpp" />
+    <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainPassRenderer.cpp" />
     <ClCompile Include="pch.cpp">
@@ -132,9 +133,11 @@
     <ClInclude Include="CommonSceneObjectComponents.hpp" />
     <ClInclude Include="Device.hpp" />
     <ClInclude Include="Drawing.hpp" />
+    <ClInclude Include="EntityContainer.hpp" />
     <ClInclude Include="GeometryPrimitives.hpp" />
     <ClInclude Include="Image.hpp" />
     <ClInclude Include="EquidistantDot.hpp" />
+    <ClInclude Include="Layer.hpp" />
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
@@ -143,7 +146,7 @@
     <ClInclude Include="CanvasPanel.hpp" />
     <ClInclude Include="Project.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
-    <ClInclude Include="StrokeCompoinents.hpp" />
+    <ClInclude Include="Stroke.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

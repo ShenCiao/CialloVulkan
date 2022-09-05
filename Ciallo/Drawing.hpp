@@ -6,8 +6,7 @@ namespace ciallo
 	{
 		glm::vec2 min; // left upper corner of world coordinate, unit is meter.
 		glm::vec2 max;
-		float dpi = 74.0f;
-		std::vector<entt::entity> layers{};
+		float dpi;
 
 		float width() const // in pixel
 		{
