@@ -80,6 +80,9 @@
     <ClCompile Include="Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GPUObjectAssignmentSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vku.hpp">
@@ -151,15 +154,22 @@
     <ClInclude Include="Stroke.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Project.hpp" />
     <ClInclude Include="CanvasInteraction.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Drawing.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Layer.hpp" />
     <ClInclude Include="EntityContainer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUObjectAssignmentSystem.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Project.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,7 +7,8 @@
 namespace ciallo::vulkan
 {
 	/**
-	 * \brief 2D image (color image only, changes on AspectMask needed). Copy constructor/assignment only allocate memory and create object, do not copy content.
+	 * \brief 2D image (color image only, changes on AspectMask needed).
+	 * Copy constructor/assignment only allocate memory and create object, do not copy content.
 	 */
 	class Image : public AllocationBase
 	{
@@ -89,10 +90,11 @@ namespace ciallo::vulkan
 
 namespace ciallo
 {
-	struct VulkanImageCpo
+	// Where should I put this?
+	struct GPUImageCpo
 	{
 		vulkan::Image image;
 		vk::Sampler sampler;
-		ImTextureID id;
+		ImTextureID id = nullptr;
 	};
 }

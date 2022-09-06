@@ -11,7 +11,7 @@ namespace ciallo
 		v.each([&registry](entt::entity canvasPanelEntity, CanvasPanelCpo& canvasPanelCpo)
 		{
 			entt::entity drawingEntity = canvasPanelCpo.drawing;
-			auto& vulkanImageCpo = registry.get<const VulkanImageCpo>(drawingEntity);
+			auto& vulkanImageCpo = registry.get<const GPUImageCpo>(drawingEntity);
 			vk::Extent2D s = vulkanImageCpo.image.extent2D();
 			glm::vec2 imageSize = {
 				static_cast<float>(s.width) * canvasPanelCpo.zoom,
@@ -33,7 +33,7 @@ namespace ciallo
 				return;
 			}
 
-			if (!registry.valid(drawingEntity) || !registry.all_of<VulkanImageCpo>(drawingEntity))
+			if (!registry.valid(drawingEntity) || !registry.all_of<GPUImageCpo>(drawingEntity))
 			{
 				ImGui::Text("Image is not valid.");
 				ImGui::End();

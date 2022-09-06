@@ -79,3 +79,11 @@ namespace ciallo::vulkan
 		void destroyStagingBuffer();
 	};
 }
+
+namespace ciallo
+{
+	struct GPUBufferCpo
+	{
+		vulkan::Buffer buffer;
+	};
+}

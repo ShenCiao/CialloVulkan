@@ -78,7 +78,7 @@ void ciallo::Application::run()
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// --start imgui recording------------------------------------------------------
 		entt::entity tempe = registry.view<CanvasPanelCpo>()[0];
-		canvasRenderer->render(cb, &registry.get<VulkanImageCpo>(registry.get<CanvasPanelCpo>(tempe).drawing).image);
+		canvasRenderer->render(cb, &registry.get<GPUImageCpo>(registry.get<CanvasPanelCpo>(tempe).drawing).image);
 		CanvasPanelDrawer::update(registry);
 		if (ImGui::BeginMainMenuBar())
 		{
@@ -188,7 +188,7 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	entt::entity drawing = registry.create();
 	auto& canvasPanelCpo = registry.emplace<CanvasPanelCpo>(canvasPanel);
 	canvasPanelCpo.drawing = drawing;
-	auto& vulkanImageCpo = registry.emplace<VulkanImageCpo>(drawing);
+	auto& vulkanImageCpo = registry.emplace<GPUImageCpo>(drawing);
 	vk::SamplerCreateInfo samplerCreateInfo{};
 	vk::UniqueSampler sampler = m_device->device().createSamplerUnique(samplerCreateInfo);
 	vulkanImageCpo.sampler = *sampler;
