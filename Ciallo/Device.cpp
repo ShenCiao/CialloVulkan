@@ -133,6 +133,12 @@ namespace ciallo::vulkan
 		return m_device->allocateCommandBuffers(info)[0];
 	}
 
+	vk::UniqueDescriptorSet Device::createDescriptorSetUnique(vk::DescriptorSetLayout layout) const
+	{
+		vk::DescriptorSetAllocateInfo info{*m_descriptorPool, layout};
+		return std::move(m_device->allocateDescriptorSetsUnique(info)[0]);
+	}
+
 	void Device::genCommandPool()
 	{
 		vk::CommandPoolCreateInfo poolInfo{};

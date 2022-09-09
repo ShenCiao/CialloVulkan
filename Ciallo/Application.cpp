@@ -13,6 +13,7 @@
 #include "Layer.hpp"
 #include "EntityContainer.hpp"
 #include "Stroke.hpp"
+#include "CtxUtilities.hpp"
 
 void ciallo::Application::run()
 {
@@ -26,6 +27,8 @@ void ciallo::Application::run()
 	vk::PhysicalDevice physicalDevice = vulkan::Device::pickPhysicalDevice(*m_instance, surface);
 	uint32_t queueIndex = vulkan::Device::findRequiredQueueFamily(physicalDevice, surface);
 	m_device = std::make_shared<vulkan::Device>(*m_instance, physicalDevice, queueIndex);
+	vk::CommandBuffer cb = m_device->createCommandBuffer();
+
 	window->setDevice(*m_device);
 	window->setPhysicalDevice(m_device->physicalDevice());
 	window->initSwapchain();
@@ -34,11 +37,13 @@ void ciallo::Application::run()
 	// -----------------------------------------------------------------------------
 	Project project = createDefaultProject();
 	entt::registry& registry = project.registry();
+	registry.ctx().emplace<vulkan::Device*>(m_device.get());
+	auto& commandBuffers = registry.ctx().emplace<CommandBuffers>();
+	commandBuffers.setMain(cb);
 	// -----------------------------------------------------------------------------
 
 	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
 	window->show();
-	vk::CommandBuffer cb = m_device->createCommandBuffer();
 
 	auto canvasRenderer = std::make_unique<rendering::CanvasRenderer>(m_device.get());
 
@@ -200,12 +205,7 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	                                     vk::ImageUsageFlagBits::eTransferSrc);
 	m_device->executeImmediately([&vulkanImageCpo](vk::CommandBuffer cb)
 	{
-		vk::ImageMemoryBarrier2 barrier = vulkanImageCpo.image.createLayoutTransitionMemoryBarrier(
-			vk::ImageLayout::eGeneral);
-		vk::DependencyInfo info{};
-		info.setImageMemoryBarriers(barrier);
-		cb.pipelineBarrier2(info);
-		vulkanImageCpo.image.setImageLayout(vk::ImageLayout::eGeneral);
+		vulkanImageCpo.image.changeLayout(cb, vk::ImageLayout::eGeneral);
 	});
 	vk::ImageView imageView = vulkanImageCpo.image.imageView();
 	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
@@ -232,7 +232,7 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	}
 	registry.emplace<PolylineCpo>(stroke, line);
 	std::vector<float> width(n, 0.01f);
-	registry.emplace<WidthVCpo>(stroke, width);
+	registry.emplace<WidthPerVertCpo>(stroke, width);
 	registry.emplace<ColorCpo>(stroke);
 
 	return project;

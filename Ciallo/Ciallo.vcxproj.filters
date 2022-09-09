@@ -80,7 +80,10 @@
     <ClCompile Include="Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GPUObjectAssignmentSystem.cpp">
+    <ClCompile Include="ArticulatedLineRenderObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CtxUtilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -163,13 +166,19 @@
     <ClInclude Include="EntityContainer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GPUObjectAssignmentSystem.hpp">
+    <ClInclude Include="ArticulatedLineRenderObject.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Layer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Project.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CtxUtilities.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tags.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,7 +3,7 @@
 #include "Buffer.hpp"
 #include "ObjectRenderer.hpp"
 
-namespace ciallo::scene
+namespace ciallo::temp
 {
 	struct ColorCpo
 	{
@@ -28,6 +28,6 @@ namespace ciallo::scene
 
 	struct RendererCpo
 	{
-		rendering::ObjectRenderer* renderer;
+		ObjectRenderer* renderer;
 	};
 }

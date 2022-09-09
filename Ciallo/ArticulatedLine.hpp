@@ -5,8 +5,13 @@
 #include "ShaderModule.hpp"
 #include "ObjectRenderer.hpp"
 
-namespace ciallo::rendering
+namespace ciallo
 {
+	struct ArticulatedLineSettings
+	{
+		bool enableFalloff = false;
+	};
+
 	class ArticulatedLineEngine
 	{
 		struct Vertex

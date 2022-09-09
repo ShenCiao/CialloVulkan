@@ -4,7 +4,7 @@
 #include "vku.hpp"
 #include "CommonSceneObjectComponents.hpp"
 
-namespace ciallo::rendering
+namespace ciallo
 {
 	ArticulatedLineEngine::ArticulatedLineEngine(vulkan::Device* device): m_device(*device)
 	{
@@ -83,11 +83,11 @@ namespace ciallo::rendering
 
 	void ArticulatedLineRenderer::render(vk::CommandBuffer cb, entt::handle object)
 	{
-		auto& vbCpo = object.get<scene::VertexBufferCpo>();
+		auto& vbCpo = object.get<temp::VertexBufferCpo>();
 		auto& buffers = vbCpo.buffers;
 		uint32_t vertexCount = vbCpo.vertexCount;
 
-		auto& pdsCpo = object.get<scene::PipelineDescriptorSetCpo>();
+		auto& pdsCpo = object.get<temp::PipelineDescriptorSetCpo>();
 		vk::DescriptorSet desS = *pdsCpo.pipelineDesS;
 		auto getBufferObject = [](const vulkan::Buffer& b)
 		{

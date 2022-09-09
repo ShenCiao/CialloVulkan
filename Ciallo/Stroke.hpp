@@ -16,7 +16,7 @@ namespace ciallo
 		std::vector<geom::Point> polyline{};
 	};
 
-	struct WidthVCpo // Width per Vertex
+	struct WidthPerVertCpo // Width per Vertex
 	{
 		std::vector<float> width{};
 	};

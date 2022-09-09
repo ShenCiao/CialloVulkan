@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ciallo::rendering
+namespace ciallo
 {
 	class ObjectRenderer
 	{

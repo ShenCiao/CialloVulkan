@@ -7,7 +7,7 @@
 #include "CommonSceneObjectComponents.hpp"
 #include "vku.hpp"
 
-namespace ciallo::rendering
+namespace ciallo
 {
 	EquidistantDotEngine::EquidistantDotEngine(vulkan::Device* device): m_device(*device)
 	{
@@ -165,7 +165,7 @@ namespace ciallo::rendering
 	void EquidistantDotRenderer::render(vk::CommandBuffer cb, entt::handle object)
 	{
 		// Compute
-		auto& vbCpo = object.get<scene::VertexBufferCpo>();
+		auto& vbCpo = object.get<temp::VertexBufferCpo>();
 		vk::DescriptorSet vbDesS = *vbCpo.descriptorSet;
 
 		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, m_computePipelineLayout, 0, vbDesS, nullptr);

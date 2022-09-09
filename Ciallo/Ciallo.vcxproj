@@ -103,7 +103,8 @@
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CanvasInteraction.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
-    <ClCompile Include="GPUObjectAssignmentSystem.cpp" />
+    <ClCompile Include="CtxUtilities.cpp" />
+    <ClCompile Include="ArticulatedLineRenderObject.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -130,7 +131,8 @@
     <ClInclude Include="Buffer.hpp" />
     <ClInclude Include="CanvasInteraction.hpp" />
     <ClInclude Include="CanvasRenderer.hpp" />
-    <ClInclude Include="GPUObjectAssignmentSystem.hpp" />
+    <ClInclude Include="CtxUtilities.hpp" />
+    <ClInclude Include="ArticulatedLineRenderObject.hpp" />
     <ClInclude Include="ciallo_imgui_config.h" />
     <ClInclude Include="CommonSceneObjectComponents.hpp" />
     <ClInclude Include="Device.hpp" />
@@ -149,6 +151,7 @@
     <ClInclude Include="Project.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="Stroke.hpp" />
+    <ClInclude Include="Tags.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />
   </ItemGroup>

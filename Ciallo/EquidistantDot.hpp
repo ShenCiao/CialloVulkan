@@ -5,7 +5,7 @@
 #include "ShaderModule.hpp"
 #include "ObjectRenderer.hpp"
 
-namespace ciallo::rendering
+namespace ciallo
 {
 	class EquidistantDotEngine
 	{

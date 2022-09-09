@@ -69,10 +69,9 @@ namespace ciallo::vulkan
 		 * \param cb Command buffer for recording copy command
 		 * \param data Pointer to the data
 		 * \param size Size of the data
+		 * Will generate a staging buffer if not host visible
 		 */
 		void upload(vk::CommandBuffer cb, const void* data, vk::DeviceSize size);
-		template <typename T>
-		void upload(vk::CommandBuffer cb, std::vector<T>& data);
 		void uploadLocal(const void* data, vk::DeviceSize size) const;
 
 		vk::DeviceSize size() const;

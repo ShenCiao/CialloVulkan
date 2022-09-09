@@ -62,6 +62,7 @@ namespace ciallo::vulkan
 
 		void executeImmediately(const std::function<void(vk::CommandBuffer)>& func);
 		vk::CommandBuffer createCommandBuffer(vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
+		vk::UniqueDescriptorSet createDescriptorSetUnique(vk::DescriptorSetLayout layout) const;
 		vk::Queue queue() const;
 		vk::Device device() const { return *m_device; }
 		vk::PhysicalDevice physicalDevice() const { return m_physicalDevice; }
