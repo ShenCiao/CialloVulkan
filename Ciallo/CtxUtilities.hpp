@@ -24,7 +24,7 @@ namespace ciallo
 		std::vector<uint32_t> m_componentIDs;
 	public:
 		template <typename Cpo>
-		void clearEndFrame()
+		void cleanEndFrame()
 		{
 			m_componentIDs.push_back(entt::type_hash<Cpo>());
 		}

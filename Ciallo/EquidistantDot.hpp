@@ -3,7 +3,7 @@
 #include "Device.hpp"
 #include "Image.hpp"
 #include "ShaderModule.hpp"
-#include "ObjectRenderer.hpp"
+#include "EntityRenderer.hpp"
 
 namespace ciallo
 {
@@ -49,7 +49,7 @@ namespace ciallo
 		void compute(vk::CommandBuffer cb);
 	};
 
-	class EquidistantDotRenderer : public ObjectRenderer
+	class EquidistantDotRenderer : public EntityRenderer
 	{
 		vk::Pipeline m_pipeline;
 		vk::PipelineLayout m_pipelineLayout;
@@ -60,12 +60,12 @@ namespace ciallo
 		vulkan::Buffer m_dotBuffer; // buffer for graphics pipeline input.
 	public:
 		EquidistantDotRenderer() = default;
-		EquidistantDotRenderer(const EquidistantDotRenderer& other) = default;
+		EquidistantDotRenderer(const EquidistantDotRenderer& other) = delete;
 		EquidistantDotRenderer(EquidistantDotRenderer&& other) noexcept = default;
-		EquidistantDotRenderer& operator=(const EquidistantDotRenderer& other) = default;
+		EquidistantDotRenderer& operator=(const EquidistantDotRenderer& other) = delete;
 		EquidistantDotRenderer& operator=(EquidistantDotRenderer&& other) noexcept = default;
 		~EquidistantDotRenderer() override = default;
 
-		void render(vk::CommandBuffer cb, entt::handle object) override;
+		void render(vk::CommandBuffer cb) override;
 	};
 }

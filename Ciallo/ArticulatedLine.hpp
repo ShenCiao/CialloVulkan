@@ -1,9 +1,9 @@
 #pragma once
 
+#include "ArticulatedLineRenderer.hpp"
 #include "Device.hpp"
 #include "Image.hpp"
 #include "ShaderModule.hpp"
-#include "ObjectRenderer.hpp"
 
 namespace ciallo
 {
@@ -12,6 +12,9 @@ namespace ciallo
 		bool enableFalloff = false;
 	};
 
+	/**
+	 * \brief Need a factory pattern here. Engine is the factory of renderer.
+	 */
 	class ArticulatedLineEngine
 	{
 		struct Vertex
@@ -25,34 +28,21 @@ namespace ciallo
 		vulkan::ShaderModule m_vertShader;
 		vulkan::ShaderModule m_fragShader;
 		vulkan::ShaderModule m_geomShader;
-		vk::UniquePipeline m_pipeline;
+		vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
 		vk::UniquePipelineLayout m_pipelineLayout;
+		vk::UniquePipeline m_pipeline;
 		vulkan::Buffer m_vertBuffer;
+		std::vector<ArticulatedLineRenderer> m_renderers;
 	public:
 		std::vector<Vertex> vertices; // delete it after...
 		explicit ArticulatedLineEngine(vulkan::Device* device);
-
 		void genPipelineLayout();
-
 		void genPipelineDynamic();
-
 		void renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target);
-
 		void genVertexBuffer(VmaAllocator allocator);
-	};
-
-	class ArticulatedLineRenderer : public ObjectRenderer
-	{
-		vk::Pipeline m_pipeline;
-		vk::PipelineLayout m_pipelineLayout;
 	public:
-		ArticulatedLineRenderer() = default;
-		ArticulatedLineRenderer(const ArticulatedLineRenderer& other) = default;
-		ArticulatedLineRenderer(ArticulatedLineRenderer&& other) = default;
-		ArticulatedLineRenderer& operator=(const ArticulatedLineRenderer& other) = default;
-		ArticulatedLineRenderer& operator=(ArticulatedLineRenderer&& other) = default;
-		~ArticulatedLineRenderer() override = default;
+		void assignRenderer(entt::registry& r, entt::entity e);
 
-		void render(vk::CommandBuffer cb, entt::handle object) override;
+		void update(entt::registry& r);
 	};
 }

@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include "CommonSceneObjectComponents.hpp"
 #include "vku.hpp"
 
 namespace ciallo
@@ -162,32 +161,8 @@ namespace ciallo
 		cb.dispatch(1, 1, 1);
 	}
 
-	void EquidistantDotRenderer::render(vk::CommandBuffer cb, entt::handle object)
+	void EquidistantDotRenderer::render(vk::CommandBuffer cb)
 	{
 		// Compute
-		auto& vbCpo = object.get<temp::VertexBufferCpo>();
-		vk::DescriptorSet vbDesS = *vbCpo.descriptorSet;
-
-		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, m_computePipelineLayout, 0, vbDesS, nullptr);
-		cb.bindPipeline(vk::PipelineBindPoint::eCompute, m_computePipeline);
-		cb.dispatch(1, 1, 1);
-
-		// Sync
-		const vk::MemoryBarrier2 drawIndirectBarrier{
-			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
-			vk::PipelineStageFlagBits2::eDrawIndirect, vk::AccessFlagBits2::eIndirectCommandRead
-		};
-		const vk::MemoryBarrier2 vertexBarrier{
-			vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderStorageWrite,
-			vk::PipelineStageFlagBits2::eVertexInput, vk::AccessFlagBits2::eVertexAttributeRead
-		};
-		const std::vector barriers = {drawIndirectBarrier, vertexBarrier};
-		cb.pipelineBarrier2({{}, barriers, {}, {}});
-
-		// Graphics
-		std::vector<vk::Buffer> vertexBuffers{m_dotBuffer};
-		cb.bindVertexBuffers(0, vertexBuffers, {0});
-		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-		cb.drawIndirect(m_indirectDrawBuffer, 0, 1, {});
 	}
 }

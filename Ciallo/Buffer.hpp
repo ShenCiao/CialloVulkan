@@ -36,7 +36,7 @@ namespace ciallo::vulkan
 	class Buffer : public AllocationBase
 	{
 		vk::Buffer m_buffer = VK_NULL_HANDLE;
-		vk::DeviceSize m_size{};
+		vk::DeviceSize m_size = 0;
 		vk::BufferUsageFlags m_usage;
 		std::unique_ptr<Buffer> m_stagingBuffer;
 	public:
@@ -76,13 +76,5 @@ namespace ciallo::vulkan
 
 		vk::DeviceSize size() const;
 		void destroyStagingBuffer();
-	};
-}
-
-namespace ciallo
-{
-	struct GPUBufferCpo
-	{
-		vulkan::Buffer buffer;
 	};
 }

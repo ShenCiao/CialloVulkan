@@ -2,7 +2,9 @@
 #include "ArticulatedLine.hpp"
 
 #include "vku.hpp"
-#include "CommonSceneObjectComponents.hpp"
+#include "CtxUtilities.hpp"
+#include "Stroke.hpp"
+#include "Tags.hpp"
 
 namespace ciallo
 {
@@ -81,23 +83,30 @@ namespace ciallo
 		m_vertBuffer.uploadLocal(vertices.data(), size);
 	}
 
-	void ArticulatedLineRenderer::render(vk::CommandBuffer cb, entt::handle object)
+	void ArticulatedLineEngine::assignRenderer(entt::registry& r, entt::entity e)
 	{
-		auto& vbCpo = object.get<temp::VertexBufferCpo>();
-		auto& buffers = vbCpo.buffers;
-		uint32_t vertexCount = vbCpo.vertexCount;
+		// check out ArticulatedLineSettings
 
-		auto& pdsCpo = object.get<temp::PipelineDescriptorSetCpo>();
-		vk::DescriptorSet desS = *pdsCpo.pipelineDesS;
-		auto getBufferObject = [](const vulkan::Buffer& b)
+		// set suitable renderer
+		r.emplace<ArticulatedLineRenderer>(e);
+		r.patch<ArticulatedLineRenderer>(e, [&](ArticulatedLineRenderer& renderer)
 		{
-			return b.buffer();
-		};
-		std::vector<vk::Buffer> vbs = buffers | views::transform(getBufferObject) | ranges::to_vector;
+			renderer.pipeline = *m_pipeline;
+			renderer.pipelineLayout = *m_pipelineLayout;
+			renderer.descriptorSetLayout = *m_descriptorSetLayout;
+		});
+	}
 
-		cb.bindVertexBuffers(0, vbs, {0});
-		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, desS, nullptr);
-		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-		cb.draw(vertexCount, 1, 0, 0);
+	void ArticulatedLineEngine::update(entt::registry& r)
+	{
+		// on construct
+		for (auto e : r.view<Constructed<ArticulatedLineSettings>, StrokeCpo>())
+		{
+			auto* device = r.ctx().at<vulkan::Device*>();
+			vk::CommandBuffer cb = r.ctx().at<CommandBuffers>().mainCb();
+			auto& engine = r.ctx().at<ArticulatedLineEngine>();
+			engine.assignRenderer(r, e);
+			// renderObjCpo.objectDescriptorSet = device->createDescriptorSetUnique(layout);
+		}
 	}
 }

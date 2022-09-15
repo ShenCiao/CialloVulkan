@@ -6,7 +6,7 @@
 
 Ciallo aims for improving 2D artist's work efficiency with modern GPU and computational geometry. 
 
-Name "Ciallo" is the combination of Italian "Ciao" and English "Hello", comes from the video game *Sabbat of the Witch* developed by Yuzusoft.
+Name "Ciallo" is the combination of Italian "Ciao" and English "Hello", comes from the video game *Sabbat of the Witch* developed by _Yuzusoft_.
 
 Different from traditional pixelmap or bezier curve based painting software, polylines/polygons are the first citizen in Ciallo. They are rendered with GPU and edited based on computational geometry algorithms. 
 
@@ -64,7 +64,7 @@ https://user-images.githubusercontent.com/24319509/182907394-b014c70b-33b3-4f8d-
 
 *Fig. -  Attributes are editable at per vertex level.*
 
-In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated Line_. As the name imply, _equidistant dot_ evenly place texture quad along the polyline. _Articulated line_ render a polyline as if an articulated arm. Here are some comparisons between them:
+In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated Line_. As the names imply, _equidistant dot_ evenly place texture quad along the polyline, _articulated line_ render a polyline as if an articulated arm. Here are some comparisons between them:
 
 | Features                | Equidistant Dot                                              | Articulated Line                                             |
 | ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |

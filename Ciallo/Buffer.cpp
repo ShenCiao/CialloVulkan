@@ -108,7 +108,6 @@ namespace ciallo::vulkan
 		{
 			genStagingBuffer();
 		}
-		m_stagingBuffer->uploadLocal(data, size);
 		uploadStaging(cb, data, size, *m_stagingBuffer);
 	}
 

@@ -104,7 +104,7 @@
     <ClCompile Include="CanvasInteraction.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CtxUtilities.cpp" />
-    <ClCompile Include="ArticulatedLineRenderObject.cpp" />
+    <ClCompile Include="ArticulatedLineRenderer.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -116,7 +116,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Instance.cpp" />
-    <ClCompile Include="ObjectRenderer.cpp" />
     <ClCompile Include="CanvasPanel.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
@@ -132,9 +131,8 @@
     <ClInclude Include="CanvasInteraction.hpp" />
     <ClInclude Include="CanvasRenderer.hpp" />
     <ClInclude Include="CtxUtilities.hpp" />
-    <ClInclude Include="ArticulatedLineRenderObject.hpp" />
+    <ClInclude Include="ArticulatedLineRenderer.hpp" />
     <ClInclude Include="ciallo_imgui_config.h" />
-    <ClInclude Include="CommonSceneObjectComponents.hpp" />
     <ClInclude Include="Device.hpp" />
     <ClInclude Include="Drawing.hpp" />
     <ClInclude Include="EntityContainer.hpp" />
@@ -146,7 +144,7 @@
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
     <ClInclude Include="CommonBrushComponents.hpp" />
-    <ClInclude Include="ObjectRenderer.hpp" />
+    <ClInclude Include="EntityRenderer.hpp" />
     <ClInclude Include="CanvasPanel.hpp" />
     <ClInclude Include="Project.hpp" />
     <ClInclude Include="ShaderModule.hpp" />

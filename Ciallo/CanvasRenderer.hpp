@@ -3,7 +3,6 @@
 #include "Device.hpp"
 #include "EquidistantDot.hpp"
 #include "Image.hpp"
-#include <glm/glm.hpp>
 
 namespace ciallo::rendering
 {

@@ -130,7 +130,6 @@ namespace ciallo::vulkan
 		{
 			genStagingBuffer();
 		}
-		m_stagingBuffer->uploadLocal(data, size);
 		uploadStaging(cb, data, size, *m_stagingBuffer);
 	}
 
@@ -176,11 +175,12 @@ namespace ciallo::vulkan
 		return device().createImageViewUnique(info);
 	}
 
-	// Only color image for now.
+	// Only color image for now. Refer to vulkan spec struct VkImageSubresourceRange for aspectMask information
 	void Image::uploadStaging(vk::CommandBuffer cb, const void* data, vk::DeviceSize size,
 	                          vk::Buffer stagingBuffer) const
 	{
-		// Refer to vulkan spec struct VkImageSubresourceRange for aspectMask information
+		m_stagingBuffer->uploadLocal(data, size);
+		
 		vk::BufferImageCopy copy{};
 		copy.setBufferOffset(0);
 		copy.setImageExtent(m_extent);
