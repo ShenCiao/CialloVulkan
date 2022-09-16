@@ -43,6 +43,8 @@ namespace ciallo
 	public:
 		void assignRenderer(entt::registry& r, entt::entity e);
 
+		static inline std::array<entt::observer, 1> obs;
+		static void connect(entt::registry& r);
 		void update(entt::registry& r);
 	};
 }

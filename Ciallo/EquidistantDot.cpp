@@ -32,7 +32,7 @@ namespace ciallo
 
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
-		vku::PipelineMaker maker(0, 0);
+		vku::PipelineMaker maker;
 		maker.topology(vk::PrimitiveTopology::eLineStrip)
 		     .dynamicState(vk::DynamicState::eViewport)
 		     .dynamicState(vk::DynamicState::eScissor)

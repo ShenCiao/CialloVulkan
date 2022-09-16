@@ -4,6 +4,7 @@
 // - Renamed "Renderpass" to "RenderPass".
 // - Create pipeline and compute pipeline with vk::ShaderModule instead of vku::ShaderModule
 // - Add support for dynamic rendering.
+// - Add default value for weight and height in pipeline maker
 // - Delete class Image, Buffer, ShaderModule, Device, Instance. We use our own.
 // - Clean up unused #include and reformat whole code.
 // - Add default offset and range to DescriptorUpdater::buffer.
@@ -610,6 +611,26 @@ namespace vku
 		};
 
 	public:
+		PipelineMaker()
+		{
+			// copied from `PipelineMaker(uint32_t width, uint32_t height)`
+			inputAssemblyState_.topology = vk::PrimitiveTopology::eTriangleList;
+			viewport_ = vk::Viewport{0.0f, 0.0f, .0f, .0f, 0.0f, 1.0f};
+			scissor_ = vk::Rect2D{{0, 0}, {0, 0}};
+			rasterizationState_.lineWidth = 1.0f;
+
+			// Set up depth test, but do not enable it.
+			depthStencilState_.depthTestEnable = VK_FALSE;
+			depthStencilState_.depthWriteEnable = VK_TRUE;
+			depthStencilState_.depthCompareOp = vk::CompareOp::eLessOrEqual;
+			depthStencilState_.depthBoundsTestEnable = VK_FALSE;
+			depthStencilState_.back.failOp = vk::StencilOp::eKeep;
+			depthStencilState_.back.passOp = vk::StencilOp::eKeep;
+			depthStencilState_.back.compareOp = vk::CompareOp::eAlways;
+			depthStencilState_.stencilTestEnable = VK_FALSE;
+			depthStencilState_.front = depthStencilState_.back;
+		}
+
 		PipelineMaker(uint32_t width, uint32_t height)
 		{
 			inputAssemblyState_.topology = vk::PrimitiveTopology::eTriangleList;

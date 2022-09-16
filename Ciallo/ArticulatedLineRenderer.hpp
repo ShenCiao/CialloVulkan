@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Buffer.hpp"
-#include "Device.hpp"
 #include "EntityRenderer.hpp"
 
 namespace ciallo
@@ -28,6 +27,10 @@ namespace ciallo
 
 		void render(vk::CommandBuffer cb) override;
 
+		static inline std::array<entt::observer, 3> obs;
 		static void update(entt::registry& r);
+		static void construct(entt::registry& r, entt::entity e);
+		static void connect(entt::registry& r);
+		static void disconnect(entt::registry& r);
 	};
 }

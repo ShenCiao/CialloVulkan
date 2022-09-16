@@ -31,7 +31,7 @@ namespace ciallo
 	{
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
-		vku::PipelineMaker maker(0, 0);
+		vku::PipelineMaker maker;
 		maker.topology(vk::PrimitiveTopology::eLineStrip)
 		     .dynamicState(vk::DynamicState::eViewport)
 		     .dynamicState(vk::DynamicState::eScissor)
@@ -97,10 +97,14 @@ namespace ciallo
 		});
 	}
 
+	void ArticulatedLineEngine::connect(entt::registry& r)
+	{
+		obs[0].connect(r, entt::collector.update<ArticulatedLineSettings>());
+	}
+
 	void ArticulatedLineEngine::update(entt::registry& r)
 	{
-		// on construct
-		for (auto e : r.view<Constructed<ArticulatedLineSettings>, StrokeCpo>())
+		for (auto e : obs[0])
 		{
 			auto* device = r.ctx().at<vulkan::Device*>();
 			vk::CommandBuffer cb = r.ctx().at<CommandBuffers>().mainCb();
