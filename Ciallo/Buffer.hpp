@@ -22,12 +22,17 @@ namespace ciallo::vulkan
 		AllocationBase& operator=(AllocationBase&& other) noexcept;
 		~AllocationBase() = default;
 
-		vk::MemoryPropertyFlags memoryProperty() const;
+		bool allocated() const;
 		bool hostVisible() const;
 		bool hostCoherent() const;
-		uint32_t memoryTypeIndex() const;
 		vk::Device device() const;
 
+		uint32_t memoryTypeIndex() const;
+		vk::MemoryPropertyFlags memoryProperty() const;
+		/**
+		 * \brief The actual allocated memory size. May not same as memory required.
+		 */
+		vk::DeviceSize memorySize() const;
 		void memoryCopy(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const;
 		template <class VecType> requires std::is_arithmetic_v<VecType>
 		void memorySet(VecType value, vk::DeviceSize offset, uint32_t count);

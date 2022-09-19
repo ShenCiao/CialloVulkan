@@ -87,13 +87,13 @@ namespace ciallo
 	{
 		// check out ArticulatedLineSettings
 
-		// set suitable renderer
-		r.emplace<ArticulatedLineRenderer>(e);
-		r.patch<ArticulatedLineRenderer>(e, [&](ArticulatedLineRenderer& renderer)
+		// set suitable renderer data and renderer
+		r.emplace<ArticulatedLineRenderingData>(e);
+		r.patch<ArticulatedLineRenderingData>(e, [&](ArticulatedLineRenderingData& data)
 		{
-			renderer.pipeline = *m_pipeline;
-			renderer.pipelineLayout = *m_pipelineLayout;
-			renderer.descriptorSetLayout = *m_descriptorSetLayout;
+			data.pipeline = *m_pipeline;
+			data.pipelineLayout = *m_pipelineLayout;
+			data.descriptorSetLayout = *m_descriptorSetLayout;
 		});
 	}
 

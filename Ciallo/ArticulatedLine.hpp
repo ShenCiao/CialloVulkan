@@ -32,7 +32,7 @@ namespace ciallo
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vk::UniquePipeline m_pipeline;
 		vulkan::Buffer m_vertBuffer;
-		std::vector<ArticulatedLineRenderer> m_renderers;
+		std::vector<ArticulatedLineDefaultRenderer> m_renderers;
 	public:
 		std::vector<Vertex> vertices; // delete it after...
 		explicit ArticulatedLineEngine(vulkan::Device* device);

@@ -83,6 +83,12 @@
     <ClCompile Include="CtxUtilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BufferObjects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferBindingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vku.hpp">
@@ -173,6 +179,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Tags.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferObjects.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferBindingSystem.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

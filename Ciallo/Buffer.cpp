@@ -11,6 +11,18 @@ namespace ciallo::vulkan
 		return static_cast<vk::MemoryPropertyFlags>(flags);
 	}
 
+	vk::DeviceSize AllocationBase::memorySize() const
+	{
+		VmaAllocationInfo info{};
+		vmaGetAllocationInfo(m_allocator, m_allocation, &info);
+		return info.size;
+	}
+
+	bool AllocationBase::allocated() const
+	{
+		return static_cast<bool>(m_allocation);
+	}
+
 	bool AllocationBase::hostVisible() const
 	{
 		return static_cast<bool>(memoryProperty() & vk::MemoryPropertyFlagBits::eHostVisible);
@@ -23,9 +35,9 @@ namespace ciallo::vulkan
 
 	uint32_t AllocationBase::memoryTypeIndex() const
 	{
-		VmaAllocationInfo allocInfo;
-		vmaGetAllocationInfo(m_allocator, m_allocation, &allocInfo);
-		return allocInfo.memoryType;
+		VmaAllocationInfo info;
+		vmaGetAllocationInfo(m_allocator, m_allocation, &info);
+		return info.memoryType;
 	}
 
 	void AllocationBase::memoryCopy(const void* data, vk::DeviceSize offset, vk::DeviceSize size) const
