@@ -9,13 +9,13 @@ namespace ciallo::rendering
 	class CanvasRenderer
 	{
 	public:
-		std::unique_ptr<ArticulatedLineEngine> m_articulated;
+		std::unique_ptr<ArticulatedLineEngineTemp> m_articulated;
 		std::unique_ptr<EquidistantDotEngine> m_equidistantDot;
 		vulkan::Buffer m_canvasViewProj;
 	public:
 		explicit CanvasRenderer(vulkan::Device* device)
 		{
-			m_articulated = std::make_unique<ArticulatedLineEngine>(device);
+			m_articulated = std::make_unique<ArticulatedLineEngineTemp>(device);
 			m_equidistantDot = std::make_unique<EquidistantDotEngine>(device);
 		}
 

@@ -3,8 +3,10 @@
 namespace ciallo
 {
 	/*
-	 * Stroke is the core object of Ciallo. It's constructed by a polyline with width and color.
+	 * Stroke is the core object of Ciallo. It's constructed by a polyline and it's thickness.
+	 * Ciallo takes thickness as a part of geometry. It's a controversial decision but I get good reason for that.
 	 */
+
 	struct StrokeCpo
 	{
 
@@ -16,9 +18,9 @@ namespace ciallo
 		std::vector<geom::Point> polyline{};
 	};
 
-	struct WidthPerVertCpo // Width per Vertex
+	struct ThicknessPerVertCpo // Width per vertex
 	{
-		std::vector<float> width{};
+		std::vector<float> thickness{};
 	};
 
 	struct ColorCpo

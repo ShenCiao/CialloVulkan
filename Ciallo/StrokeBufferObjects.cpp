@@ -1,5 +1,5 @@
 ﻿#include "pch.hpp"
-#include "BufferObjects.hpp"
+#include "StrokeBufferObjects.hpp"
 
 #include <glm/gtx/optimum_pow.hpp>
 #include <glm/gtc/integer.hpp>
@@ -52,7 +52,7 @@ namespace ciallo
 
 	void WidthPerVertBuffer::connect(entt::registry& r)
 	{
-		ob.connect(r, entt::collector.update<WidthPerVertCpo>().where<WidthPerVertBuffer>());
+		ob.connect(r, entt::collector.update<ThicknessPerVertCpo>().where<WidthPerVertBuffer>());
 		r.on_construct<WidthPerVertBuffer>().connect<&onConstruct>();
 	}
 
@@ -60,7 +60,7 @@ namespace ciallo
 	                                      const vulkan::Device* device)
 	{
 		vulkan::Buffer& buffer = r.get<WidthPerVertBuffer>(e).buffer;
-		auto& width = r.get<WidthPerVertCpo>(e).width;
+		auto& width = r.get<ThicknessPerVertCpo>(e).thickness;
 		size_t bufVertCount = buffer.size() / sizeof(float);
 
 		if (!buffer.allocated() || width.size() > bufVertCount)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ArticulatedLineRenderer.hpp"
 #include "Device.hpp"
 #include "Image.hpp"
 #include "ShaderModule.hpp"
@@ -15,7 +14,7 @@ namespace ciallo
 	/**
 	 * \brief Need a factory pattern here. Engine is the factory of renderer.
 	 */
-	class ArticulatedLineEngine
+	class ArticulatedLineEngineTemp
 	{
 		struct Vertex
 		{
@@ -32,19 +31,37 @@ namespace ciallo
 		vk::UniquePipelineLayout m_pipelineLayout;
 		vk::UniquePipeline m_pipeline;
 		vulkan::Buffer m_vertBuffer;
-		std::vector<ArticulatedLineDefaultRenderer> m_renderers;
 	public:
 		std::vector<Vertex> vertices; // delete it after...
-		explicit ArticulatedLineEngine(vulkan::Device* device);
+		explicit ArticulatedLineEngineTemp(vulkan::Device* device);
 		void genPipelineLayout();
 		void genPipelineDynamic();
 		void renderDynamic(vk::CommandBuffer cb, const vulkan::Image* target);
 		void genVertexBuffer(VmaAllocator allocator);
 	public:
-		void assignRenderer(entt::registry& r, entt::entity e);
+		void assignRenderer(entt::registry& r, entt::entity e, vulkan::Device* device);
 
 		static inline std::array<entt::observer, 1> obs;
 		static void connect(entt::registry& r);
 		void update(entt::registry& r);
+	};
+
+	struct ArticulatedLineEngine
+	{
+		// more appropriate data structure needed
+		vk::UniqueShaderModule vertShader;
+		vk::UniqueShaderModule geomShader;
+		vk::UniqueShaderModule fragShader;
+		vk::UniqueDescriptorSetLayout entityDescriptorSetLayout;
+		vk::UniquePipelineLayout pipelineLayout;
+		vk::UniquePipeline pipeline;
+
+		explicit ArticulatedLineEngine(vk::Device device);
+		void init(vk::Device device);
+
+		std::array<entt::observer, 1> obs;
+		void connect(entt::registry& r);
+		void assignRenderer(entt::registry& r, entt::entity e);
+		void removeRenderer(entt::registry& r, entt::entity e);
 	};
 }

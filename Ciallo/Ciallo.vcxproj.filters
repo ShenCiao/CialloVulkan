@@ -83,7 +83,7 @@
     <ClCompile Include="CtxUtilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BufferObjects.cpp">
+    <ClCompile Include="StrokeBufferObjects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BufferBindingSystem.cpp">
@@ -181,7 +181,7 @@
     <ClInclude Include="Tags.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="BufferObjects.hpp">
+    <ClInclude Include="StrokeBufferObjects.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="BufferBindingSystem.hpp">

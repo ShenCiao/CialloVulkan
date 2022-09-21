@@ -36,10 +36,12 @@ void ciallo::Application::run()
 	vulkan::MainPassRenderer mainPassRenderer(window.get(), m_device.get());
 	// -----------------------------------------------------------------------------
 	Project project = createDefaultProject();
-	entt::registry& registry = project.registry();
-	registry.ctx().emplace<vulkan::Device*>(m_device.get());
-	auto& commandBuffers = registry.ctx().emplace<CommandBuffers>();
+	entt::registry& r = project.registry();
+	r.ctx().emplace<vulkan::Device*>(m_device.get());
+	auto& commandBuffers = r.ctx().emplace<CommandBuffers>();
 	commandBuffers.setMain(cb);
+	ArticulatedLineEngine engine(*m_device);
+	engine.connect(r);
 	// -----------------------------------------------------------------------------
 
 	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
@@ -82,9 +84,9 @@ void ciallo::Application::run()
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 		// --start imgui recording------------------------------------------------------
-		entt::entity tempe = registry.view<CanvasPanelCpo>()[0];
-		canvasRenderer->render(cb, &registry.get<GPUImageCpo>(registry.get<CanvasPanelCpo>(tempe).drawing).image);
-		CanvasPanelDrawer::update(registry);
+		entt::entity tempe = r.view<CanvasPanelCpo>()[0];
+		canvasRenderer->render(cb, &r.get<GPUImageCpo>(r.get<CanvasPanelCpo>(tempe).drawing).image);
+		CanvasPanelDrawer::update(r);
 		if (ImGui::BeginMainMenuBar())
 		{
 			ImGui::EndMainMenuBar();
@@ -232,7 +234,7 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	}
 	registry.emplace<PolylineCpo>(stroke, line);
 	std::vector<float> width(n, 0.01f);
-	registry.emplace<WidthPerVertCpo>(stroke, width);
+	registry.emplace<ThicknessPerVertCpo>(stroke, width);
 	registry.emplace<ColorCpo>(stroke);
 
 	return project;

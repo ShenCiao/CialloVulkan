@@ -14,9 +14,9 @@ namespace ciallo
 
 		static inline entt::observer ob{};
 		static void connect(entt::registry& r);
+		static void update(entt::registry& r);
 		static void updateBuffer(entt::registry& r, entt::entity e, vk::CommandBuffer cb, const vulkan::Device* device);
 		static void onConstruct(entt::registry& r, entt::entity e);
-		static void update(entt::registry& r);
 	};
 
 	struct WidthPerVertBuffer
@@ -25,9 +25,9 @@ namespace ciallo
 
 		static inline entt::observer ob{};
 		static void connect(entt::registry& r);
+		static void update(entt::registry& r);
 		static void updateBuffer(entt::registry& r, entt::entity e, vk::CommandBuffer cb, const vulkan::Device* device);
 		static void onConstruct(entt::registry& r, entt::entity e);
-		static void update(entt::registry& r);
 	};
 
 	struct ColorBuffer

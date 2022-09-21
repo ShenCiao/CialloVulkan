@@ -120,7 +120,7 @@
     <ClCompile Include="CanvasPanel.cpp" />
     <ClCompile Include="Project.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
-    <ClCompile Include="BufferObjects.cpp" />
+    <ClCompile Include="StrokeBufferObjects.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -152,7 +152,7 @@
     <ClInclude Include="Project.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="Stroke.hpp" />
-    <ClInclude Include="BufferObjects.hpp" />
+    <ClInclude Include="StrokeBufferObjects.hpp" />
     <ClInclude Include="Tags.hpp" />
     <ClInclude Include="vku.hpp" />
     <ClInclude Include="Window.hpp" />

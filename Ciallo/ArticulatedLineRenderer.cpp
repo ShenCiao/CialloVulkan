@@ -2,7 +2,7 @@
 #include "ArticulatedLineRenderer.hpp"
 
 #include "Stroke.hpp"
-#include "BufferObjects.hpp"
+#include "StrokeBufferObjects.hpp"
 #include "vku.hpp"
 
 namespace ciallo
@@ -23,7 +23,7 @@ namespace ciallo
 		}
 	}
 
-	void ArticulatedLineDefaultRenderer::render(entt::registry& r, entt::entity e, vk::CommandBuffer cb)
+	void ArticulatedLineDefaultRenderTag::render(entt::registry& r, entt::entity e, vk::CommandBuffer cb)
 	{
 		std::vector<vk::Buffer> vbs(2);
 		vbs.push_back(r.get<PolylineBuffer>(e).buffer);
@@ -33,7 +33,7 @@ namespace ciallo
 
 		cb.bindVertexBuffers(0, vbs, {0});
 		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, d.pipeline);
-		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, d.pipelineLayout, 0, *d.objectDescriptorSet, nullptr);
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, d.pipelineLayout, 0, *d.entityDescriptorSet, nullptr);
 		cb.draw(d.vertexCount, 1, 0, 0);
 	}
 }

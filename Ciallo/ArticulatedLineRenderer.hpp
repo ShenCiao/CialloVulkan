@@ -1,19 +1,16 @@
 #pragma once
 
-#include "Buffer.hpp"
-#include "EntityRenderer.hpp"
-
 namespace ciallo
 {
 	struct ArticulatedLineRenderingData
 	{
-		// owned by engine
+		// owned by engine, only engine knows how to construct this object.
 		vk::Pipeline pipeline;
 		vk::PipelineLayout pipelineLayout;
 		vk::DescriptorSetLayout descriptorSetLayout;
 
 		// owned by entity
-		vk::UniqueDescriptorSet objectDescriptorSet;
+		vk::UniqueDescriptorSet entityDescriptorSet;
 		uint32_t vertexCount = 0;
 
 		static inline entt::observer ob{};
@@ -21,7 +18,7 @@ namespace ciallo
 		static void update(entt::registry& r);
 	};
 
-	struct ArticulatedLineDefaultRenderer
+	struct ArticulatedLineDefaultRenderTag
 	{
 		static void render(entt::registry& r, entt::entity e, vk::CommandBuffer cb);
 	};
