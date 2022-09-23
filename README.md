@@ -69,7 +69,7 @@ In July 2022, two engines are made, named as _Equidistant Dot_ and _Articulated 
 | Features                | Equidistant Dot                                              | Articulated Line                                             |
 | ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Great performance       | Yes, better than methods on CPU.                             | Yes, better than Equidistant Dot in theory.                  |
-| Customization by users  | Easy. Procedural texture is not mandatory.                   | Hard. Procedural texture is mandatory. Need experience in shader development or shader graph node system. |
+| Customization by users  | Easy. Procedural texture is not mandatory.                   | Hard. Procedural texture or seamless tiled texture is mandatory. Need experience in shader development or shader graph node system. |
 | Robustness to ill cases | One ill case would be pretty common (unevenly distributed vertices) and it would hit hard on rendering performance. Need help from editor to avoid it. | Better than Equidistant Dot. Pretty few ill cases I've found and they rarely happen in practice. |
 | Limitations on vertices | Total amount of vertices input are limited be *maximum local workgroup size* (1024) in compute shader. Total amount of dots generated are limited by buffer size set by developers. | No limits on regular usage.                                  |
 

@@ -2,24 +2,26 @@
 
 namespace ciallo
 {
-	struct ArticulatedLineRenderingData
+	struct ArticulatedLineStrokeData
 	{
-		// owned by engine, only engine knows how to construct this object.
-		vk::Pipeline pipeline;
-		vk::PipelineLayout pipelineLayout;
-		vk::DescriptorSetLayout descriptorSetLayout;
-
 		// owned by entity
-		vk::UniqueDescriptorSet entityDescriptorSet;
-		uint32_t vertexCount = 0;
-
-		static inline entt::observer ob{};
-		static void connect(entt::registry& r);
-		static void update(entt::registry& r);
+		std::vector<entt::id_type> vertexBufferIds;
+		vk::UniqueDescriptorSet descriptorSet;
 	};
 
-	struct ArticulatedLineDefaultRenderTag
+	struct ArticulatedLineBrushData
 	{
-		static void render(entt::registry& r, entt::entity e, vk::CommandBuffer cb);
+		// owned by engine, only engine knows how to construct this component.
+		vk::Pipeline pipeline;
+		vk::PipelineLayout pipelineLayout;
+		vk::UniqueDescriptorSet descriptorSet;
+	};
+
+	enum class ArticulatedLineRenderMethodFlags
+	{
+		Default = 0u,
+		VertexBufferColor = 1u << 0,
+
+		_entt_enum_as_bitmask
 	};
 }

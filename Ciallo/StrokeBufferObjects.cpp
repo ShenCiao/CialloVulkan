@@ -6,6 +6,7 @@
 
 #include "CtxUtilities.hpp"
 #include "Stroke.hpp"
+#include "Brush.hpp"
 
 namespace ciallo
 {

@@ -13,6 +13,7 @@
 #include "Layer.hpp"
 #include "EntityContainer.hpp"
 #include "Stroke.hpp"
+#include "Brush.hpp"
 #include "CtxUtilities.hpp"
 
 void ciallo::Application::run()
@@ -41,7 +42,6 @@ void ciallo::Application::run()
 	auto& commandBuffers = r.ctx().emplace<CommandBuffers>();
 	commandBuffers.setMain(cb);
 	ArticulatedLineEngine engine(*m_device);
-	engine.connect(r);
 	// -----------------------------------------------------------------------------
 
 	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
@@ -221,7 +221,7 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	// stroke
 	entt::entity stroke = registry.create();
 	objectContainer.push_back(stroke);
-	registry.emplace<StrokeCpo>(stroke);
+	registry.emplace<StrokeTag>(stroke);
 
 	const int n = 1024;
 	std::vector<geom::Point> line;

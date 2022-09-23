@@ -52,16 +52,17 @@ namespace ciallo
 		vk::UniqueShaderModule vertShader;
 		vk::UniqueShaderModule geomShader;
 		vk::UniqueShaderModule fragShader;
-		vk::UniqueDescriptorSetLayout entityDescriptorSetLayout;
+		vk::UniqueDescriptorSetLayout strokeDescriptorSetLayout;
+		vk::UniqueDescriptorSetLayout brushDescriptorSetLayout;
 		vk::UniquePipelineLayout pipelineLayout;
 		vk::UniquePipeline pipeline;
 
 		explicit ArticulatedLineEngine(vk::Device device);
 		void init(vk::Device device);
 
-		std::array<entt::observer, 1> obs;
-		void connect(entt::registry& r);
-		void assignRenderer(entt::registry& r, entt::entity e);
-		void removeRenderer(entt::registry& r, entt::entity e);
+		void assignBrushRenderingData(entt::registry& r, entt::entity brushE, const ArticulatedLineSettings& settings);
+		void assignStrokeRenderingData(entt::registry& r, entt::entity strokeE, const ArticulatedLineSettings& settings);
+		void removeRenderingData(entt::registry& r, entt::entity e);
+		void render(entt::registry& r, entt::entity brushE, entt::entity strokeE, vk::CommandBuffer cb);
 	};
 }
