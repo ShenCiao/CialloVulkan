@@ -14,6 +14,6 @@ namespace ciallo
 
 	struct CanvasPanelDrawer
 	{
-		static void update(entt::registry& registry);
+		static void update(entt::registry& r);
 	};
 }

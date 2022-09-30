@@ -89,6 +89,9 @@
     <ClCompile Include="BufferBindingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LayerRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vku.hpp">
@@ -188,6 +191,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Brush.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LayerRenderer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

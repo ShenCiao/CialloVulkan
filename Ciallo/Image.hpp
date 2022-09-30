@@ -34,7 +34,6 @@ namespace ciallo::vulkan
 		      uint32_t width, uint32_t height, vk::SampleCountFlagBits sampleCount, vk::ImageUsageFlags usage);
 		~Image();
 
-		// TODO: customized memory flags.
 		Image() = default;
 		Image(const Image& other);
 		Image(Image&& other) noexcept;

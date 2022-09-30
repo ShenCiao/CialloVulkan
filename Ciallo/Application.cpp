@@ -189,13 +189,13 @@ void ciallo::Application::run()
 ciallo::Project ciallo::Application::createDefaultProject() const
 {
 	Project project;
-	entt::registry& registry = project.registry();
+	entt::registry& r = project.registry();
 	// Canvas panel and drawing
-	entt::entity canvasPanel = registry.create();
-	entt::entity drawing = registry.create();
-	auto& canvasPanelCpo = registry.emplace<CanvasPanelCpo>(canvasPanel);
+	entt::entity canvasPanel = r.create();
+	entt::entity drawing = r.create();
+	auto& canvasPanelCpo = r.emplace<CanvasPanelCpo>(canvasPanel);
 	canvasPanelCpo.drawing = drawing;
-	auto& vulkanImageCpo = registry.emplace<GPUImageCpo>(drawing);
+	auto& vulkanImageCpo = r.emplace<GPUImageCpo>(drawing);
 	vk::SamplerCreateInfo samplerCreateInfo{};
 	vk::UniqueSampler sampler = m_device->device().createSamplerUnique(samplerCreateInfo);
 	vulkanImageCpo.sampler = *sampler;
@@ -211,17 +211,17 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	});
 	vk::ImageView imageView = vulkanImageCpo.image.imageView();
 	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
-	auto& drawingCpo = registry.emplace<DrawingCpo>(drawing, A4Paper);
-	auto& layerContainer = registry.emplace<EntityContainer>(drawing);
+	auto& drawingCpo = r.emplace<ViewRectCpo>(drawing, A4PaperViewRect);
+	auto& layerContainer = r.emplace<EntityContainer>(drawing);
 	// layer
-	entt::entity layer = registry.create();
+	entt::entity layer = r.create();
 	layerContainer.push_back(layer);
-	auto& layerCpo = registry.emplace<LayerCpo>(layer);
-	auto& objectContainer = registry.emplace<EntityContainer>(layer);
+	auto& layerCpo = r.emplace<LayerCpo>(layer);
+	auto& objectContainer = r.emplace<EntityContainer>(layer);
 	// stroke
-	entt::entity stroke = registry.create();
+	entt::entity stroke = r.create();
 	objectContainer.push_back(stroke);
-	registry.emplace<StrokeTag>(stroke);
+	r.emplace<StrokeTag>(stroke);
 
 	const int n = 1024;
 	std::vector<geom::Point> line;
@@ -229,13 +229,13 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	{
 		float ratio = static_cast<float>(i)/static_cast<float>(n);
 		const float pi = 3.141592653f;
-		geom::Point p = {A4Paper.max.x * ratio, A4Paper.max.y/2.0f * glm::sin(ratio*2.0f*pi) + A4Paper.max.y/2.0f};
+		geom::Point p = {A4PaperViewRect.max.x * ratio, A4PaperViewRect.max.y/2.0f * glm::sin(ratio*2.0f*pi) + A4PaperViewRect.max.y/2.0f};
 		line.push_back(p);
 	}
-	registry.emplace<PolylineCpo>(stroke, line);
+	r.emplace<PolylineCpo>(stroke, line);
 	std::vector<float> width(n, 0.01f);
-	registry.emplace<ThicknessPerVertCpo>(stroke, width);
-	registry.emplace<ColorCpo>(stroke);
+	r.emplace<ThicknessPerVertCpo>(stroke, width);
+	r.emplace<ColorCpo>(stroke);
 
 	return project;
 }

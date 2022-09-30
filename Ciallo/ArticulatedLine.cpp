@@ -88,7 +88,7 @@ namespace ciallo
 		// check out ArticulatedLineSettings
 
 		// set suitable renderer data and renderer
-		auto& data = r.emplace<ArticulatedLineStrokeData>(e);
+		auto& data = r.emplace<ArticulatedLineStrokeCpo>(e);
 
 		// data.pipeline = *m_pipeline;
 		// data.pipelineLayout = *m_pipelineLayout;
@@ -100,7 +100,7 @@ namespace ciallo
 		       .buffer(r.get<ColorBuffer>(e).buffer)
 		       .update(*device);
 
-		r.patch<ArticulatedLineStrokeData>(e);
+		r.patch<ArticulatedLineStrokeCpo>(e);
 	}
 
 	void ArticulatedLineEngineTemp::connect(entt::registry& r)
@@ -120,42 +120,30 @@ namespace ciallo
 
 	ArticulatedLineEngine::ArticulatedLineEngine(vk::Device device)
 	{
-		init(device);
-	}
-
-	void ArticulatedLineEngine::init(vk::Device device)
-	{
 		auto vertShaderData = vulkan::ShaderModule::loadSpv("./shaders/articulatedLine.vert.spv");
 		vk::ShaderModuleCreateInfo vertInfo{
 			{}, vertShaderData.size(), reinterpret_cast<const uint32_t*>(vertShaderData.data())
 		};
 		vertShader = device.createShaderModuleUnique(vertInfo);
-
 		auto geomShaderData = vulkan::ShaderModule::loadSpv("./shaders/articulatedLine.geom.spv");
 		vk::ShaderModuleCreateInfo geomInfo{
 			{}, geomShaderData.size(), reinterpret_cast<const uint32_t*>(geomShaderData.data())
 		};
 		geomShader = device.createShaderModuleUnique(geomInfo);
-
 		auto fragShaderData = vulkan::ShaderModule::loadSpv("./shaders/articulatedLine.frag.spv");
 		vk::ShaderModuleCreateInfo fragInfo{
 			{}, fragShaderData.size(), reinterpret_cast<const uint32_t*>(fragShaderData.data())
 		};
 		fragShader = device.createShaderModuleUnique(fragInfo);
-
-
 		vku::DescriptorSetLayoutMaker strokeDsMaker;
 		strokeDescriptorSetLayout = strokeDsMaker.createUnique(device);
-
 		vku::DescriptorSetLayoutMaker brushDsMaker;
 		brushDsMaker.buffer(0, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment, 1);
 		brushDescriptorSetLayout = brushDsMaker.createUnique(device);
-
 		// TODO: Ìí¼ÓÆäËûdescriptor set layout
 		std::vector<vk::DescriptorSetLayout> layouts{*strokeDescriptorSetLayout, *brushDescriptorSetLayout};
 		vk::PipelineLayoutCreateInfo info{{}, layouts, {}};
 		pipelineLayout = device.createPipelineLayoutUnique(info);
-
 		std::vector<vk::Format> colorAttachmentsFormats{vk::Format::eR8G8B8A8Unorm};
 		vk::PipelineRenderingCreateInfo renderingCreateInfo{0, colorAttachmentsFormats};
 		vku::PipelineMaker maker;
@@ -181,7 +169,7 @@ namespace ciallo
 
 		// set suitable buffer, renderer data and renderer
 		r.emplace<ColorBuffer>(brushE);
-		auto& brushData = r.emplace<ArticulatedLineBrushData>(brushE);
+		auto& brushData = r.emplace<ArticulatedLineBrushCpo>(brushE);
 		auto* device = r.ctx().at<vulkan::Device*>();
 		brushData.pipeline = *pipeline;
 		brushData.pipelineLayout = *pipelineLayout;
@@ -189,15 +177,13 @@ namespace ciallo
 		updater.beginDescriptorSet(*brushData.descriptorSet)
 		       .buffer(r.get<ColorBuffer>(brushE).buffer)
 		       .update(*device);
-
-		r.emplace<ArticulatedLineRenderMethodFlags>(brushE);
 	}
 
 	void ArticulatedLineEngine::assignStrokeRenderingData(entt::registry& r, entt::entity strokeE,
 	                                                      const ArticulatedLineSettings& settings)
 	{
 		auto* device = r.ctx().at<vulkan::Device*>();
-		auto& strokeData = r.emplace<ArticulatedLineStrokeData>(strokeE);
+		auto& strokeData = r.emplace<ArticulatedLineStrokeCpo>(strokeE);
 
 		r.emplace<PolylineBuffer>(strokeE);
 		strokeData.vertexBufferIds.push_back(entt::type_id<PolylineBuffer>().hash());
@@ -211,28 +197,27 @@ namespace ciallo
 	{
 		// TODO: Remove all buffers with a dedicate system
 		
-		r.remove<ArticulatedLineStrokeData>(e);
-		r.remove<ArticulatedLineBrushData>(e);
-		r.remove<ArticulatedLineRenderMethodFlags>(e);
+		r.remove<ArticulatedLineStrokeCpo>(e);
+		r.remove<ArticulatedLineBrushCpo>(e);
 	}
 
 	void ArticulatedLineEngine::render(entt::registry& r, entt::entity brushE, entt::entity strokeE, vk::CommandBuffer cb)
 	{
-		auto& strokeData = r.get<ArticulatedLineStrokeData>(strokeE);
-		auto& brushData = r.get<ArticulatedLineBrushData>(brushE);
+		auto& strokeCpo = r.get<ArticulatedLineStrokeCpo>(strokeE);
+		auto& brushCpo = r.get<ArticulatedLineBrushCpo>(brushE);
 
-		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, brushData.pipeline);
-		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, brushData.pipelineLayout, 1, *brushData.descriptorSet, {});
+		cb.bindPipeline(vk::PipelineBindPoint::eGraphics, brushCpo.pipeline);
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, brushCpo.pipelineLayout, 1, *brushCpo.descriptorSet, {});
 
 		std::vector<vk::Buffer> vbs;
-		for(auto id : strokeData.vertexBufferIds)
+		for(auto id : strokeCpo.vertexBufferIds)
 		{
 			auto& base = r.storage(id)->second;
 			auto* buffer = static_cast<vulkan::Buffer*>(base.get(brushE));
 			vbs.push_back(*buffer);
 		}
 		cb.bindVertexBuffers({}, vbs, {});
-		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, brushData.pipelineLayout, 0, *strokeData.descriptorSet, {});
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, brushCpo.pipelineLayout, 0, *strokeCpo.descriptorSet, {});
 		uint32_t vertCount = r.get<PolylineCpo>(strokeE).polyline.size();
 		cb.draw(vertCount, {}, {}, {});
 	}

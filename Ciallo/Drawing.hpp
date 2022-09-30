@@ -2,22 +2,22 @@
 
 namespace ciallo
 {
-	struct DrawingCpo
+	struct DrawingTag
+	{
+	};
+
+	struct ViewRectCpo
 	{
 		glm::vec2 min; // left upper corner of world coordinate, unit is meter.
 		glm::vec2 max;
 		float dpi;
 
-		float width() const // in pixel
-		{
-			return (max-min).x * dpi/0.0254f;
-		}
+		// in pixel
+		float width() const;
+		float height() const;
 
-		float height() const
-		{
-			return (max-min).y * dpi/0.0254f;
-		}
+		glm::mat4 projMat() const;
 	};
 
-	constexpr DrawingCpo A4Paper{{0.0f, 0.0f}, {0.297f, 0.21f}, 144.0f};
+	constexpr ViewRectCpo A4PaperViewRect{{0.0f, 0.0f}, {0.297f, 0.21f}, 144.0f};
 }

@@ -119,6 +119,7 @@
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="CanvasPanel.cpp" />
     <ClCompile Include="Project.cpp" />
+    <ClCompile Include="LayerRenderer.cpp" />
     <ClCompile Include="ShaderModule.cpp" />
     <ClCompile Include="StrokeBufferObjects.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="EntityRenderer.hpp" />
     <ClInclude Include="CanvasPanel.hpp" />
     <ClInclude Include="Project.hpp" />
+    <ClInclude Include="LayerRenderer.hpp" />
     <ClInclude Include="ShaderModule.hpp" />
     <ClInclude Include="Stroke.hpp" />
     <ClInclude Include="StrokeBufferObjects.hpp" />

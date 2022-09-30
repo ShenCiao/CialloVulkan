@@ -58,7 +58,6 @@ namespace ciallo
 		vk::UniquePipeline pipeline;
 
 		explicit ArticulatedLineEngine(vk::Device device);
-		void init(vk::Device device);
 
 		void assignBrushRenderingData(entt::registry& r, entt::entity brushE, const ArticulatedLineSettings& settings);
 		void assignStrokeRenderingData(entt::registry& r, entt::entity strokeE, const ArticulatedLineSettings& settings);
