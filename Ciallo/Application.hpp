@@ -12,9 +12,9 @@ public:
 	Application() = default;
 
 	Application(const Application& other) = delete;
-	Application(Application&& other) = delete;
+	Application(Application&& other) = default;
 	Application& operator=(const Application& other) = delete;
-	Application& operator=(Application&& other) = delete;
+	Application& operator=(Application&& other) = default;
 	~Application() = default;
 
 	void run();

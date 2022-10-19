@@ -11,7 +11,6 @@
 #include "Image.hpp"
 #include "Project.hpp"
 #include "Layer.hpp"
-#include "EntityContainer.hpp"
 #include "Stroke.hpp"
 #include "Brush.hpp"
 #include "CtxUtilities.hpp"
@@ -25,8 +24,8 @@ void ciallo::Application::run()
 	window->setInstance(*m_instance);
 	vk::SurfaceKHR surface = window->genSurface();
 
-	vk::PhysicalDevice physicalDevice = vulkan::Device::pickPhysicalDevice(*m_instance, surface);
-	uint32_t queueIndex = vulkan::Device::findRequiredQueueFamily(physicalDevice, surface);
+	vk::PhysicalDevice physicalDevice = vulkan::Instance::pickPhysicalDevice(*m_instance, surface);
+	uint32_t queueIndex = vulkan::Instance::findRequiredQueueFamily(physicalDevice, surface);
 	m_device = std::make_shared<vulkan::Device>(*m_instance, physicalDevice, queueIndex);
 	vk::CommandBuffer cb = m_device->createCommandBuffer();
 
@@ -41,7 +40,7 @@ void ciallo::Application::run()
 	r.ctx().emplace<vulkan::Device*>(m_device.get());
 	auto& commandBuffers = r.ctx().emplace<CommandBuffers>();
 	commandBuffers.setMain(cb);
-	ArticulatedLineEngine engine(*m_device);
+	ArticulatedLineEngine engine(m_device.get());
 	// -----------------------------------------------------------------------------
 
 	vk::UniqueSemaphore presentImageAvailableSemaphore = m_device->device().createSemaphoreUnique({});
@@ -51,6 +50,7 @@ void ciallo::Application::run()
 
 	m_device->device().waitIdle();
 
+	// main loop, uni-buffer synchronized rendering 
 	while (!window->shouldClose())
 	{
 		window->pollEvents();
@@ -145,8 +145,7 @@ void ciallo::Application::run()
 		// -----------------------------------------------------------------------------
 		ImGui::EndFrame();
 		ImGui::Render();
-		ImDrawData* main_draw_data = ImGui::GetDrawData();
-		mainPassRenderer.render(cb, index, main_draw_data);
+		mainPassRenderer.render(cb, index, ImGui::GetDrawData());
 		cb.end();
 		std::vector<vk::PipelineStageFlags> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
@@ -205,23 +204,18 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 	                                     vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst |
 	                                     vk::ImageUsageFlagBits::eColorAttachment |
 	                                     vk::ImageUsageFlagBits::eTransferSrc);
+	auto start = std::chrono::high_resolution_clock::now();
+
 	m_device->executeImmediately([&vulkanImageCpo](vk::CommandBuffer cb)
 	{
 		vulkanImageCpo.image.changeLayout(cb, vk::ImageLayout::eGeneral);
 	});
+	auto end = std::chrono::high_resolution_clock::now();
+
+	std::cout << std::chrono::duration<double, std::milli>(end-start) << std::endl;
+
 	vk::ImageView imageView = vulkanImageCpo.image.imageView();
 	vulkanImageCpo.id = ImGui_ImplVulkan_AddTexture(*sampler, imageView, VK_IMAGE_LAYOUT_GENERAL);
-	auto& drawingCpo = r.emplace<ViewRectCpo>(drawing, A4PaperViewRect);
-	auto& layerContainer = r.emplace<EntityContainer>(drawing);
-	// layer
-	entt::entity layer = r.create();
-	layerContainer.push_back(layer);
-	auto& layerCpo = r.emplace<LayerCpo>(layer);
-	auto& objectContainer = r.emplace<EntityContainer>(layer);
-	// stroke
-	entt::entity stroke = r.create();
-	objectContainer.push_back(stroke);
-	r.emplace<StrokeTag>(stroke);
 
 	const int n = 1024;
 	std::vector<geom::Point> line;
@@ -232,10 +226,6 @@ ciallo::Project ciallo::Application::createDefaultProject() const
 		geom::Point p = {A4PaperViewRect.max.x * ratio, A4PaperViewRect.max.y/2.0f * glm::sin(ratio*2.0f*pi) + A4PaperViewRect.max.y/2.0f};
 		line.push_back(p);
 	}
-	r.emplace<PolylineCpo>(stroke, line);
-	std::vector<float> width(n, 0.01f);
-	r.emplace<ThicknessPerVertCpo>(stroke, width);
-	r.emplace<ColorCpo>(stroke);
 
 	return project;
 }

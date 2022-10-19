@@ -1,4 +1,5 @@
 #pragma once
+
 #include <functional>
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
@@ -44,22 +45,12 @@ namespace ciallo::vulkan
 		operator VmaAllocator() const { return m_allocator; }
 
 	private:
-		static inline std::vector<const char*> m_extensions{
-			"VK_KHR_swapchain",
-			//ShenCiao's AMD Gpu(integrated) does not support these :(. I need them!!!
-			// "VK_EXT_blend_operation_advanced",
-			// "VK_EXT_vertex_input_dynamic_state",
-		};
 
 		void genDevice();
 		void genCommandPool();
 		void genDescriptorPool();
 		void genAllocator(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device device);
 	public:
-		static int findRequiredQueueFamily(vk::PhysicalDevice device, vk::SurfaceKHR surface);
-		static bool isPhysicalDeviceValid(vk::PhysicalDevice device, vk::SurfaceKHR surface);
-		static vk::PhysicalDevice pickPhysicalDevice(vk::Instance instance, vk::SurfaceKHR surface);
-
 		void executeImmediately(const std::function<void(vk::CommandBuffer)>& func);
 		vk::CommandBuffer createCommandBuffer(vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
 		vk::UniqueDescriptorSet createDescriptorSetUnique(vk::DescriptorSetLayout layout) const;

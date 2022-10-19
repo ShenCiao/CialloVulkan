@@ -46,7 +46,7 @@ namespace ciallo
 		void update(entt::registry& r);
 	};
 
-	struct ArticulatedLineEngine
+	class ArticulatedLineEngine
 	{
 		// more appropriate data structure needed
 		vk::UniqueShaderModule vertShader;
@@ -57,11 +57,14 @@ namespace ciallo
 		vk::UniquePipelineLayout pipelineLayout;
 		vk::UniquePipeline pipeline;
 
-		explicit ArticulatedLineEngine(vk::Device device);
+		vulkan::Device* m_device;
+	public:
+		explicit ArticulatedLineEngine(vulkan::Device* d);
 
 		void assignBrushRenderingData(entt::registry& r, entt::entity brushE, const ArticulatedLineSettings& settings);
 		void assignStrokeRenderingData(entt::registry& r, entt::entity strokeE, const ArticulatedLineSettings& settings);
 		void removeRenderingData(entt::registry& r, entt::entity e);
 		void render(entt::registry& r, entt::entity brushE, entt::entity strokeE, vk::CommandBuffer cb);
+		std::vector<vulkan::Buffer> createVertexBuffers(entt::registry& r, entt::entity strokeE,  const ArticulatedLineSettings& settings);
 	};
 }

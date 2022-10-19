@@ -101,7 +101,6 @@
     <ClCompile Include="BezierTransformer.cpp" />
     <ClCompile Include="BrushCabinet.cpp" />
     <ClCompile Include="Buffer.cpp" />
-    <ClCompile Include="BufferBindingSystem.cpp" />
     <ClCompile Include="CanvasInteraction.cpp" />
     <ClCompile Include="CanvasRenderer.cpp" />
     <ClCompile Include="CtxUtilities.cpp" />
@@ -132,7 +131,6 @@
     <ClInclude Include="Brush.hpp" />
     <ClInclude Include="BrushCabinet.hpp" />
     <ClInclude Include="Buffer.hpp" />
-    <ClInclude Include="BufferBindingSystem.hpp" />
     <ClInclude Include="CanvasInteraction.hpp" />
     <ClInclude Include="CanvasRenderer.hpp" />
     <ClInclude Include="CtxUtilities.hpp" />
@@ -140,7 +138,6 @@
     <ClInclude Include="ciallo_imgui_config.h" />
     <ClInclude Include="Device.hpp" />
     <ClInclude Include="Drawing.hpp" />
-    <ClInclude Include="EntityContainer.hpp" />
     <ClInclude Include="GeometryPrimitives.hpp" />
     <ClInclude Include="Image.hpp" />
     <ClInclude Include="EquidistantDot.hpp" />
@@ -148,7 +145,6 @@
     <ClInclude Include="MainPassRenderer.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Instance.hpp" />
-    <ClInclude Include="CommonBrushComponents.hpp" />
     <ClInclude Include="EntityRenderer.hpp" />
     <ClInclude Include="CanvasPanel.hpp" />
     <ClInclude Include="Project.hpp" />

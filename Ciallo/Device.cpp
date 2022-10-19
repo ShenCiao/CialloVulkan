@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #define VMA_IMPLEMENTATION
 #include "Device.hpp"
+#include "Instance.hpp"
 
 namespace ciallo::vulkan
 {
@@ -27,7 +28,7 @@ namespace ciallo::vulkan
 			{},
 			deviceQueueCreateInfo,
 			{},
-			m_extensions,
+			Instance::m_deviceExtensions,
 		};
 
 		// Warning: may encounter features do not supported
@@ -47,80 +48,6 @@ namespace ciallo::vulkan
 
 		vk::StructureChain c(deviceCreateInfo, physicalDeviceFeatures2, vulkan13Features);
 		m_device = m_physicalDevice.createDeviceUnique(c.get<vk::DeviceCreateInfo>());
-	}
-
-	// need a queue family be able to graphics, compute, transfer and presents
-	int Device::findRequiredQueueFamily(vk::PhysicalDevice device, vk::SurfaceKHR surface)
-	{
-		auto queueFamilies = device.getQueueFamilyProperties();
-
-		vk::QueueFlags req = vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
-		for (const auto [i, qF] : views::enumerate(queueFamilies))
-		{
-			if (qF.queueCount > 0 && (qF.queueFlags & req) == req)
-			{
-				bool support = device.getSurfaceSupportKHR(static_cast<uint32_t>(i), surface);
-				if (support)
-					return static_cast<int>(i);
-			}
-		}
-		return -1;
-	}
-
-	bool Device::isPhysicalDeviceValid(vk::PhysicalDevice device, vk::SurfaceKHR surface)
-	{
-		using vk::QueueFlags;
-		using vk::QueueFlagBits;
-		// find queue family
-		bool queueFamilyFound = false;
-		if (int i = findRequiredQueueFamily(device, surface); i != -1)
-		{
-			queueFamilyFound = true;
-		}
-
-		// device extension support
-		auto extensions = device.enumerateDeviceExtensionProperties();
-		std::unordered_set<std::string> requiredExtensions{m_extensions.begin(), m_extensions.end()};
-
-		for (const auto& extension : extensions)
-		{
-			requiredExtensions.erase(extension.extensionName);
-		}
-		bool extensionsFound = requiredExtensions.empty();
-
-		// Do no need to check the swapchain
-		return queueFamilyFound && extensionsFound;
-	}
-
-	/**
-	 * \brief Choose from available physical device
-	 * \param instance Vulkan instance
-	 * \param surface Vulkan surface, use it for checking present capability of queue 
-	 * \return Physical device index
-	 */
-	vk::PhysicalDevice Device::pickPhysicalDevice(vk::Instance instance, vk::SurfaceKHR surface)
-	{
-		auto physicalDevices = instance.enumeratePhysicalDevices();
-		vk::PhysicalDevice nearest;
-		for (auto device : physicalDevices)
-		{
-			if (isPhysicalDeviceValid(device, surface))
-			{
-				nearest = device;
-				auto prop = device.getProperties2().properties;
-				if (prop.deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
-				{
-					return device;
-				}
-			}
-		}
-
-		if(nearest)
-		{
-			return nearest;
-		}
-
-		throw std::runtime_error("Fail to find appropriate physical Device!");
 	}
 
 	vk::CommandBuffer Device::createCommandBuffer(vk::CommandBufferLevel level)

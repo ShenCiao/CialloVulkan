@@ -11,8 +11,7 @@ namespace ciallo::vulkan
 {
 	/**
 	 * \brief Class wraps up glfw. Include windows object and swapchain related object.
-	 * Glfw will be changed into platform native window api or something else. Since the imgui_impl_glfw(for vulkan) introduce extra lag and supporting tablet and stylus is a rabbit hole.
-	 * SDL2 has lag too, it's all the problem of imgui vulkan implementation.
+	 * Vulkan's FIFO rendering mode introduce extra lag. change it!
 	 */
 	class Window
 	{

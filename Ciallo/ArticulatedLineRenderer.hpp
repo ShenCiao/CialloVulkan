@@ -1,12 +1,12 @@
 #pragma once
+#include "Buffer.hpp"
 
 namespace ciallo
 {
 	struct ArticulatedLineStrokeCpo
 	{
 		// owned by entity
-		std::vector<entt::id_type> vertexBufferIds;
-		vk::UniqueDescriptorSet descriptorSet;
+		std::vector<vulkan::Buffer> vertexBuffers;
 	};
 
 	struct ArticulatedLineBrushCpo

@@ -86,9 +86,6 @@
     <ClCompile Include="StrokeBufferObjects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BufferBindingSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LayerRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -122,9 +119,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="CanvasRenderer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommonBrushComponents.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Device.hpp">
@@ -166,9 +160,6 @@
     <ClInclude Include="Drawing.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="EntityContainer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="ArticulatedLineRenderer.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -185,9 +176,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="StrokeBufferObjects.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferBindingSystem.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Brush.hpp">

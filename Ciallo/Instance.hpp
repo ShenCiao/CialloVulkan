@@ -7,6 +7,7 @@ namespace ciallo::vulkan
 	class Instance
 	{
 		friend class Window;
+		friend class Device;
 		vk::UniqueInstance m_instance;
 		vk::DebugUtilsMessengerEXT m_debugMessenger;
 		vk::DispatchLoaderDynamic m_dldi;
@@ -17,6 +18,12 @@ namespace ciallo::vulkan
 		};
 		static inline std::vector<const char*> m_instanceExtensions{
 			"VK_EXT_debug_utils"
+		};
+		static inline std::vector<const char*> m_deviceExtensions{
+			"VK_KHR_swapchain",
+			//ShenCiao's AMD Gpu(integrated) does not support these :(. I need them!!!
+			// "VK_EXT_blend_operation_advanced",
+			// "VK_EXT_vertex_input_dynamic_state",
 		};
 
 	public:
@@ -43,9 +50,10 @@ namespace ciallo::vulkan
 			return *m_instance;
 		}
 
-		static void addExtensions(const std::vector<const char *>& extensions)
-		{
-			m_instanceExtensions.insert(m_instanceExtensions.end(), extensions.begin(), extensions.end());
-		}
+		static void addExtensions(const std::vector<const char *>& extensions);
+		static int findRequiredQueueFamily(vk::PhysicalDevice device, vk::SurfaceKHR surface);
+		static bool isPhysicalDeviceValid(vk::PhysicalDevice device, vk::SurfaceKHR surface);
+		static vk::PhysicalDevice pickPhysicalDevice(vk::Instance instance, vk::SurfaceKHR surface);
+
 	};
 }

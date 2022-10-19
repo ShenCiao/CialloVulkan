@@ -7,23 +7,13 @@ namespace ciallo
 	 * Ciallo takes thickness as a part of stroke itself instead of brush or rendering. It's a controversial decision but I get good reason for that.
 	 */
 
-	struct StrokeTag
+	struct StrokeCpo
 	{
-	};
-
-	struct PolylineCpo
-	{
-		// Suppose to be a dedicate geom::Polyline class. Temporarily use vector.
-		std::vector<geom::Point> polyline{};
-	};
-
-	struct ThicknessPerVertCpo // Width per vertex
-	{
+		std::vector<geom::Point> position{}; // a dedicated class geom::Polyline is needed here
 		std::vector<float> thickness{};
-	};
 
-	struct BrushCpo
-	{
 		entt::entity brush{entt::null};
+
+		StrokeCpo() = default;
 	};
 }
