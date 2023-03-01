@@ -3,7 +3,7 @@
 Ciallo～(∠・ω< )⌒★! Anime/Cartoon/2D computer graphics.
 
 ## Deprecated
-The repository is deprecated since using Vulkan. Check out https://github.com/ShenCiao/Ciallo for OpenGl implementation.
+The repository is deprecated since using Vulkan. Check out https://github.com/ShenCiao/Ciallo for OpenGL implementation.
 
 For myself, it's a nice practice about using Vulkan. But I'm pretty glad to switch back to OpenGL, it's late but much better than never. 
 
